@@ -24,7 +24,7 @@ contribution-policy:
 dependencies:
   third-party-packages: true
   dependencies-lists:
-    - https://github.com/envoyproxy/envoy/blob/main/go.mod
+    - https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/security/external_deps
 distribution-points:
   - https://github.com/envoyproxy/envoy
 documentation:
