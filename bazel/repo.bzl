@@ -198,3 +198,7 @@ _envoy_repo = repository_rule(
 def envoy_repo():
     if "envoy_repo" not in native.existing_rules().keys():
         _envoy_repo(name = "envoy_repo")
+
+envoy_repo_extension = module_extension(
+    implementation = lambda ctx: _envoy_repo(name = "envoy_repo"),
+)

@@ -52,7 +52,7 @@ envoy_repo()
 
 load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
 
-envoy_dependencies()
+envoy_dependencies(bzlmod = False)
 
 load("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra")
 
