@@ -11,7 +11,14 @@
 # TODO: Adding just to test android
 startup --host_jvm_args=-Xmx3g
 
+# Bzlmod configuration
+# Default: bzlmod disabled, use WORKSPACE for all dependencies
 common --noenable_bzlmod
+
+# Experimental bzlmod support for testing hybrid setup
+# Use with: bazel build --config=bzlmod <target>
+build:bzlmod --enable_bzlmod
+test:bzlmod --enable_bzlmod
 
 fetch --color=yes
 run --color=yes
