@@ -38,16 +38,16 @@ def envoy_dependency_imports(
         yq_version = YQ_VERSION,
         buf_sha = BUF_SHA,
         buf_version = BUF_VERSION):
+    # Only call rules_foreign_cc_dependencies when not in bzlmod mode
+    # In bzlmod mode, rules_foreign_cc is managed via bazel_dep in MODULE.bazel
     rules_foreign_cc_dependencies()
+
     go_rules_dependencies()
     go_register_toolchains(go_version)
     if go_version != "host":
         envoy_download_go_sdks(go_version)
     gazelle_dependencies(go_sdk = "go_sdk")
     apple_rules_dependencies()
-    pip_dependencies()
-    pip_dev_dependencies()
-    pip_fuzzing_dependencies()
     rules_pkg_dependencies()
     emscripten_deps(emscripten_version = "4.0.6")
     register_emscripten_toolchains()
