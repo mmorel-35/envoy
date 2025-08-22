@@ -1,0 +1,5 @@
+workspace(name = "envoy_api")
+
+load("//bazel:repositories.bzl", "api_dependencies")
+
+api_dependencies()
