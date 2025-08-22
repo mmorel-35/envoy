@@ -117,7 +117,7 @@ def _rust_deps():
 def envoy_dependencies(skip_targets = []):
     # Treat Envoy's overall build config as an external repo, so projects that
     # build Envoy as a subcomponent can easily override the config.
-    if "envoy_build_config" not in native.existing_rules().keys():
+    if "envoy_build_config" not in native.existing_rules():
         default_envoy_build_config(name = "envoy_build_config")
 
     # Setup Bazel shell rules
@@ -244,13 +244,14 @@ def envoy_dependencies(skip_targets = []):
     _com_github_wamr()
     _com_github_wasmtime()
 
-    switched_rules_by_language(
-        name = "com_google_googleapis_imports",
-        cc = True,
-        go = True,
-        python = True,
-        grpc = True,
-    )
+    if "com_google_googleapis_imports" not in native.existing_rules():
+        switched_rules_by_language(
+            name = "com_google_googleapis_imports",
+            cc = True,
+            go = True,
+            python = True,
+            grpc = True,
+        )
     native.bind(
         name = "bazel_runfiles",
         actual = "@bazel_tools//tools/cpp/runfiles",
@@ -679,11 +680,11 @@ def _com_google_protobuf():
             build_file = "@envoy//bazel/protoc:BUILD.protoc",
         )
 
-    external_http_archive(
-        "com_google_protobuf",
-        patches = ["@envoy//bazel:protobuf.patch"],
-        patch_args = ["-p1"],
-    )
+        external_http_archive(
+            "com_google_protobuf",
+            patches = ["@envoy//bazel:protobuf.patch"],
+            patch_args = ["-p1"],
+        )
 
     # Needed by grpc, jwt_verify_lib, maybe others.
     native.bind(
