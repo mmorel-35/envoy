@@ -188,6 +188,32 @@ The experimental bzlmod configuration allows testing the hybrid setup while keep
 - [ ] Phase out WORKSPACE
 - [ ] Remove legacy compatibility code
 
+## Summary
+
+This migration sets up the **minimal viable infrastructure** for progressive WORKSPACE to bzlmod migration:
+
+### ✅ What's Implemented
+1. **Hybrid setup**: Both WORKSPACE and bzlmod can work
+2. **Patch preservation**: All 34 patched dependencies remain in WORKSPACE  
+3. **Conflict resolution**: Removed conflicting deps from MODULE.bazel
+4. **Build flags**: `--config=bzlmod` for experimental testing
+5. **Documentation**: Complete strategy and quick start guides
+6. **Validation**: Automated testing script
+
+### 🎯 What's Safe to Use
+- **WORKSPACE mode**: Default, stable, all patches work
+- **bzlmod mode**: Experimental, for testing and gradual migration
+- **Validation script**: Helps detect issues early
+
+### 🔄 Next Steps for the Team
+1. **Test both modes** to ensure equivalence
+2. **Identify patchless dependencies** that can migrate immediately  
+3. **Upstream patches** to enable broader migration
+4. **Gradually migrate** one dependency at a time
+5. **Track progress** in BZLMOD_MIGRATION.md
+
+This approach ensures **nothing breaks** while providing a **clear path forward** for the bzlmod migration.
+
 ## References
 
 - [Bazel bzlmod documentation](https://bazel.build/external/module)
