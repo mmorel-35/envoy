@@ -31,7 +31,6 @@ BROWSE
 /build
 /build_*
 *.bzlc
-/ci/bazel-*
 compile_commands.json
 cscope.*
 /docs/landing_source/.bundle
