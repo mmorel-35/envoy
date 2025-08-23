@@ -73,7 +73,7 @@ envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
 
 # API extensions from API module
 envoy_api_binding = use_extension("@envoy_api//bazel/extensions:api_binding.bzl", "api_binding")
-envoy_api_deps_main = use_extension("@envoy_api//bazel/extensions:api_dependencies_main.bzl", "api_dependencies_main")
+envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
 
 # Mobile-specific extensions using local module
 envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")

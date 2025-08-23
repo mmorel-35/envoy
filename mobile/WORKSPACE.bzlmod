@@ -9,9 +9,9 @@ workspace(name = "envoy_mobile")
 # - envoy_dependency_imports_extra_ext from "@envoy//bazel:dependency_imports.bzl"
 #
 # Envoy API and repository setup:
-# - envoy_api_binding_ext from "@envoy//bazel:api_binding.bzl"
-# - envoy_api_dependencies_main_ext from "@envoy//bazel:api_repositories.bzl"
-# - envoy_repo_ext from "@envoy//bazel:repo.bzl"
+# - envoy_api_binding_ext from "@envoy_api//bazel/extensions:api_binding.bzl"
+# - envoy_api_dependencies_ext from "@envoy_api//bazel/extensions:api_dependencies.bzl"
+# - envoy_repo_ext from "@envoy//bazel/extensions:repo.bzl"
 #
 # Mobile-specific dependencies:
 # - envoy_mobile_repositories_ext from "//bazel:envoy_mobile_repositories.bzl"
