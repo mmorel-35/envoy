@@ -380,3 +380,20 @@ go_grpc_library(
     ],
 )
 """
+
+def _api_dependencies_impl(module_ctx):
+    """Implementation of the api_dependencies extension."""
+    # Call the api dependencies function
+    api_dependencies()
+
+# Module extension for api_dependencies  
+api_dependencies_ext = module_extension(
+    implementation = _api_dependencies_impl,
+    doc = """
+    Extension for Envoy API's dependencies.
+    
+    This extension wraps the api_dependencies() function to make it
+    available as a bzlmod module extension, following the same pattern
+    as the main envoy module extensions.
+    """,
+)

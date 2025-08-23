@@ -1,5 +1,4 @@
 workspace(name = "envoy_api")
 
-load("//bazel:repositories.bzl", "api_dependencies")
-
-api_dependencies()
+# api_dependencies() is now handled by bzlmod extension declared in MODULE.bazel:
+# - api_dependencies_ext from "//bazel:repositories.bzl"

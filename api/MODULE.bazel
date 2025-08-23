@@ -40,3 +40,6 @@ switched_rules.use_languages(
     python = True,
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
+
+# API dependencies extension - migrated from WORKSPACE rule
+api_deps = use_extension("//bazel:repositories.bzl", "api_dependencies_ext")

@@ -31,21 +31,15 @@ load("@envoy//bazel:repo.bzl", "envoy_repo")
 
 envoy_repo()
 
-load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
-
-envoy_dependencies()
-
-load("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra")
-
-envoy_dependencies_extra(ignore_root_user_error=True)
+# envoy_dependencies(), envoy_dependencies_extra(), and envoy_dependency_imports()
+# are now handled by bzlmod extensions declared in MODULE.bazel:
+# - envoy_dependencies_ext from "//bazel:repositories.bzl" 
+# - envoy_dependencies_extra_ext from "//bazel:repositories_extra.bzl"
+# - envoy_dependency_imports_ext from "//bazel:dependency_imports.bzl"
 
 load("@envoy//bazel:python_dependencies.bzl", "envoy_python_dependencies")
 
 envoy_python_dependencies()
-
-load("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports")
-
-envoy_dependency_imports()
 
 load("@envoy_mobile//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
 
