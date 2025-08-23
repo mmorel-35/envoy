@@ -3,10 +3,10 @@ module(
     version = "0.0.0-dev",
 )
 
-bazel_dep(name = "bazel_gazelle", version = "0.32.0")
 bazel_dep(name = "envoy", version = "0.0.0-dev")
 bazel_dep(name = "envoy_api", version = "0.0.0-dev")
 bazel_dep(name = "envoy_build_config", version = "0.0.0-dev")
+bazel_dep(name = "bazel_gazelle", version = "0.45.0", repo_name = "bazel_gazelle")
 bazel_dep(
     name = "googleapis",
     version = "0.0.0-20250703-f9d6fe4a",

@@ -190,10 +190,10 @@ The mobile directory has its own MODULE.bazel file that extends the root configu
 module(name = "envoy_mobile", version = "0.0.0-dev")
 
 # Additional dependencies specific to mobile builds
-bazel_dep(name = "bazel_gazelle", version = "0.32.0")
 bazel_dep(name = "envoy", version = "0.0.0-dev")
 bazel_dep(name = "envoy_api", version = "0.0.0-dev")
 bazel_dep(name = "envoy_build_config", version = "0.0.0-dev")
+bazel_dep(name = "gazelle", version = "0.45.0")
 bazel_dep(name = "googleapis", version = "0.0.0-20250703-f9d6fe4a")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_python", version = "1.4.1")
