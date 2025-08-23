@@ -21,6 +21,23 @@ bazel_dep(
     version = "0.35.0",
 )
 
+# rules_foreign_cc override needed for mobile builds until upstream issue is resolved
+# TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
+bazel_dep(
+    name = "rules_foreign_cc",
+    version = "0.11.1",  # This will be overridden below
+)
+
+archive_override(
+    module_name = "rules_foreign_cc",
+    integrity = "sha256-bbc605fd36048923939845d6843464197df6e6ffd188db704423952825e4760a",
+    strip_prefix = "rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b",
+    urls = [
+        "https://storage.googleapis.com/engflow-tools-public/rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
+        "https://github.com/EngFlow/rules_foreign_cc/archive/a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
+    ],
+)
+
 local_path_override(
     module_name = "envoy",
     path = "..",
@@ -49,11 +66,22 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 envoy_deps = use_extension("@envoy//bazel:repositories.bzl", "envoy_dependencies_ext")
 envoy_deps_extra = use_extension("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
 envoy_imports = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
+envoy_imports_extra = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_extra_ext")
 
-# Mobile-specific dependencies extension
+# Envoy API and repository extensions - inherited from parent envoy module
+envoy_api_binding = use_extension("@envoy//bazel:api_binding.bzl", "envoy_api_binding_ext")
+envoy_api_deps_main = use_extension("@envoy//bazel:api_repositories.bzl", "envoy_api_dependencies_main_ext")
+envoy_repo_setup = use_extension("@envoy//bazel:repo.bzl", "envoy_repo_ext")
+
+# Mobile-specific extensions
+envoy_mobile_repos = use_extension("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories_ext")
 envoy_mobile_deps = use_extension("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies_ext")
-# envoy_mobile_dependencies_ext handles mobile-specific dependencies like Swift, Kotlin, etc.
+envoy_mobile_toolchains = use_extension("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains_ext")
+envoy_android_config = use_extension("//bazel:android_configure.bzl", "envoy_android_configure_ext")
+envoy_android_workspace = use_extension("//bazel:android_configure.bzl", "envoy_android_workspace_ext")
+envoy_mobile_workspace = use_extension("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace_ext")
 
+# Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(
     python_version = "3.12",
