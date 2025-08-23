@@ -1,8 +1,19 @@
+# DEPRECATED: This file is no longer used for bzlmod builds.
+# Python dependencies are now handled by upstream rules_python extensions in MODULE.bazel.
+# 
+# For bzlmod builds:
+# - pip dependencies are handled by @rules_python//python/extensions:pip.bzl
+# - python toolchains are handled by @rules_python//python/extensions:python.bzl
+#
+# This file is preserved for WORKSPACE-only builds and will be removed once
+# full bzlmod migration is complete.
+
 load("@com_google_protobuf//bazel:system_python.bzl", "system_python")
 load("@envoy_toolshed//:packages.bzl", "load_packages")
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 def envoy_python_dependencies():
+    """DEPRECATED: Use upstream rules_python extensions in bzlmod instead."""
     # TODO(phlax): rename base_pip3 -> pip3 and remove this
     load_packages()
     pip_parse(
@@ -30,20 +41,3 @@ def envoy_python_dependencies():
         name = "system_python",
         minimum_python_version = "3.7",
     )
-
-def _envoy_python_dependencies_impl(module_ctx):
-    """Implementation of the envoy_python_dependencies extension."""
-    # Call the python dependencies function
-    envoy_python_dependencies()
-
-# Module extension for envoy_python_dependencies following consistent naming convention
-envoy_python_dependencies_ext = module_extension(
-    implementation = _envoy_python_dependencies_impl,
-    doc = """
-    Extension for Envoy's Python dependencies.
-    
-    This extension wraps the envoy_python_dependencies() function to make it
-    available as a bzlmod module extension, following the consistent
-    naming convention envoy_*_ext across all Envoy modules.
-    """,
-)
