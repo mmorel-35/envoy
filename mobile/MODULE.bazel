@@ -50,6 +50,10 @@ envoy_deps = use_extension("@envoy//bazel:repositories.bzl", "envoy_dependencies
 envoy_deps_extra = use_extension("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
 envoy_imports = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
 
+# Mobile-specific dependencies extension
+envoy_mobile_deps = use_extension("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies_ext")
+# envoy_mobile_dependencies_ext handles mobile-specific dependencies like Swift, Kotlin, etc.
+
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(
     python_version = "3.12",

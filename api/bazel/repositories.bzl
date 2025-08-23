@@ -386,14 +386,14 @@ def _api_dependencies_impl(module_ctx):
     # Call the api dependencies function
     api_dependencies()
 
-# Module extension for api_dependencies  
-api_dependencies_ext = module_extension(
+# Module extension for api_dependencies following consistent naming convention
+envoy_api_dependencies_ext = module_extension(
     implementation = _api_dependencies_impl,
     doc = """
     Extension for Envoy API's dependencies.
     
     This extension wraps the api_dependencies() function to make it
-    available as a bzlmod module extension, following the same pattern
-    as the main envoy module extensions.
+    available as a bzlmod module extension, following the consistent
+    naming convention envoy_*_ext across all Envoy modules.
     """,
 )

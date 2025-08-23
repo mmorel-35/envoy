@@ -41,11 +41,10 @@ load("@envoy//bazel:python_dependencies.bzl", "envoy_python_dependencies")
 
 envoy_python_dependencies()
 
-load("@envoy_mobile//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
-
-envoy_mobile_dependencies()
-
 load("@envoy_mobile//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
+
+# envoy_mobile_dependencies() is now handled by bzlmod extension declared in MODULE.bazel:
+# - envoy_mobile_dependencies_ext from "//bazel:envoy_mobile_dependencies.bzl"
 
 envoy_mobile_toolchains()
 

@@ -104,3 +104,20 @@ def kotlin_dependencies(extra_maven_dependencies = []):
     rules_proto_grpc_repos()
     rules_proto_dependencies()
     rules_proto_toolchains()
+
+def _envoy_mobile_dependencies_impl(module_ctx):
+    """Implementation of the envoy_mobile_dependencies extension."""
+    # Call the mobile dependencies function
+    envoy_mobile_dependencies()
+
+# Module extension for envoy_mobile_dependencies following consistent naming convention
+envoy_mobile_dependencies_ext = module_extension(
+    implementation = _envoy_mobile_dependencies_impl,
+    doc = """
+    Extension for Envoy Mobile's dependencies.
+    
+    This extension wraps the envoy_mobile_dependencies() function to make it
+    available as a bzlmod module extension, following the consistent
+    naming convention envoy_*_ext across all Envoy modules.
+    """,
+)

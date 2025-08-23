@@ -1,4 +1,4 @@
 workspace(name = "envoy_api")
 
 # api_dependencies() is now handled by bzlmod extension declared in MODULE.bazel:
-# - api_dependencies_ext from "//bazel:repositories.bzl"
+# - envoy_api_dependencies_ext from "//bazel:repositories.bzl"
