@@ -219,8 +219,18 @@ envoy_api_deps = use_extension("//bazel:repositories.bzl", "envoy_api_dependenci
 
 **Migration Strategy:**
 - ✅ **Python dependencies**: Migrated to `@rules_python//python/extensions:pip.bzl` 
-- 🔄 **Potential future migrations**: Go, proto, and other standard dependencies as upstream support matures
-- 🔒 **Custom extensions preserved**: Complex Envoy-specific logic (API binding, repository metadata) remains custom
+- 🔄 **Potential future migrations**:
+  - **Go dependencies**: Could migrate to `@rules_go//go:extensions.bzl` for standard Go modules
+  - **Proto dependencies**: Could use `@rules_proto//proto:extensions.bzl` for standard proto compilation
+  - **Java dependencies**: Could use `@rules_jvm_external//private/rules:extensions.bzl` for Maven dependencies
+  - **Container images**: Could use `@rules_oci//oci:extensions.bzl` for container build rules
+- 🔒 **Custom extensions preserved**: Complex Envoy-specific logic (API binding, repository metadata, patched dependencies) remains custom
+
+**Evaluation Criteria for Future Migrations**:
+- Extension provides equivalent functionality to custom implementation
+- Upstream extension supports required configuration (patches, custom args)
+- Migration doesn't break existing Envoy-specific workflows
+- Clear maintenance and support benefits outweigh migration costs
 
 **Performance and Reliability:**
 - Upstream extensions often have better caching and performance optimizations
