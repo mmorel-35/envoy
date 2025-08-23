@@ -5,6 +5,10 @@ module(
 
 # Minimal bzlmod migration - only dependencies without patches
 # Dependencies with patches remain in WORKSPACE.bzlmod and extensions
+#
+# Note: Legacy //external: references are now redirected to //third_party: 
+# compatibility layer. New code should use direct @repo//:target dependencies.
+# See THIRD_PARTY_MIGRATION.md for details.
 
 bazel_dep(
     name = "bazel_features",

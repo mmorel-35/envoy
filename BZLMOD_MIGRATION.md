@@ -4,7 +4,29 @@ This document describes the bzlmod migration implemented for Envoy to prepare fo
 
 ## Overview
 
-This migration implements a comprehensive approach to prepare for Bazel 8.0's removal of WORKSPACE support. It migrates clean dependencies (without patches) to MODULE.bazel and creates dedicated module extensions for the three main Envoy dependency functions, enabling both main module and submodule usage.
+This migration implements a comprehensive approach to prepare for Bazel 8.0's removal of WORKSPACE support. It includes:
+
+1. Migration of clean dependencies to MODULE.bazel
+2. Dedicated module extensions for Envoy dependency functions  
+3. **Compatibility layer for //external: to //third_party: migration**
+4. Support for both main module and all submodules
+
+## Dependencies and External References Migration
+
+### Legacy //external: Compatibility Layer
+
+A `third_party/BUILD.bazel` compatibility layer provides aliases for all legacy `//external:foo` references:
+
+```starlark
+alias(name = "ssl", actual = "@envoy//bazel:boringssl")
+alias(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+```
+
+The `envoy_external_dep_path()` function now redirects to `//third_party:` instead of `//external:`. 
+
+**For new code**: Use direct `@repo//:target` dependencies instead of `//external:` or `//third_party:` references.
+
+See `THIRD_PARTY_MIGRATION.md` for detailed migration strategy.
 
 ## Problem Being Solved
 

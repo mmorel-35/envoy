@@ -839,11 +839,11 @@ def _com_github_grpc_grpc():
     )
     native.bind(
         name = "libssl",
-        actual = "//external:ssl",
+        actual = "//third_party:ssl",
     )
     native.bind(
         name = "libcrypto",
-        actual = "//external:crypto",
+        actual = "//third_party:crypto",
     )
 
     native.bind(
