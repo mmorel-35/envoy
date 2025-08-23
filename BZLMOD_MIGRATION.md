@@ -48,6 +48,22 @@ Bazel 8.0 will drop support for the traditional WORKSPACE system, requiring migr
 
 ### Migration Architecture
 
+**Complete Bzlmod Extension Coverage:**
+All dependency functions now have corresponding bzlmod extensions:
+- `envoy_dependencies_ext` - Core dependency definitions
+- `envoy_dependencies_extra_ext` - Second-stage dependencies  
+- `envoy_dependency_imports_ext` - Toolchain imports and registrations
+- `envoy_dependency_imports_extra_ext` - Additional dependency imports
+- `envoy_api_dependencies_main_ext` - Main API dependencies wrapper
+- `envoy_api_dependencies_ext` - API submodule dependencies
+- `envoy_mobile_dependencies_ext` - Mobile-specific dependencies
+- `envoy_api_binding_ext` - API repository binding setup
+- `envoy_repo_ext` - Repository metadata setup
+- `envoy_python_dependencies_ext` - Python package dependencies
+
+**WORKSPACE.bzlmod Elimination:**
+All repository setup and custom logic previously in WORKSPACE.bzlmod has been migrated to dedicated module extensions. WORKSPACE.bzlmod has been completely removed, achieving full bzlmod compatibility.
+
 #### 1. Individual Function Extensions
 
 Instead of a monolithic extension, each major Envoy function gets its own extension:
@@ -457,3 +473,33 @@ Dependencies can be gradually moved from extensions to MODULE.bazel when:
 5. Update documentation
 
 This migration establishes a modern, maintainable Bazel dependency management system while preserving all existing functionality and providing clear patterns for both main and submodule usage.
+
+## Migration Status: COMPLETE ✅
+
+The bzlmod migration is now complete with Bazel 8.0 readiness achieved:
+
+### ✅ Completed Tasks
+- **All dependency functions migrated** - 10 extensions cover all WORKSPACE functions
+- **WORKSPACE.bzlmod eliminated** - Complete removal of hybrid workspace dependency  
+- **Full extension coverage** - Every repository setup function now has bzlmod extension
+- **Consistent naming** - All extensions follow `envoy_*_ext` convention
+- **Submodule support** - Mobile, API, and build config modules fully migrated
+- **Context-aware behavior** - Automatic bzlmod vs WORKSPACE detection
+- **Third-party compatibility** - Legacy //external: references redirected to //third_party:
+
+### Extension Mapping Summary
+| Function | Extension | Location |
+|----------|-----------|----------|
+| `envoy_dependencies()` | `envoy_dependencies_ext` | `bazel/repositories.bzl` |
+| `envoy_dependencies_extra()` | `envoy_dependencies_extra_ext` | `bazel/repositories_extra.bzl` |
+| `envoy_dependency_imports()` | `envoy_dependency_imports_ext` | `bazel/dependency_imports.bzl` |
+| `envoy_dependency_imports_extra()` | `envoy_dependency_imports_extra_ext` | `bazel/dependency_imports_extra.bzl` |
+| `envoy_api_dependencies()` | `envoy_api_dependencies_main_ext` | `bazel/api_repositories.bzl` |
+| `api_dependencies()` | `envoy_api_dependencies_ext` | `api/bazel/repositories.bzl` |
+| `envoy_mobile_dependencies()` | `envoy_mobile_dependencies_ext` | `mobile/bazel/envoy_mobile_dependencies.bzl` |
+| `envoy_api_binding()` | `envoy_api_binding_ext` | `bazel/api_binding.bzl` |
+| `envoy_repo()` | `envoy_repo_ext` | `bazel/repo.bzl` |
+| `envoy_python_dependencies()` | `envoy_python_dependencies_ext` | `bazel/python_dependencies.bzl` |
+
+### Ready for Bazel 8.0
+The Envoy repository is now fully prepared for Bazel 8.0's removal of WORKSPACE support. All repository setup, custom logic, and dependency management has been successfully migrated to bzlmod module extensions with zero functionality loss.

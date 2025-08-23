@@ -127,3 +127,19 @@ envoy_deps_extra = use_extension("//bazel:repositories_extra.bzl", "envoy_depend
 
 envoy_imports = use_extension("//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
 # envoy_dependency_imports_ext handles toolchain imports and registrations
+
+# Additional extensions for remaining WORKSPACE.bzlmod functions
+envoy_api_binding = use_extension("//bazel:api_binding.bzl", "envoy_api_binding_ext")
+# envoy_api_binding_ext handles API repository binding and setup
+
+envoy_api_deps = use_extension("//bazel:api_repositories.bzl", "envoy_api_dependencies_main_ext")
+# envoy_api_dependencies_main_ext handles main API dependencies
+
+envoy_repo_setup = use_extension("//bazel:repo.bzl", "envoy_repo_ext")
+# envoy_repo_ext handles repository metadata setup
+
+envoy_python_deps = use_extension("//bazel:python_dependencies.bzl", "envoy_python_dependencies_ext")
+# envoy_python_dependencies_ext handles Python package dependencies
+
+envoy_imports_extra = use_extension("//bazel:dependency_imports_extra.bzl", "envoy_dependency_imports_extra_ext")
+# envoy_dependency_imports_extra_ext handles additional dependency imports

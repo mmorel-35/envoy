@@ -28,12 +28,32 @@ def envoy_api_binding():
     if "envoy_api" not in native.existing_rules().keys():
         _default_envoy_api(name = "envoy_api", reldir = "api")
 
-    # TODO(https://github.com/envoyproxy/envoy/issues/7719) need to remove both bindings and use canonical rules
-    native.bind(
-        name = "api_httpbody_protos",
-        actual = "@com_google_googleapis//google/api:httpbody_cc_proto",
-    )
-    native.bind(
-        name = "http_api_protos",
-        actual = "@com_google_googleapis//google/api:annotations_cc_proto",
-    )
+    # Detect bzlmod context to skip native.bind() calls
+    _IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
+    if not _IS_BZLMOD:
+        # TODO(https://github.com/envoyproxy/envoy/issues/7719) need to remove both bindings and use canonical rules
+        native.bind(
+            name = "api_httpbody_protos",
+            actual = "@com_google_googleapis//google/api:httpbody_cc_proto",
+        )
+        native.bind(
+            name = "http_api_protos",
+            actual = "@com_google_googleapis//google/api:annotations_cc_proto",
+        )
+
+def _envoy_api_binding_impl(module_ctx):
+    """Implementation of the envoy_api_binding extension."""
+    # Call the api binding function
+    envoy_api_binding()
+
+# Module extension for envoy_api_binding following consistent naming convention
+envoy_api_binding_ext = module_extension(
+    implementation = _envoy_api_binding_impl,
+    doc = """
+    Extension for Envoy's API binding setup.
+    
+    This extension wraps the envoy_api_binding() function to make it
+    available as a bzlmod module extension, following the consistent
+    naming convention envoy_*_ext across all Envoy modules.
+    """,
+)
