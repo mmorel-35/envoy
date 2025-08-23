@@ -40,12 +40,15 @@ Bazel 8.0 will drop support for the traditional WORKSPACE system, requiring migr
 # Minimal bzlmod migration - only dependencies without patches
 bazel_dep(name = "bazel_features", version = "1.33.0")
 bazel_dep(name = "fmt", version = "11.2.0")
+bazel_dep(name = "gazelle", version = "0.45.0")
 bazel_dep(name = "google_benchmark", version = "1.9.4")
 bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1")
 bazel_dep(name = "platforms", version = "1.0.0") 
 bazel_dep(name = "protoc-gen-validate", version = "1.2.1.bcr.1")
 bazel_dep(name = "rules_python", version = "0.35.0")
 bazel_dep(name = "rules_cc", version = "0.1.4")
+bazel_dep(name = "rules_go", version = "0.53.0")
+bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_shell", version = "0.5.1")
 bazel_dep(name = "rules_shellcheck", version = "0.3.3")
@@ -96,8 +99,11 @@ envoy_dependencies()  # Uses native.existing_rules() to skip MODULE.bazel deps
 - **googleapis** (0.0.0-20241220-5e258e33.bcr.1) - Google APIs with switched_rules extension
 - **spdlog** (1.15.3) - Logging library  
 - **fmt** (11.2.0) - String formatting
+- **gazelle** (0.45.0) - Bazel BUILD file generator for Go projects
 - **xxhash** (0.8.3) - Hash function library
 - **protoc-gen-validate** (1.2.1.bcr.1) - Protocol buffer validation
+- **rules_go** (0.53.0) - Bazel rules for the Go language
+- **rules_license** (1.0.0) - Bazel rules for checking open source licenses
 - **rules_python** (0.35.0) - Python build rules
 - **rules_cc** (0.1.4) - C++ build rules
 - **rules_pkg** (1.1.0) - Package creation rules
