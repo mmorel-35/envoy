@@ -1,4 +1,4 @@
-"""Public extension for Envoy's main dependencies."""
+"""Extension for Envoy's main dependencies."""
 
 load("//bazel:repositories.bzl", "envoy_dependencies")
 

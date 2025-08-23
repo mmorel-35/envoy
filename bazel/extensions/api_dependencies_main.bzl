@@ -1,4 +1,4 @@
-"""Public extension for Envoy's main API dependencies wrapper."""
+"""Extension for Envoy's main API dependencies wrapper."""
 
 load("//bazel:api_repositories.bzl", "envoy_api_dependencies")
 

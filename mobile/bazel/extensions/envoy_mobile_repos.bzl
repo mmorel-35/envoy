@@ -1,6 +1,6 @@
-"""Public extension for Envoy Mobile repositories."""
+"""Extension for Envoy Mobile repositories."""
 
-load("//mobile/bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories")
+load("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories")
 
 def _envoy_mobile_repos_impl(module_ctx):
     """Implementation for envoy_mobile_repos extension.

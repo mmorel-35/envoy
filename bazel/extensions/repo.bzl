@@ -1,4 +1,4 @@
-"""Public extension for Envoy repository setup."""
+"""Extension for Envoy repository setup."""
 
 load("//bazel:repo.bzl", "envoy_repo")
 

@@ -1,4 +1,4 @@
-"""Public extension for Envoy API binding."""
+"""Extension for Envoy API binding."""
 
 load("//bazel:api_binding.bzl", "envoy_api_binding")
 

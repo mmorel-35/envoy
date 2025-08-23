@@ -1,6 +1,6 @@
-"""Public extension for Envoy Mobile toolchains."""
+"""Extension for Envoy Mobile toolchains."""
 
-load("//mobile/bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
+load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
 
 def _envoy_mobile_toolchains_impl(module_ctx):
     """Implementation for envoy_mobile_toolchains extension.

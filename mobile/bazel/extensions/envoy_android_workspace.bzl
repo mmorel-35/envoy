@@ -1,4 +1,4 @@
-"""Public extension for Android workspace setup."""
+"""Extension for Android workspace setup."""
 
 def _post_android_setup_impl(repository_ctx):
     """Repository rule to handle post-android configuration setup."""

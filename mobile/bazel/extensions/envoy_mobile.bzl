@@ -1,6 +1,6 @@
-"""Public extension for Envoy Mobile dependencies."""
+"""Extension for Envoy Mobile dependencies."""
 
-load("//mobile/bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
+load("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
 
 def _envoy_mobile_impl(module_ctx):
     """Implementation for envoy_mobile extension.

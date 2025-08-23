@@ -1,6 +1,6 @@
-"""Public extension for Envoy Mobile workspace setup."""
+"""Extension for Envoy Mobile workspace setup."""
 
-load("//mobile/bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace")
+load("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace")
 
 def _envoy_mobile_workspace_impl(module_ctx):
     """Implementation for envoy_mobile_workspace extension.

@@ -1,6 +1,6 @@
-"""Public extension for Android configuration."""
+"""Extension for Android configuration."""
 
-load("//mobile/bazel:android_configure.bzl", "android_configure")
+load("//bazel:android_configure.bzl", "android_configure")
 
 def _envoy_android_impl(module_ctx):
     """Implementation for envoy_android extension.
