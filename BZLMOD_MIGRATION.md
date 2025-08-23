@@ -16,36 +16,36 @@ This document describes the **completed** bzlmod migration implemented for Envoy
 
 This migration implements a comprehensive approach for **full Bazel 8.0 compatibility**. It includes:
 
-1. **Complete bzlmod migration** - All 10 dependency functions now use extensions
+1. **Complete bzlmod migration** - All 13 dependency functions now use extensions  
 2. **WORKSPACE.bzlmod elimination** - Pure bzlmod architecture across all modules
-3. **Upstream rules_python integration** - Standard pip and python toolchain extensions
-4. **Compatibility layer for //external: to //third_party: migration**
-5. **Universal submodule support** - Consistent patterns across all modules
+3. **Per-module organization** - Extensions organized by module ownership and responsibility
+4. **Upstream rules_python integration** - Standard pip and python toolchain extensions
+5. **Compatibility layer for //external: to //third_party: migration**
+6. **Clear module boundaries** - Each module manages its own extensions
 
 ## Completed Bzlmod Extensions
 
-### Core Envoy Extensions (10 total)
-All repository setup functions now have corresponding bzlmod extensions with consistent `envoy_*_ext` naming:
+### Per-Module Extension Organization (13 total)
+All repository setup functions are now organized in dedicated per-module extensions with simplified naming:
 
-**Main Envoy:**
-- `envoy_dependencies_ext` - Core dependency definitions with patches
-- `envoy_dependencies_extra_ext` - Second-stage dependencies  
-- `envoy_dependency_imports_ext` - Toolchain imports and registrations
-- `envoy_dependency_imports_extra_ext` - Additional dependency imports
-- `envoy_api_binding_ext` - API repository binding setup
-- `envoy_api_dependencies_main_ext` - Main API dependencies wrapper
-- `envoy_repo_ext` - Repository metadata setup
+**Main Module (@envoy//bazel/extensions/):**
+- `dependencies` - Core dependency definitions with patches
+- `dependencies_extra` - Second-stage dependencies  
+- `dependency_imports` - Toolchain imports and registrations
+- `dependency_imports_extra` - Additional dependency imports
+- `repo` - Repository metadata setup
 
-**Mobile-Specific:**
-- `envoy_mobile_repositories_ext` - Mobile repository setup
-- `envoy_mobile_dependencies_ext` - Swift, Kotlin, Android dependencies
-- `envoy_mobile_toolchains_ext` - Mobile toolchain registration
-- `envoy_android_configure_ext` - Android SDK/NDK configuration
-- `envoy_android_workspace_ext` - Android workspace setup
-- `envoy_mobile_workspace_ext` - Xcode and provisioning setup
+**API Module (@envoy_api//bazel/extensions/):**
+- `api_dependencies` - API-specific dependencies
+- `api_binding` - API repository binding setup
 
-**API-Specific:**
-- `envoy_api_dependencies_ext` - API-specific dependencies
+**Mobile Module (@envoy_mobile//bazel/extensions/):**
+- `mobile` - Mobile-specific dependencies (Swift, Kotlin, Android)
+- `repos` - Mobile repository setup
+- `toolchains` - Mobile toolchain registration
+- `android` - Android SDK/NDK configuration
+- `android_workspace` - Android workspace setup
+- `workspace` - Xcode and provisioning setup
 
 ## Dependencies and External References Migration
 
@@ -68,15 +68,16 @@ See `THIRD_PARTY_MIGRATION.md` for detailed migration strategy.
 
 Bazel 8.0 will drop support for the traditional WORKSPACE system, requiring migration to the MODULE.bazel (bzlmod) system. This migration must preserve all existing custom patches that Envoy requires and make the dependency management functions available to all submodules.
 
-## Solution: Complete Extension Migration + Upstream Integration
+## Solution: Complete Extension Migration + Per-Module Organization
 
 ### Key Achievements
 - **Pure bzlmod architecture** - WORKSPACE.bzlmod files completely eliminated 
 - **13 dedicated extensions** - Every dependency function has corresponding extension
-- **Consistent naming** - All extensions follow `envoy_*_ext` pattern across modules
+- **Per-module organization** - Each module manages extensions in dedicated `bazel/extensions/` directories
+- **Simplified naming** - Clean extension names without redundant prefixes (leveraging per-module context)
 - **Upstream integration** - Python uses standard `@rules_python` extensions
 - **Zero code duplication** - Extensions directly call existing functions
-- **Universal submodule support** - All modules use consistent extension patterns
+- **Clear module boundaries** - Extensions organized by module ownership and responsibility
 - **Context-aware behavior** - Automatic bzlmod vs WORKSPACE detection
 - **Full Bazel 8.0 readiness** - No WORKSPACE dependencies remaining
 
@@ -91,10 +92,10 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 ```
 
-**Custom Extensions (for complex/patched dependencies)**:
-- Core Envoy dependencies with patches remain in custom extensions
-- Mobile platform-specific dependencies (Swift, Kotlin, Android) 
-- API bindings and repository metadata setup
+**Custom Extensions (per-module organization for complex/patched dependencies)**:
+- Core Envoy dependencies with patches in main module extensions
+- Mobile platform-specific dependencies (Swift, Kotlin, Android) in mobile module
+- API bindings and repository metadata setup in appropriate modules
 
 **Benefits of upstream migration**:
 - Standardized approach maintained by rules authors
@@ -102,81 +103,81 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 - Consistent patterns across the Bazel ecosystem
 - Reduced custom extension maintenance burden
 
-**Custom extensions preserved for**:
-- Complex repository setup (`envoy_api_binding_ext`, `envoy_repo_ext`)
-- Envoy-specific dependency patching and configuration
-- Mobile platform-specific tooling (Swift, Kotlin, Android)
+**Custom extensions preserved for per-module organization**:
+- Complex repository setup in appropriate module contexts
+- Envoy-specific dependency patching and configuration in main module
+- Mobile platform-specific tooling (Swift, Kotlin, Android) in mobile module
+- API-specific setup and bindings in API module
 
 ### Migration Architecture
 
 **Complete Bzlmod Extension Coverage:**
-All dependency functions now have corresponding bzlmod extensions or use upstream alternatives:
+All dependency functions now have corresponding bzlmod extensions organized by module ownership:
 
-**Custom Envoy Extensions (for complex/patched dependencies):**
-- `envoy_dependencies_ext` - Core dependency definitions
-- `envoy_dependencies_extra_ext` - Second-stage dependencies  
-- `envoy_dependency_imports_ext` - Toolchain imports and registrations
-- `envoy_dependency_imports_extra_ext` - Additional dependency imports
-- `envoy_api_dependencies_main_ext` - Main API dependencies wrapper
-- `envoy_api_dependencies_ext` - API submodule dependencies
-- `envoy_mobile_dependencies_ext` - Mobile-specific dependencies
-- `envoy_api_binding_ext` - API repository binding setup
-- `envoy_repo_ext` - Repository metadata setup
+**Main Module Extensions (@envoy//bazel/extensions/):**
+- `dependencies` - Core dependency definitions
+- `dependencies_extra` - Second-stage dependencies  
+- `dependency_imports` - Toolchain imports and registrations
+- `dependency_imports_extra` - Additional dependency imports
+- `repo` - Repository metadata setup
+
+**API Module Extensions (@envoy_api//bazel/extensions/):**
+- `api_dependencies` - API submodule dependencies
+- `api_binding` - API repository binding setup
+
+**Mobile Module Extensions (@envoy_mobile//bazel/extensions/):**
+- `mobile` - Mobile-specific dependencies
+- `repos` - Mobile repository setup
+- `toolchains` - Mobile toolchain registration
+- `android` - Android SDK/NDK configuration
+- `android_workspace` - Android workspace setup
+- `workspace` - Xcode and provisioning setup
 
 **Upstream Extensions (for standardized dependencies):**
-- Python dependencies: `@rules_python//python/extensions:pip.bzl` (replaces `envoy_python_dependencies_ext`)
+- Python dependencies: `@rules_python//python/extensions:pip.bzl` (replaces custom Python dependency extension)
 - Python toolchains: `@rules_python//python/extensions:python.bzl`
 
 **WORKSPACE.bzlmod Elimination:**
 All repository setup and custom logic previously in WORKSPACE.bzlmod has been migrated to dedicated module extensions. WORKSPACE.bzlmod has been completely removed, achieving full bzlmod compatibility.
 
-#### 1. Individual Function Extensions
+#### 1. Per-Module Extension Organization
 
-Instead of a monolithic extension, each major Envoy function gets its own extension:
+Extensions are organized by module ownership with simplified naming:
 
 ```starlark
-# bazel/repositories.bzl
-def _envoy_dependencies_impl(module_ctx):
+# @envoy//bazel/extensions/dependencies.bzl
+def _dependencies_impl(module_ctx):
     envoy_dependencies()
 
-envoy_dependencies_ext = module_extension(
-    implementation = _envoy_dependencies_impl,
+dependencies = module_extension(
+    implementation = _dependencies_impl,
     doc = "Extension for Envoy's main dependencies."
 )
 
-# bazel/repositories_extra.bzl  
-def _envoy_dependencies_extra_impl(module_ctx):
+# @envoy//bazel/extensions/dependencies_extra.bzl  
+def _dependencies_extra_impl(module_ctx):
     envoy_dependencies_extra()
 
-envoy_dependencies_extra_ext = module_extension(
-    implementation = _envoy_dependencies_extra_impl,
+dependencies_extra = module_extension(
+    implementation = _dependencies_extra_impl,
     doc = "Extension for Envoy's extra dependencies."
 )
 
-# bazel/dependency_imports.bzl
-def _envoy_dependency_imports_impl(module_ctx):
-    envoy_dependency_imports()
-
-envoy_dependency_imports_ext = module_extension(
-    implementation = _envoy_dependency_imports_impl,
-    doc = "Extension for Envoy's dependency imports."
-)
-
-# api/bazel/repositories.bzl
+# @envoy_api//bazel/extensions/api_dependencies.bzl
 def _api_dependencies_impl(module_ctx):
     api_dependencies()
 
-envoy_api_dependencies_ext = module_extension(
+api_dependencies = module_extension(
     implementation = _api_dependencies_impl,
     doc = "Extension for Envoy API's dependencies."
 )
 
-# mobile/bazel/envoy_mobile_dependencies.bzl
-def _envoy_mobile_dependencies_impl(module_ctx):
+# @envoy_mobile//bazel/extensions/mobile.bzl
+def _mobile_impl(module_ctx):
     envoy_mobile_dependencies()
 
-envoy_mobile_dependencies_ext = module_extension(
-    implementation = _envoy_mobile_dependencies_impl,
+mobile = module_extension(
+    implementation = _mobile_impl,
     doc = "Extension for Envoy Mobile's dependencies."
 )
 ```
@@ -198,10 +199,14 @@ if not _IS_BZLMOD:
 
 #### Main Module (MODULE.bazel)
 ```starlark
-# Core Envoy extensions (custom)
-envoy_deps = use_extension("//bazel:repositories.bzl", "envoy_dependencies_ext")
-envoy_deps_extra = use_extension("//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")
-envoy_imports = use_extension("//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
+# Core Envoy extensions using per-module organization
+envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
+envoy_deps_extra = use_extension("//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
+envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "dependency_imports")
+envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
+
+# Repository setup using local module
+envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
 
 # Python dependencies (upstream rules_python - preferred approach)
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
@@ -211,32 +216,30 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(hub_name = "base_pip3", python_version = "3.12", requirements_lock = "//tools/base:requirements.txt")
 pip.parse(hub_name = "dev_pip3", python_version = "3.12", requirements_lock = "//tools/dev:requirements.txt")
 use_repo(pip, "base_pip3", "dev_pip3", "fuzzing_pip3")
-
-# Repository setup (custom extensions for complex logic)
-envoy_api_binding = use_extension("//bazel:api_binding.bzl", "envoy_api_binding_ext")
-envoy_repo_setup = use_extension("//bazel:repo.bzl", "envoy_repo_ext")
 ```
 
-#### Submodules (mobile/MODULE.bazel) - Complete Migration
+#### Submodules (mobile/MODULE.bazel) - Per-Module Organization
 ```starlark
 # Core Envoy dependencies extensions - inherited from parent envoy module
-envoy_deps = use_extension("@envoy//bazel:repositories.bzl", "envoy_dependencies_ext")
-envoy_deps_extra = use_extension("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
-envoy_imports = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
-envoy_imports_extra = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_extra_ext")
+envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")  
+envoy_imports = use_extension("@envoy//bazel/extensions:dependency_imports.bzl", "dependency_imports")
+envoy_imports_extra = use_extension("@envoy//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
 
-# Envoy API and repository extensions - inherited from parent envoy module
-envoy_api_binding = use_extension("@envoy//bazel:api_binding.bzl", "envoy_api_binding_ext")
-envoy_api_deps_main = use_extension("@envoy//bazel:api_repositories.bzl", "envoy_api_dependencies_main_ext")
-envoy_repo_setup = use_extension("@envoy//bazel:repo.bzl", "envoy_repo_ext")
+# Envoy repository setup - inherited from parent envoy module
+envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
 
-# Mobile-specific extensions - comprehensive coverage
-envoy_mobile_repos = use_extension("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories_ext")
-envoy_mobile_deps = use_extension("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies_ext")
-envoy_mobile_toolchains = use_extension("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains_ext")
-envoy_android_config = use_extension("//bazel:android_configure.bzl", "envoy_android_configure_ext")
-envoy_android_workspace = use_extension("//bazel:android_configure.bzl", "envoy_android_workspace_ext")
-envoy_mobile_workspace = use_extension("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace_ext")
+# API extensions from API module
+envoy_api_binding = use_extension("@envoy_api//bazel/extensions:api_binding.bzl", "api_binding")
+envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+
+# Mobile-specific extensions using local module with simplified naming
+envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
+envoy_mobile_deps = use_extension("//bazel/extensions:mobile.bzl", "mobile")
+envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
+envoy_android_config = use_extension("//bazel/extensions:android.bzl", "android")
+envoy_android_workspace = use_extension("//bazel/extensions:android_workspace.bzl", "android_workspace")
+envoy_mobile_workspace = use_extension("//bazel/extensions:workspace.bzl", "workspace")
 
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
@@ -257,9 +260,13 @@ archive_override(
 
 #### API Module (api/MODULE.bazel)
 ```starlark
-# API dependencies extension - migrated from WORKSPACE rule with consistent naming
-envoy_api_deps = use_extension("//bazel:repositories.bzl", "envoy_api_dependencies_ext")
-# envoy_api_dependencies_ext handles API-specific dependencies and external archives
+# API dependencies extension using local module
+envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+# Handles API-specific dependencies and external archives
+
+# API binding extension using local module  
+envoy_api_binding = use_extension("//bazel/extensions:api_binding.bzl", "api_binding")
+# Handles API repository binding and setup
 ```
 
 ### WORKSPACE.bzlmod Complete Elimination ✅
@@ -272,19 +279,19 @@ envoy_api_deps = use_extension("//bazel:repositories.bzl", "envoy_api_dependenci
 - **Build config module**: WORKSPACE.bzlmod is empty
 
 **All repository setup functions have been migrated**:
-- ❌ ~~envoy_dependencies()~~ → ✅ `envoy_dependencies_ext`
-- ❌ ~~envoy_dependencies_extra()~~ → ✅ `envoy_dependencies_extra_ext`
-- ❌ ~~envoy_dependency_imports()~~ → ✅ `envoy_dependency_imports_ext`
-- ❌ ~~envoy_dependency_imports_extra()~~ → ✅ `envoy_dependency_imports_extra_ext`
+- ❌ ~~envoy_dependencies()~~ → ✅ `dependencies` (@envoy//bazel/extensions:)
+- ❌ ~~envoy_dependencies_extra()~~ → ✅ `dependencies_extra` (@envoy//bazel/extensions:)
+- ❌ ~~envoy_dependency_imports()~~ → ✅ `dependency_imports` (@envoy//bazel/extensions:)
+- ❌ ~~envoy_dependency_imports_extra()~~ → ✅ `dependency_imports_extra` (@envoy//bazel/extensions:)
 - ❌ ~~envoy_python_dependencies()~~ → ✅ upstream `@rules_python` extensions
-- ❌ ~~envoy_api_binding()~~ → ✅ `envoy_api_binding_ext`
-- ❌ ~~envoy_api_dependencies()~~ → ✅ `envoy_api_dependencies_main_ext` + `envoy_api_dependencies_ext`
-- ❌ ~~envoy_repo()~~ → ✅ `envoy_repo_ext`
-- ❌ ~~envoy_mobile_repositories()~~ → ✅ `envoy_mobile_repositories_ext`
-- ❌ ~~envoy_mobile_dependencies()~~ → ✅ `envoy_mobile_dependencies_ext`
-- ❌ ~~envoy_mobile_toolchains()~~ → ✅ `envoy_mobile_toolchains_ext`
-- ❌ ~~android_configure() + android_workspace()~~ → ✅ `envoy_android_configure_ext` + `envoy_android_workspace_ext`
-- ❌ ~~xcodeproj + provisioning setup~~ → ✅ `envoy_mobile_workspace_ext`
+- ❌ ~~envoy_api_binding()~~ → ✅ `api_binding` (@envoy_api//bazel/extensions:)
+- ❌ ~~api_dependencies()~~ → ✅ `api_dependencies` (@envoy_api//bazel/extensions:)
+- ❌ ~~envoy_repo()~~ → ✅ `repo` (@envoy//bazel/extensions:)
+- ❌ ~~envoy_mobile_repositories()~~ → ✅ `repos` (@envoy_mobile//bazel/extensions:)
+- ❌ ~~envoy_mobile_dependencies()~~ → ✅ `mobile` (@envoy_mobile//bazel/extensions:)
+- ❌ ~~envoy_mobile_toolchains()~~ → ✅ `toolchains` (@envoy_mobile//bazel/extensions:)
+- ❌ ~~android_configure() + android_workspace()~~ → ✅ `android` + `android_workspace` (@envoy_mobile//bazel/extensions:)
+- ❌ ~~xcodeproj + provisioning setup~~ → ✅ `workspace` (@envoy_mobile//bazel/extensions:)
 
 **Result**: Pure bzlmod architecture ready for Bazel 8.0 🎉
 
@@ -403,13 +410,14 @@ bazel_dep(name = "envoy_api", version = "0.0.0-dev")
 # ... other dependencies
 
 # Envoy dependencies extensions - inherited from parent envoy module
-envoy_deps = use_extension("@envoy//bazel:repositories.bzl", "envoy_dependencies_ext")
-envoy_deps_extra = use_extension("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
-envoy_imports = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
+envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")  
+envoy_imports = use_extension("@envoy//bazel/extensions:dependency_imports.bzl", "dependency_imports")
 
-# Mobile-specific dependencies extension
-envoy_mobile_deps = use_extension("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies_ext")
-# envoy_mobile_dependencies_ext handles mobile-specific dependencies like Swift, Kotlin, etc.
+# Mobile-specific dependencies extensions using local module
+envoy_mobile_deps = use_extension("//bazel/extensions:mobile.bzl", "mobile")
+envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
+# mobile extension handles mobile-specific dependencies like Swift, Kotlin, etc.
 ```
 
 ### API Module (api/MODULE.bazel)  
@@ -418,9 +426,9 @@ module(name = "envoy_api", version = "0.0.0-dev")
 
 # ... api-specific dependencies
 
-# API dependencies extension with consistent naming
-envoy_api_deps = use_extension("//bazel:repositories.bzl", "envoy_api_dependencies_ext")
-# envoy_api_dependencies_ext handles API-specific dependencies and external archives
+# API dependencies extension using local module
+envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+# api_dependencies handles API-specific dependencies and external archives
 ```
 
 ### Build Config Module (mobile/envoy_build_config/MODULE.bazel)
@@ -435,50 +443,50 @@ bazel_dep(name = "envoy", version = "0.0.0-dev")
 
 ### Extension Definitions
 
-**1. Main Dependencies (bazel/repositories.bzl)**
+**1. Main Dependencies (@envoy//bazel/extensions/dependencies.bzl)**
 ```starlark
-def _envoy_dependencies_impl(module_ctx):
-    """Implementation of the envoy_dependencies extension."""
+def _dependencies_impl(module_ctx):
+    """Implementation of the dependencies extension."""
     envoy_dependencies()
 
-envoy_dependencies_ext = module_extension(
-    implementation = _envoy_dependencies_impl,
+dependencies = module_extension(
+    implementation = _dependencies_impl,
     doc = """
     Extension for Envoy's main dependencies.
     
     This extension wraps the envoy_dependencies() function to make it
-    available as a bzlmod module extension, following the conservative 
-    bzlmod migration strategy.
+    available as a bzlmod module extension, following the per-module 
+    organization strategy.
     """,
 )
 ```
 
-**2. Extra Dependencies (bazel/repositories_extra.bzl)**
+**2. Extra Dependencies (@envoy//bazel/extensions/dependencies_extra.bzl)**
 ```starlark  
-def _envoy_dependencies_extra_impl(module_ctx):
-    """Implementation of the envoy_dependencies_extra extension."""
+def _dependencies_extra_impl(module_ctx):
+    """Implementation of the dependencies_extra extension."""
     envoy_dependencies_extra()
 
-envoy_dependencies_extra_ext = module_extension(
-    implementation = _envoy_dependencies_extra_impl,
+dependencies_extra = module_extension(
+    implementation = _dependencies_extra_impl,
     doc = """
     Extension for Envoy's extra dependencies.
     
     This extension wraps the envoy_dependencies_extra() function to make it
     available as a bzlmod module extension. These are dependencies that rely  
-    on a first stage of dependency loading in envoy_dependencies().
+    on a first stage of dependency loading in dependencies.
     """,
 )
 ```
 
-**3. Dependency Imports (bazel/dependency_imports.bzl)**
+**3. Dependency Imports (@envoy//bazel/extensions/dependency_imports.bzl)**
 ```starlark
-def _envoy_dependency_imports_impl(module_ctx):
-    """Implementation of the envoy_dependency_imports extension.""" 
+def _dependency_imports_impl(module_ctx):
+    """Implementation of the dependency_imports extension.""" 
     envoy_dependency_imports()
 
-envoy_dependency_imports_ext = module_extension(
-    implementation = _envoy_dependency_imports_impl,
+dependency_imports = module_extension(
+    implementation = _dependency_imports_impl,
     doc = """
     Extension for Envoy's dependency imports.
     
@@ -536,19 +544,21 @@ These dependencies have no patches and are available in the Bazel Central Regist
 - **rules_shell** (0.5.1) - Shell script build rules
 - **rules_shellcheck** (0.3.3) - Shell script linting
 
-### Managed by Extensions
-All dependencies with patches, custom configurations, or complex build requirements are now managed through the dedicated extensions:
+### Managed by Per-Module Extensions
+All dependencies with patches, custom configurations, or complex build requirements are now managed through dedicated per-module extensions:
 
-#### envoy_dependencies_ext
+#### Main Module Extensions (@envoy//bazel/extensions/)
+
+**dependencies**
 Core dependencies including:
 - **protobuf** - Extensive patches for arena.h modifications
 - **abseil-cpp** - Custom compatibility patches
 - **grpc** - Custom modifications
 - **googletest** - Custom patches
 - **boringssl** - Standard and FIPS variants with patches
-- All HTTP archives defined in `bazel/repositories.bzl`
+- All HTTP archives defined in the main module
 
-#### envoy_dependencies_extra_ext  
+**dependencies_extra**  
 Second-stage dependencies including:
 - **rules_foreign_cc** - Foreign C/C++ build rules
 - **rules_rust** - Rust build rules with platform-specific patches
@@ -556,7 +566,7 @@ Second-stage dependencies including:
 - Python toolchain registrations
 - Aspect Bazel lib dependencies
 
-#### envoy_dependency_imports_ext
+**dependency_imports**
 Toolchain imports and registrations including:
 - Go toolchain registration and SDK downloads
 - Apple rules dependencies
@@ -565,7 +575,9 @@ Toolchain imports and registrations including:
 - Protobuf gRPC toolchain registrations
 - Foreign CC dependencies setup
 
-### API Module Dependencies (envoy_api_dependencies_ext)
+#### API Module Extensions (@envoy_api//bazel/extensions/)
+
+**api_dependencies**
 The API module has its own extension for API-specific dependencies:
 - **bazel_skylib**
 - **rules_jvm_external**  
@@ -579,7 +591,9 @@ The API module has its own extension for API-specific dependencies:
 - **dev_cel**
 - **com_github_chrusty_protoc_gen_jsonschema**
 
-### Mobile Module Dependencies (envoy_mobile_dependencies_ext)
+#### Mobile Module Extensions (@envoy_mobile//bazel/extensions/)
+
+**mobile**
 The Mobile module has its own extension for mobile-specific dependencies:
 - **Swift dependencies** - Apple support, rules, Swift rules
 - **Kotlin dependencies** - Java rules, Maven artifacts, Kotlin repositories
@@ -590,10 +604,11 @@ The Mobile module has its own extension for mobile-specific dependencies:
 ## Migration Benefits
 
 ### For Development
-- ✅ **Consistent patterns** - All modules use the same extension approach
+- ✅ **Per-module organization** - Clear extension ownership by module
+- ✅ **Simplified naming** - Context-appropriate names without redundant prefixes
 - ✅ **Clear separation** - Clean vs patched dependencies clearly differentiated
 - ✅ **Easy maintenance** - Extensions defined alongside their functions
-- ✅ **Reduced duplication** - Submodules inherit from parent extensions
+- ✅ **Module boundaries** - Each module manages its own dependencies
 
 ### For Operations  
 - ✅ **Bazel 8.0 ready** - Full bzlmod foundation established
@@ -602,9 +617,9 @@ The Mobile module has its own extension for mobile-specific dependencies:
 - ✅ **Incremental migration path** - Individual dependencies can be moved to MODULE.bazel over time
 
 ### For Contributors
-- ✅ **Familiar patterns** - Extension names match function names
+- ✅ **Clear extension context** - Extension location indicates module ownership
 - ✅ **Documentation alignment** - Extensions defined where functions are implemented
-- ✅ **Submodule consistency** - Same extension usage across all modules
+- ✅ **Consistent patterns** - Same per-module organization across all modules
 - ✅ **Clear migration examples** - Both main and submodule patterns documented
 
 ## Future Migration Path
@@ -630,10 +645,11 @@ This migration establishes a modern, maintainable Bazel dependency management sy
 The bzlmod migration is now complete with Bazel 8.0 readiness achieved:
 
 ### ✅ Completed Tasks
-- **All dependency functions migrated** - 10 extensions cover all WORKSPACE functions
+- **All dependency functions migrated** - 13 extensions cover all WORKSPACE functions
 - **WORKSPACE.bzlmod eliminated** - Complete removal of hybrid workspace dependency  
 - **Full extension coverage** - Every repository setup function now has bzlmod extension
-- **Consistent naming** - All extensions follow `envoy_*_ext` convention
+- **Per-module organization** - Extensions organized by module ownership with clear boundaries
+- **Simplified naming** - Extensions use context-appropriate names without redundant prefixes
 - **Submodule support** - Mobile, API, and build config modules fully migrated
 - **Context-aware behavior** - Automatic bzlmod vs WORKSPACE detection
 - **Third-party compatibility** - Legacy //external: references redirected to //third_party:
@@ -641,16 +657,20 @@ The bzlmod migration is now complete with Bazel 8.0 readiness achieved:
 ### Extension Mapping Summary
 | Function | Extension | Location |
 |----------|-----------|----------|
-| `envoy_dependencies()` | `envoy_dependencies_ext` | `bazel/repositories.bzl` |
-| `envoy_dependencies_extra()` | `envoy_dependencies_extra_ext` | `bazel/repositories_extra.bzl` |
-| `envoy_dependency_imports()` | `envoy_dependency_imports_ext` | `bazel/dependency_imports.bzl` |
-| `envoy_dependency_imports_extra()` | `envoy_dependency_imports_extra_ext` | `bazel/dependency_imports_extra.bzl` |
-| `envoy_api_dependencies()` | `envoy_api_dependencies_main_ext` | `bazel/api_repositories.bzl` |
-| `api_dependencies()` | `envoy_api_dependencies_ext` | `api/bazel/repositories.bzl` |
-| `envoy_mobile_dependencies()` | `envoy_mobile_dependencies_ext` | `mobile/bazel/envoy_mobile_dependencies.bzl` |
-| `envoy_api_binding()` | `envoy_api_binding_ext` | `bazel/api_binding.bzl` |
-| `envoy_repo()` | `envoy_repo_ext` | `bazel/repo.bzl` |
-| `envoy_python_dependencies()` | `envoy_python_dependencies_ext` | `bazel/python_dependencies.bzl` |
+| `envoy_dependencies()` | `dependencies` | `@envoy//bazel/extensions:dependencies.bzl` |
+| `envoy_dependencies_extra()` | `dependencies_extra` | `@envoy//bazel/extensions:dependencies_extra.bzl` |
+| `envoy_dependency_imports()` | `dependency_imports` | `@envoy//bazel/extensions:dependency_imports.bzl` |
+| `envoy_dependency_imports_extra()` | `dependency_imports_extra` | `@envoy//bazel/extensions:dependency_imports_extra.bzl` |
+| `envoy_repo()` | `repo` | `@envoy//bazel/extensions:repo.bzl` |
+| `api_dependencies()` | `api_dependencies` | `@envoy_api//bazel/extensions:api_dependencies.bzl` |
+| `envoy_api_binding()` | `api_binding` | `@envoy_api//bazel/extensions:api_binding.bzl` |
+| `envoy_mobile_dependencies()` | `mobile` | `@envoy_mobile//bazel/extensions:mobile.bzl` |
+| `envoy_mobile_repositories()` | `repos` | `@envoy_mobile//bazel/extensions:repos.bzl` |
+| `envoy_mobile_toolchains()` | `toolchains` | `@envoy_mobile//bazel/extensions:toolchains.bzl` |
+| `envoy_mobile_workspace()` | `workspace` | `@envoy_mobile//bazel/extensions:workspace.bzl` |
+| `android_configure()` | `android` | `@envoy_mobile//bazel/extensions:android.bzl` |
+| `android_workspace()` | `android_workspace` | `@envoy_mobile//bazel/extensions:android_workspace.bzl` |
+| `envoy_python_dependencies()` | *upstream* | `@rules_python//python/extensions:pip.bzl` |
 
 ### Ready for Bazel 8.0
 The Envoy repository is now fully prepared for Bazel 8.0's removal of WORKSPACE support. All repository setup, custom logic, and dependency management has been successfully migrated to bzlmod module extensions with zero functionality loss.

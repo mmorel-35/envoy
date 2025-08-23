@@ -1,6 +1,6 @@
 # WORKSPACE to Bzlmod Migration with third_party Compatibility Layer
 
-This document describes the incremental migration path from WORKSPACE + bind() + //external: references to bzlmod-native dependencies.
+This document describes the incremental migration path from WORKSPACE + bind() + //external: references to bzlmod-native dependencies with per-module organization.
 
 ## Migration Strategy
 
@@ -89,4 +89,16 @@ deps = ["//external:protobuf"]
 ✅ //external: references redirected to //third_party:  
 ✅ Circular bind() references resolved  
 ✅ External BUILD files updated  
+✅ Per-module bzlmod extensions implemented (13 total)
+✅ Complete WORKSPACE.bzlmod elimination achieved
 🔄 Ready for gradual migration to direct @repo//:target usage
+
+## Per-Module Extension Organization
+
+The bzlmod migration is now organized with dedicated extensions per module:
+
+**Main Module (@envoy//bazel/extensions/):** 5 extensions  
+**API Module (@envoy_api//bazel/extensions/):** 2 extensions  
+**Mobile Module (@envoy_mobile//bazel/extensions/):** 6 extensions
+
+This organization provides clear module boundaries and simplified extension naming without redundant prefixes.
