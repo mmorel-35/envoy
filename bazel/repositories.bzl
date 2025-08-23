@@ -3,6 +3,9 @@ load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repository_locations.bzl", "PROTOC_VERSIONS", "REPOSITORY_LOCATIONS_SPEC")
 
+# Bzlmod context detection - in bzlmod, labels start with @@
+_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
+
 PPC_SKIP_TARGETS = ["envoy.string_matcher.lua", "envoy.filters.http.lua", "envoy.router.cluster_specifier_plugin.lua"]
 
 WINDOWS_SKIP_TARGETS = [
@@ -92,14 +95,15 @@ def _cc_deps():
         patches = ["@envoy//bazel:proto_processing_lib.patch"],
     )
     external_http_archive("ocp")
-    native.bind(
-        name = "path_matcher",
-        actual = "@grpc_httpjson_transcoding//src:path_matcher",
-    )
-    native.bind(
-        name = "grpc_transcoding",
-        actual = "@grpc_httpjson_transcoding//src:transcoding",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "path_matcher",
+            actual = "@grpc_httpjson_transcoding//src:path_matcher",
+        )
+        native.bind(
+            name = "grpc_transcoding",
+            actual = "@grpc_httpjson_transcoding//src:transcoding",
+        )
 
 def _go_deps(skip_targets):
     # Keep the skip_targets check around until Istio Proxy has stopped using
@@ -135,14 +139,15 @@ def envoy_dependencies(skip_targets = []):
     _boringssl()
     _boringssl_fips()
     _aws_lc()
-    native.bind(
-        name = "ssl",
-        actual = "@envoy//bazel:boringssl",
-    )
-    native.bind(
-        name = "crypto",
-        actual = "@envoy//bazel:boringcrypto",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "ssl",
+            actual = "@envoy//bazel:boringssl",
+        )
+        native.bind(
+            name = "crypto",
+            actual = "@envoy//bazel:boringcrypto",
+        )
 
     # The long repo names (`com_github_fmtlib_fmt` instead of `fmtlib`) are
     # semi-standard in the Bazel community, intended to avoid both duplicate
@@ -252,10 +257,11 @@ def envoy_dependencies(skip_targets = []):
             python = True,
             grpc = True,
         )
-    native.bind(
-        name = "bazel_runfiles",
-        actual = "@bazel_tools//tools/cpp/runfiles",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "bazel_runfiles",
+            actual = "@bazel_tools//tools/cpp/runfiles",
+        )
 
 def _boringssl():
     external_http_archive(name = "boringssl")
@@ -1041,153 +1047,25 @@ def _com_github_maxmind_libmaxminddb():
     )
 
 # Bzlmod extension for dependencies not yet migrated to MODULE.bazel
-def _non_module_dependencies_impl(module_ctx):
-    """
-    Implementation of the non_module_dependencies extension.
-    
-    This extension defines all dependencies that are not yet migrated to 
-    MODULE.bazel due to patches, custom build files, or complex configurations.
-    
-    This follows the conservative bzlmod migration approach:
-    - Clean dependencies (no patches) are migrated to MODULE.bazel as bazel_dep
-    - Dependencies requiring custom patches or build configurations remain here
-    - Uses automatic bzlmod detection via native.existing_rules() to avoid conflicts
-    
-    The extension is defined in the same file where dependencies are used
-    (following the _rule suffix pattern suggested in the issue) to keep 
-    the dependency definitions close to their usage and maintain documentation sync.
-    
-    All dependency functions called here preserve their existing patches,
-    custom build files, and complex configurations while working seamlessly
-    in bzlmod mode.
-    """
-    
-    # Skip if already in bzlmod (MODULE.bazel) to avoid double-loading
-    # The external_http_archive function automatically checks native.existing_rules()
-    
-    # Setup external Bazel rules (with patches) 
-    _foreign_cc_dependencies()
+def _envoy_dependencies_impl(module_ctx):
+    """Implementation of the envoy_dependencies extension."""
+    # Call the main dependencies function
+    envoy_dependencies()
 
-    # BoringSSL with FIPS support and custom patches
-    _boringssl()
-    _boringssl_fips()
-    _aws_lc()
-
-    # Core dependencies with patches
-    _com_google_absl()  # Custom abseil.patch
-    _com_google_googletest()  # Custom googletest.patch  
-    _com_google_protobuf()  # Custom protobuf.patch
-    _com_github_grpc_grpc()  # Custom grpc.patch
-    
-    # Dependencies with custom build files or patches
-    _com_github_awslabs_aws_c_auth()
-    _com_github_axboe_liburing()
-    _com_github_bazel_buildtools()
-    _com_github_c_ares_c_ares()
-    _com_github_openhistogram_libcircllhist()
-    _com_github_datadog_dd_trace_cpp()
-    _com_github_mirror_tclap()
-    _com_github_envoyproxy_sqlparser()
-    _com_github_google_jwt_verify()
-    _com_github_google_libprotobuf_mutator()
-    _com_github_google_libsxg()
-    _com_github_google_tcmalloc()
-    _com_github_gperftools_gperftools()
-    _rules_proto_grpc()
-    _com_github_unicode_org_icu()
-    _com_github_intel_ipp_crypto_crypto_mb()
-    _com_github_intel_qatlib()
-    _com_github_intel_qatzip()
-    _com_github_qat_zstd()
-    _com_github_lz4_lz4()
-    _com_github_jbeder_yaml_cpp()
-    _com_github_libevent_libevent()
-    _com_github_luajit_luajit()
-    _com_github_nghttp2_nghttp2()
-    _com_github_msgpack_cpp()
-    _com_github_skyapm_cpp2sky()
-    _com_github_alibaba_hessian2_codec()
-    _com_github_nlohmann_json()
-    _com_github_ncopa_suexec()
-    _v8()
-    _fast_float()
-    _highway()
-    _dragonbox()
-    _fp16()
-    _simdutf()
-    _intel_ittapi()
-    _com_github_google_quiche()
-    _com_googlesource_googleurl()
-    _io_hyperscan()
-    _io_vectorscan()
-    _io_opentelemetry_api_cpp()
-    _net_colm_open_source_colm()
-    _net_colm_open_source_ragel()
-    _net_zlib()
-    _intel_dlb()
-    _com_github_zlib_ng_zlib_ng()
-    _org_boost()
-    _org_brotli()
-    _com_github_facebook_zstd()
-    _re2()
-    _proxy_wasm_cpp_sdk()
-    _proxy_wasm_cpp_host()
-    _emsdk()
-    _rules_fuzzing()
-    _com_google_cel_cpp()
-    _com_github_google_perfetto()
-    _rules_ruby()
-    _com_github_maxmind_libmaxminddb()
-    _com_github_fdio_vpp_vcl()
-    _org_llvm_releases_compiler_rt()
-    
-    # Additional external archives that don't have patches but aren't in MODULE.bazel yet
-    if "proxy_wasm_rust_sdk" not in native.existing_rules():
-        external_http_archive("proxy_wasm_rust_sdk")
-    if "com_github_google_flatbuffers" not in native.existing_rules():
-        external_http_archive("com_github_google_flatbuffers")
-    if "bazel_toolchains" not in native.existing_rules():
-        external_http_archive("bazel_toolchains")
-    if "bazel_compdb" not in native.existing_rules():
-        external_http_archive("bazel_compdb")
-    if "envoy_examples" not in native.existing_rules():
-        external_http_archive("envoy_examples")
-    if "envoy_toolshed" not in native.existing_rules():
-        external_http_archive("envoy_toolshed")
-    if "aspect_bazel_lib" not in native.existing_rules():
-        external_http_archive(
-            "aspect_bazel_lib",
-            patch_args = ["-p1"],
-            patches = ["@envoy//bazel:aspect.patch"],
-        )
-    
-    # Platform-specific dependencies
-    _cc_deps()
-    _go_deps([])  # Pass empty skip_targets for extension context
-    _rust_deps()
-    _kafka_deps()
-    _com_github_wamr()
-    _com_github_wasmtime()
-
-    # Important native binds for compatibility
-    native.bind(
-        name = "bazel_runfiles",
-        actual = "@bazel_tools//tools/cpp/runfiles",
-    )
-
-    # Note: Google APIs imports handled by switched_rules extension
-
-non_module_dependencies_rule = module_extension(
-    implementation = _non_module_dependencies_impl,
+# Module extension for envoy_dependencies  
+envoy_dependencies_ext = module_extension(
+    implementation = _envoy_dependencies_impl,
     doc = """
-    Extension for Envoy dependencies not yet migrated to MODULE.bazel.
+    Extension for Envoy's main dependencies.
     
-    This extension provides all dependencies that require custom patches,
-    build files, or complex configurations that are not yet compatible
-    with the standard MODULE.bazel bazel_dep approach.
-    
-    This follows Envoy's conservative bzlmod migration strategy:
-    - Clean dependencies (no patches) go in MODULE.bazel
-    - Dependencies with patches/custom configs use this extension
+    This extension wraps the envoy_dependencies() function to make it
+    available as a bzlmod module extension, following the conservative 
+    bzlmod migration strategy.
     """,
 )
+
+# Note: The non_module_dependencies_rule extension has been replaced by
+# individual extensions for each major function:
+# - envoy_dependencies_ext for envoy_dependencies()  
+# - envoy_dependencies_extra_ext for envoy_dependencies_extra()
+# - envoy_dependency_imports_ext for envoy_dependency_imports()

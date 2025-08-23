@@ -1,6 +1,6 @@
 workspace(name = "envoy")
 
-# WORKSPACE.bzlmod - Hybrid mode workspace
+# WORKSPACE.bzlmod - Hybrid mode workspace  
 # This file loads dependencies not yet migrated to MODULE.bazel
 # when bzlmod is enabled
 
@@ -16,21 +16,15 @@ load("//bazel:repo.bzl", "envoy_repo")
 
 envoy_repo()
 
-load("//bazel:repositories.bzl", "envoy_dependencies")
-
-envoy_dependencies()
-
-load("//bazel:repositories_extra.bzl", "envoy_dependencies_extra")
-
-envoy_dependencies_extra()
-
 load("//bazel:python_dependencies.bzl", "envoy_python_dependencies")
 
 envoy_python_dependencies()
 
-load("//bazel:dependency_imports.bzl", "envoy_dependency_imports")
-
-envoy_dependency_imports()
+# Note: Other dependencies are now handled by module extensions in MODULE.bazel:
+# - envoy_dependencies() via envoy_dependencies_ext
+# - envoy_dependencies_extra() via envoy_dependencies_extra_ext  
+# - envoy_dependency_imports() via envoy_dependency_imports_ext
+# - envoy_dependency_imports_extra() still needs to be called here since it's not in an extension yet
 
 load("//bazel:dependency_imports_extra.bzl", "envoy_dependency_imports_extra")
 
