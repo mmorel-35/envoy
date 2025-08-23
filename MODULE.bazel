@@ -117,29 +117,29 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
-# Envoy dependencies extensions - migrated from WORKSPACE rules
-envoy_deps = use_extension("//bazel:repositories.bzl", "envoy_dependencies_ext")
-# envoy_dependencies_ext handles all core repository definitions internally
-# Repositories are made available implicitly through the extension
+# Envoy dependencies extensions - organized in dedicated extensions directory
+envoy_deps = use_extension("//bazel/extensions/public:dependencies.bzl", "dependencies")
+# Core repository definitions
 
-envoy_deps_extra = use_extension("//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
-# envoy_dependencies_extra_ext handles second-stage dependencies
+envoy_deps_extra = use_extension("//bazel/extensions/public:dependencies_extra.bzl", "dependencies_extra")  
+# Second-stage dependencies
 
-envoy_imports = use_extension("//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
-# envoy_dependency_imports_ext handles toolchain imports and registrations
+envoy_imports = use_extension("//bazel/extensions/public:dependency_imports.bzl", "dependency_imports")
+# Toolchain imports and registrations
 
-# Additional extensions for remaining WORKSPACE.bzlmod functions
-envoy_api_binding = use_extension("//bazel:api_binding.bzl", "envoy_api_binding_ext")
-# envoy_api_binding_ext handles API repository binding and setup
+envoy_imports_extra = use_extension("//bazel/extensions/public:dependency_imports_extra.bzl", "dependency_imports_extra")
+# Additional dependency imports
 
-envoy_api_deps = use_extension("//bazel:api_repositories.bzl", "envoy_api_dependencies_main_ext")
-# envoy_api_dependencies_main_ext handles main API dependencies
+# API-related extensions
+envoy_api_binding = use_extension("//bazel/extensions/public:api_binding.bzl", "api_binding")
+# API repository binding and setup
 
-envoy_repo_setup = use_extension("//bazel:repo.bzl", "envoy_repo_ext")
-# envoy_repo_ext handles repository metadata setup
+envoy_api_deps = use_extension("//bazel/extensions/public:api_dependencies_main.bzl", "api_dependencies_main")
+# Main API dependencies wrapper
 
-envoy_imports_extra = use_extension("//bazel:dependency_imports_extra.bzl", "envoy_dependency_imports_extra_ext")
-# envoy_dependency_imports_extra_ext handles additional dependency imports
+# Repository setup extension
+envoy_repo_setup = use_extension("//bazel/extensions/public:repo.bzl", "repo")
+# Repository metadata setup
 
 # Python dependencies using upstream rules_python extensions (replaces custom envoy_python_dependencies_ext)
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")

@@ -41,6 +41,6 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
-# API dependencies extension - migrated from WORKSPACE rule with consistent naming
-envoy_api_deps = use_extension("//bazel:repositories.bzl", "envoy_api_dependencies_ext")
-# envoy_api_dependencies_ext handles API-specific dependencies and external archives
+# API dependencies extension - using new organization structure
+envoy_api_deps = use_extension("@envoy//bazel/extensions/public:api_dependencies.bzl", "api_dependencies")
+# Handles API-specific dependencies and external archives

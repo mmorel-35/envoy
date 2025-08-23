@@ -62,24 +62,24 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
-# Envoy dependencies extensions - inherited from parent envoy module
-envoy_deps = use_extension("@envoy//bazel:repositories.bzl", "envoy_dependencies_ext")
-envoy_deps_extra = use_extension("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra_ext")  
-envoy_imports = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_ext")
-envoy_imports_extra = use_extension("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports_extra_ext")
+# Envoy dependencies extensions - inherited from parent envoy module using new organization
+envoy_deps = use_extension("@envoy//bazel/extensions/public:dependencies.bzl", "dependencies")
+envoy_deps_extra = use_extension("@envoy//bazel/extensions/public:dependencies_extra.bzl", "dependencies_extra")  
+envoy_imports = use_extension("@envoy//bazel/extensions/public:dependency_imports.bzl", "dependency_imports")
+envoy_imports_extra = use_extension("@envoy//bazel/extensions/public:dependency_imports_extra.bzl", "dependency_imports_extra")
 
 # Envoy API and repository extensions - inherited from parent envoy module
-envoy_api_binding = use_extension("@envoy//bazel:api_binding.bzl", "envoy_api_binding_ext")
-envoy_api_deps_main = use_extension("@envoy//bazel:api_repositories.bzl", "envoy_api_dependencies_main_ext")
-envoy_repo_setup = use_extension("@envoy//bazel:repo.bzl", "envoy_repo_ext")
+envoy_api_binding = use_extension("@envoy//bazel/extensions/public:api_binding.bzl", "api_binding")
+envoy_api_deps_main = use_extension("@envoy//bazel/extensions/public:api_dependencies_main.bzl", "api_dependencies_main")
+envoy_repo_setup = use_extension("@envoy//bazel/extensions/public:repo.bzl", "repo")
 
-# Mobile-specific extensions
-envoy_mobile_repos = use_extension("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories_ext")
-envoy_mobile_deps = use_extension("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies_ext")
-envoy_mobile_toolchains = use_extension("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains_ext")
-envoy_android_config = use_extension("//bazel:android_configure.bzl", "envoy_android_configure_ext")
-envoy_android_workspace = use_extension("//bazel:android_configure.bzl", "envoy_android_workspace_ext")
-envoy_mobile_workspace = use_extension("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace_ext")
+# Mobile-specific extensions using new organization
+envoy_mobile_repos = use_extension("@envoy//bazel/extensions/public:envoy_mobile_repos.bzl", "envoy_mobile_repos")
+envoy_mobile_deps = use_extension("@envoy//bazel/extensions/public:envoy_mobile.bzl", "envoy_mobile")
+envoy_mobile_toolchains = use_extension("@envoy//bazel/extensions/public:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
+envoy_android_config = use_extension("@envoy//bazel/extensions/public:envoy_android.bzl", "envoy_android")
+envoy_android_workspace = use_extension("@envoy//bazel/extensions/public:envoy_android_workspace.bzl", "envoy_android_workspace")
+envoy_mobile_workspace = use_extension("@envoy//bazel/extensions/public:envoy_mobile_workspace.bzl", "envoy_mobile_workspace")
 
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
