@@ -2,7 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 
 def external_http_archive(name, **kwargs):
     if name not in native.existing_rules():
-        http_archive(name, **kwargs)
+        http_archive(name = name, **kwargs)
 
 def envoy_mobile_repositories():
     external_http_archive(
