@@ -1039,3 +1039,140 @@ def _com_github_maxmind_libmaxminddb():
         name = "com_github_maxmind_libmaxminddb",
         build_file_content = BUILD_ALL_CONTENT,
     )
+
+# Bzlmod extension for dependencies not yet migrated to MODULE.bazel
+def _non_module_dependencies_impl(module_ctx):
+    """
+    Implementation of the non_module_dependencies extension.
+    
+    This extension defines all dependencies that are not yet migrated to 
+    MODULE.bazel due to patches, custom build files, or complex configurations.
+    
+    This follows the conservative bzlmod migration approach - only dependencies
+    without patches are migrated to MODULE.bazel directly. Dependencies requiring
+    custom patches or build configurations remain in this extension.
+    """
+    
+    # Skip if already in bzlmod (MODULE.bazel) to avoid double-loading
+    # The external_http_archive function automatically checks native.existing_rules()
+    
+    # Setup external Bazel rules (with patches) 
+    _foreign_cc_dependencies()
+
+    # BoringSSL with FIPS support and custom patches
+    _boringssl()
+    _boringssl_fips()
+    _aws_lc()
+
+    # Core dependencies with patches
+    _com_google_absl()  # Custom abseil.patch
+    _com_google_googletest()  # Custom googletest.patch  
+    _com_google_protobuf()  # Custom protobuf.patch
+    _com_github_grpc_grpc()  # Custom grpc.patch
+    
+    # Dependencies with custom build files or patches
+    _com_github_awslabs_aws_c_auth()
+    _com_github_axboe_liburing()
+    _com_github_bazel_buildtools()
+    _com_github_c_ares_c_ares()
+    _com_github_openhistogram_libcircllhist()
+    _com_github_datadog_dd_trace_cpp()
+    _com_github_mirror_tclap()
+    _com_github_envoyproxy_sqlparser()
+    _com_github_google_jwt_verify()
+    _com_github_google_libprotobuf_mutator()
+    _com_github_google_libsxg()
+    _com_github_google_tcmalloc()
+    _com_github_gperftools_gperftools()
+    _rules_proto_grpc()
+    _com_github_unicode_org_icu()
+    _com_github_intel_ipp_crypto_crypto_mb()
+    _com_github_intel_qatlib()
+    _com_github_intel_qatzip()
+    _com_github_qat_zstd()
+    _com_github_lz4_lz4()
+    _com_github_jbeder_yaml_cpp()
+    _com_github_libevent_libevent()
+    _com_github_luajit_luajit()
+    _com_github_nghttp2_nghttp2()
+    _com_github_msgpack_cpp()
+    _com_github_skyapm_cpp2sky()
+    _com_github_alibaba_hessian2_codec()
+    _com_github_nlohmann_json()
+    _com_github_ncopa_suexec()
+    _v8()
+    _fast_float()
+    _highway()
+    _dragonbox()
+    _fp16()
+    _simdutf()
+    _intel_ittapi()
+    _com_github_google_quiche()
+    _com_googlesource_googleurl()
+    _io_hyperscan()
+    _io_vectorscan()
+    _io_opentelemetry_api_cpp()
+    _net_colm_open_source_colm()
+    _net_colm_open_source_ragel()
+    _net_zlib()
+    _intel_dlb()
+    _com_github_zlib_ng_zlib_ng()
+    _org_boost()
+    _org_brotli()
+    _com_github_facebook_zstd()
+    _re2()
+    _proxy_wasm_cpp_sdk()
+    _proxy_wasm_cpp_host()
+    _emsdk()
+    _rules_fuzzing()
+    _com_google_cel_cpp()
+    _com_github_google_perfetto()
+    _rules_ruby()
+    _com_github_maxmind_libmaxminddb()
+    _com_github_fdio_vpp_vcl()
+    _org_llvm_releases_compiler_rt()
+    
+    # Additional external archives that don't have patches but aren't in MODULE.bazel yet
+    if "proxy_wasm_rust_sdk" not in native.existing_rules():
+        external_http_archive("proxy_wasm_rust_sdk")
+    if "com_github_google_flatbuffers" not in native.existing_rules():
+        external_http_archive("com_github_google_flatbuffers")
+    if "bazel_toolchains" not in native.existing_rules():
+        external_http_archive("bazel_toolchains")
+    if "bazel_compdb" not in native.existing_rules():
+        external_http_archive("bazel_compdb")
+    if "envoy_examples" not in native.existing_rules():
+        external_http_archive("envoy_examples")
+    if "envoy_toolshed" not in native.existing_rules():
+        external_http_archive("envoy_toolshed")
+    if "aspect_bazel_lib" not in native.existing_rules():
+        external_http_archive(
+            "aspect_bazel_lib",
+            patch_args = ["-p1"],
+            patches = ["@envoy//bazel:aspect.patch"],
+        )
+    
+    # Platform-specific dependencies
+    _cc_deps()
+    _go_deps([])  # Pass empty skip_targets for extension context
+    _rust_deps()
+    _kafka_deps()
+    _com_github_wamr()
+    _com_github_wasmtime()
+
+    # Note: Google APIs imports handled by switched_rules extension
+
+non_module_dependencies_rule = module_extension(
+    implementation = _non_module_dependencies_impl,
+    doc = """
+    Extension for Envoy dependencies not yet migrated to MODULE.bazel.
+    
+    This extension provides all dependencies that require custom patches,
+    build files, or complex configurations that are not yet compatible
+    with the standard MODULE.bazel bazel_dep approach.
+    
+    This follows Envoy's conservative bzlmod migration strategy:
+    - Clean dependencies (no patches) go in MODULE.bazel
+    - Dependencies with patches/custom configs use this extension
+    """,
+)
