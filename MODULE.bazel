@@ -130,13 +130,6 @@ envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "depe
 envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
 # Additional dependency imports
 
-# API-related extensions
-envoy_api_binding = use_extension("//bazel/extensions:api_binding.bzl", "api_binding")
-# API repository binding and setup
-
-envoy_api_deps = use_extension("//bazel/extensions:api_dependencies_main.bzl", "api_dependencies_main")
-# Main API dependencies wrapper
-
 # Repository setup extension
 envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
 # Repository metadata setup

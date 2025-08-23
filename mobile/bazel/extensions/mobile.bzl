@@ -12,7 +12,7 @@ def _envoy_mobile_impl(module_ctx):
     envoy_mobile_dependencies()
 
 # Module extension for envoy_mobile_dependencies
-envoy_mobile = module_extension(
+mobile = module_extension(
     implementation = _envoy_mobile_impl,
     doc = """
     Extension for Envoy Mobile dependencies.

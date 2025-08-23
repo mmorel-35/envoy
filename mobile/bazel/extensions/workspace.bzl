@@ -12,7 +12,7 @@ def _envoy_mobile_workspace_impl(module_ctx):
     envoy_mobile_workspace()
 
 # Module extension for envoy_mobile_workspace
-envoy_mobile_workspace = module_extension(
+workspace = module_extension(
     implementation = _envoy_mobile_workspace_impl,
     doc = """
     Extension for Envoy Mobile workspace setup.

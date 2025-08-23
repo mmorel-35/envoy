@@ -12,7 +12,7 @@ def _envoy_mobile_toolchains_impl(module_ctx):
     envoy_mobile_toolchains()
 
 # Module extension for envoy_mobile_toolchains
-envoy_mobile_toolchains = module_extension(
+toolchains = module_extension(
     implementation = _envoy_mobile_toolchains_impl,
     doc = """
     Extension for Envoy Mobile toolchains.

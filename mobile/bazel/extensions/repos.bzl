@@ -12,7 +12,7 @@ def _envoy_mobile_repos_impl(module_ctx):
     envoy_mobile_repositories()
 
 # Module extension for envoy_mobile_repositories
-envoy_mobile_repos = module_extension(
+repos = module_extension(
     implementation = _envoy_mobile_repos_impl,
     doc = """
     Extension for Envoy Mobile repositories.

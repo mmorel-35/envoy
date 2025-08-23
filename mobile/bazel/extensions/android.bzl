@@ -17,7 +17,7 @@ def _envoy_android_impl(module_ctx):
     )
 
 # Module extension for android_configure
-envoy_android = module_extension(
+android = module_extension(
     implementation = _envoy_android_impl,
     doc = """
     Extension for Android configuration.

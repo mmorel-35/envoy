@@ -23,7 +23,7 @@ def _envoy_android_workspace_impl(module_ctx):
     _post_android_setup(name = "envoy_android_workspace_setup")
 
 # Module extension for android workspace setup
-envoy_android_workspace = module_extension(
+android_workspace = module_extension(
     implementation = _envoy_android_workspace_impl,
     doc = """
     Extension for Android workspace setup.

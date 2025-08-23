@@ -1,6 +1,6 @@
 """Extension for Envoy's main API dependencies wrapper."""
 
-load("//bazel:api_repositories.bzl", "envoy_api_dependencies")
+load("@envoy//bazel:api_repositories.bzl", "envoy_api_dependencies")
 
 def _api_dependencies_main_impl(module_ctx):
     """Implementation for api_dependencies_main extension.
