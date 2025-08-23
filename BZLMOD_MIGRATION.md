@@ -348,9 +348,25 @@ local_path_override(module_name = "envoy_build_config", path = "envoy_build_conf
 
 ## Future Expansion
 
-Dependencies can be migrated to MODULE.bazel when:
-1. BCR versions include equivalent functionality to current patches
-2. Patches are no longer needed due to upstream fixes
-3. Custom Envoy requirements are met by standard BCR releases
+Dependencies can be gradually migrated from the `non_module_dependencies` extension to MODULE.bazel when:
 
-This ensures production stability while enabling modern Bazel dependency management.
+1. **BCR versions include equivalent functionality** to current patches
+2. **Patches are no longer needed** due to upstream fixes
+3. **Custom Envoy requirements** are met by standard BCR releases
+4. **Complex build configurations** are simplified or standardized
+
+**Migration Process:**
+1. Remove dependency from `non_module_dependencies_rule` extension
+2. Add as `bazel_dep()` in MODULE.bazel
+3. Remove from `use_repo()` list
+4. Update documentation
+
+**Benefits of Extension Approach:**
+- ✅ **Centralized management** - All non-migrated dependencies in one place
+- ✅ **Easy tracking** - Clear separation between migrated and non-migrated dependencies
+- ✅ **Documentation sync** - Extension defined where dependencies are used
+- ✅ **Future-proof** - Easy to migrate individual dependencies over time
+- ✅ **Automatic conflict prevention** - Built-in bzlmod detection
+- ✅ **Conservative safety** - Preserves all existing functionality
+
+This ensures production stability while enabling modern Bazel dependency management and providing a clear path for future migration expansion.

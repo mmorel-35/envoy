@@ -1048,9 +1048,18 @@ def _non_module_dependencies_impl(module_ctx):
     This extension defines all dependencies that are not yet migrated to 
     MODULE.bazel due to patches, custom build files, or complex configurations.
     
-    This follows the conservative bzlmod migration approach - only dependencies
-    without patches are migrated to MODULE.bazel directly. Dependencies requiring
-    custom patches or build configurations remain in this extension.
+    This follows the conservative bzlmod migration approach:
+    - Clean dependencies (no patches) are migrated to MODULE.bazel as bazel_dep
+    - Dependencies requiring custom patches or build configurations remain here
+    - Uses automatic bzlmod detection via native.existing_rules() to avoid conflicts
+    
+    The extension is defined in the same file where dependencies are used
+    (following the _rule suffix pattern suggested in the issue) to keep 
+    the dependency definitions close to their usage and maintain documentation sync.
+    
+    All dependency functions called here preserve their existing patches,
+    custom build files, and complex configurations while working seamlessly
+    in bzlmod mode.
     """
     
     # Skip if already in bzlmod (MODULE.bazel) to avoid double-loading
@@ -1159,6 +1168,12 @@ def _non_module_dependencies_impl(module_ctx):
     _kafka_deps()
     _com_github_wamr()
     _com_github_wasmtime()
+
+    # Important native binds for compatibility
+    native.bind(
+        name = "bazel_runfiles",
+        actual = "@bazel_tools//tools/cpp/runfiles",
+    )
 
     # Note: Google APIs imports handled by switched_rules extension
 
