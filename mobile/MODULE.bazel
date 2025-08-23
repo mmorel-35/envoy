@@ -32,7 +32,7 @@ local_path_override(
 )
 
 local_path_override(
-    name = "envoy_build_config",
+    module_name = "envoy_build_config",
     path = "envoy_build_config",
 )
 
