@@ -18,7 +18,23 @@ bazel_dep(
 )
 bazel_dep(
     name = "rules_python",
-    version = "1.4.1",
+    version = "0.35.0",
+)
+
+# rules_foreign_cc override needed for mobile builds until upstream issue is resolved
+# TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
+bazel_dep(
+    name = "rules_foreign_cc",
+    version = "0.11.1",  # This will be overridden below
+)
+archive_override(
+    module_name = "rules_foreign_cc",
+    integrity = "sha256-bbc605fd36048923939845d6843464197df6e6ffd188db704423952825e4760a",
+    strip_prefix = "rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b",
+    urls = [
+        "https://storage.googleapis.com/engflow-tools-public/rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
+        "https://github.com/EngFlow/rules_foreign_cc/archive/a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
+    ],
 )
 
 local_path_override(
@@ -45,6 +61,35 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
+# Envoy dependencies extensions - inherited from parent envoy module using new organization
+envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+
+envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
+
+envoy_imports = use_extension("@envoy//bazel/extensions:dependency_imports.bzl", "dependency_imports")
+
+envoy_imports_extra = use_extension("@envoy//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
+
+# Envoy API and repository extensions - inherited from parent envoy module
+envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
+
+# API extensions from API module
+envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+
+# Mobile-specific extensions using local module
+envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
+
+envoy_mobile_deps = use_extension("//bazel/extensions:mobile.bzl", "mobile")
+
+envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
+
+envoy_android_config = use_extension("//bazel/extensions:android.bzl", "android")
+
+envoy_android_workspace = use_extension("//bazel/extensions:android_workspace.bzl", "android_workspace")
+
+envoy_mobile_workspace = use_extension("//bazel/extensions:workspace.bzl", "workspace")
+
+# Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(
     python_version = "3.12",

@@ -5,6 +5,10 @@ module(
 
 # Minimal bzlmod migration - only dependencies without patches
 # Dependencies with patches remain in WORKSPACE.bzlmod and extensions
+#
+# Note: Legacy //external: references are now redirected to //third_party:
+# compatibility layer. New code should use direct @repo//:target dependencies.
+# See THIRD_PARTY_MIGRATION.md for details.
 
 bazel_dep(
     name = "bazel_features",
@@ -112,3 +116,56 @@ switched_rules.use_languages(
     python = True,
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
+
+# Envoy dependencies extensions - organized in dedicated extensions directory
+envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
+# Core repository definitions
+
+envoy_deps_extra = use_extension("//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
+# Second-stage dependencies
+
+envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "dependency_imports")
+# Toolchain imports and registrations
+
+envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
+# Additional dependency imports
+
+# Repository setup extension
+envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
+# Repository metadata setup
+
+# Python dependencies using upstream rules_python extensions (replaces custom envoy_python_dependencies_ext)
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = "3.12",
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    extra_pip_args = ["--require-hashes"],
+    hub_name = "base_pip3",
+    python_version = "3.12",
+    requirements_lock = "//tools/base:requirements.txt",
+)
+pip.parse(
+    extra_pip_args = ["--require-hashes"],
+    hub_name = "dev_pip3",
+    python_version = "3.12",
+    requirements_lock = "//tools/dev:requirements.txt",
+)
+pip.parse(
+    extra_pip_args = ["--require-hashes"],
+    hub_name = "fuzzing_pip3",
+    python_version = "3.12",
+    requirements_lock = "@rules_fuzzing//fuzzing:requirements.txt",
+)
+use_repo(
+    pip,
+    "base_pip3",
+    "dev_pip3",
+    "fuzzing_pip3",
+)
+
+# Python toolchain setup using upstream extension (replaces system_python from custom extension)
+python_configure = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python_configure.toolchain(python_version = "3.7")  # minimum version requirement

@@ -40,3 +40,7 @@ switched_rules.use_languages(
     python = True,
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
+
+# API dependencies extension - using local module
+envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+# Handles API-specific dependencies and external archives

@@ -3,6 +3,9 @@ load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repository_locations.bzl", "PROTOC_VERSIONS", "REPOSITORY_LOCATIONS_SPEC")
 
+# Bzlmod context detection - in bzlmod, labels start with @@
+_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
+
 PPC_SKIP_TARGETS = ["envoy.string_matcher.lua", "envoy.filters.http.lua", "envoy.router.cluster_specifier_plugin.lua"]
 
 WINDOWS_SKIP_TARGETS = [
@@ -92,14 +95,15 @@ def _cc_deps():
         patches = ["@envoy//bazel:proto_processing_lib.patch"],
     )
     external_http_archive("ocp")
-    native.bind(
-        name = "path_matcher",
-        actual = "@grpc_httpjson_transcoding//src:path_matcher",
-    )
-    native.bind(
-        name = "grpc_transcoding",
-        actual = "@grpc_httpjson_transcoding//src:transcoding",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "path_matcher",
+            actual = "@grpc_httpjson_transcoding//src:path_matcher",
+        )
+        native.bind(
+            name = "grpc_transcoding",
+            actual = "@grpc_httpjson_transcoding//src:transcoding",
+        )
 
 def _go_deps(skip_targets):
     # Keep the skip_targets check around until Istio Proxy has stopped using
@@ -135,14 +139,15 @@ def envoy_dependencies(skip_targets = []):
     _boringssl()
     _boringssl_fips()
     _aws_lc()
-    native.bind(
-        name = "ssl",
-        actual = "@envoy//bazel:boringssl",
-    )
-    native.bind(
-        name = "crypto",
-        actual = "@envoy//bazel:boringcrypto",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "ssl",
+            actual = "@envoy//bazel:boringssl",
+        )
+        native.bind(
+            name = "crypto",
+            actual = "@envoy//bazel:boringcrypto",
+        )
 
     # The long repo names (`com_github_fmtlib_fmt` instead of `fmtlib`) are
     # semi-standard in the Bazel community, intended to avoid both duplicate
@@ -252,10 +257,11 @@ def envoy_dependencies(skip_targets = []):
             python = True,
             grpc = True,
         )
-    native.bind(
-        name = "bazel_runfiles",
-        actual = "@bazel_tools//tools/cpp/runfiles",
-    )
+    if not _IS_BZLMOD:
+        native.bind(
+            name = "bazel_runfiles",
+            actual = "@bazel_tools//tools/cpp/runfiles",
+        )
 
 def _boringssl():
     external_http_archive(name = "boringssl")
@@ -833,11 +839,11 @@ def _com_github_grpc_grpc():
     )
     native.bind(
         name = "libssl",
-        actual = "//external:ssl",
+        actual = "//third_party:ssl",
     )
     native.bind(
         name = "libcrypto",
-        actual = "//external:crypto",
+        actual = "//third_party:crypto",
     )
 
     native.bind(
@@ -1039,3 +1045,27 @@ def _com_github_maxmind_libmaxminddb():
         name = "com_github_maxmind_libmaxminddb",
         build_file_content = BUILD_ALL_CONTENT,
     )
+
+# Bzlmod extension for dependencies not yet migrated to MODULE.bazel
+def _envoy_dependencies_impl(module_ctx):
+    """Implementation of the envoy_dependencies extension."""
+    # Call the main dependencies function
+    envoy_dependencies()
+
+# Module extension for envoy_dependencies  
+envoy_dependencies_ext = module_extension(
+    implementation = _envoy_dependencies_impl,
+    doc = """
+    Extension for Envoy's main dependencies.
+    
+    This extension wraps the envoy_dependencies() function to make it
+    available as a bzlmod module extension, following the conservative 
+    bzlmod migration strategy.
+    """,
+)
+
+# Note: The non_module_dependencies_rule extension has been replaced by
+# individual extensions for each major function:
+# - envoy_dependencies_ext for envoy_dependencies()  
+# - envoy_dependencies_extra_ext for envoy_dependencies_extra()
+# - envoy_dependency_imports_ext for envoy_dependency_imports()
