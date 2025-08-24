@@ -109,21 +109,28 @@ See `THIRD_PARTY_MIGRATION.md` for detailed migration strategy.
 
 **Problem**: The `repo_mapping` attribute is only supported in bzlmod module extensions, not in native Bazel rules used in WORKSPACE builds. This causes build errors when wrappers like `envoy_http_archive` and `external_http_archive` pass through `repo_mapping` to the native `http_archive` rule.
 
-**Solution**: The `envoy_http_archive` wrapper automatically filters out `repo_mapping` when running in WORKSPACE context, ensuring compatibility between WORKSPACE and bzlmod builds.
+**Solution**: The `envoy_http_archive` wrapper automatically detects the build context and filters out `repo_mapping` only when running in WORKSPACE context, preserving it in bzlmod builds where it's supported.
 
 **Implementation (`api/bazel/envoy_http_archive.bzl`)**:
 ```starlark
+# Detect bzlmod vs WORKSPACE context - in bzlmod, labels start with @@
+_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
+
 def envoy_http_archive(name, locations, location_name = None, **kwargs):
     if name not in native.existing_rules():
         location = locations[location_name or name]
 
-        # Filter out repo_mapping for WORKSPACE compatibility
+        # Context-aware repo_mapping handling.
         # The repo_mapping attribute is only supported in bzlmod module extensions,
-        # not in native Bazel rules used in WORKSPACE builds.
+        # not in WORKSPACE builds with native http_archive. We detect the context
+        # using label inspection and only filter repo_mapping in WORKSPACE builds.
         filtered_kwargs = {}
         for key, value in kwargs.items():
-            if key != "repo_mapping":
-                filtered_kwargs[key] = value
+            # Only filter repo_mapping in WORKSPACE builds (not bzlmod)
+            if key == "repo_mapping" and not _IS_BZLMOD:
+                # Skip repo_mapping in WORKSPACE builds where it's not supported
+                continue
+            filtered_kwargs[key] = value
 
         http_archive(
             name = name,
@@ -134,16 +141,18 @@ def envoy_http_archive(name, locations, location_name = None, **kwargs):
         )
 ```
 
+**Context Detection**: Uses label inspection (`str(Label("//:invalid")).startswith("@@")`) to reliably detect bzlmod vs WORKSPACE context, following the same pattern used in `bazel/native_binding_wrapper.bzl`.
+
 **Behavior**:
 - **WORKSPACE builds**: `repo_mapping` is automatically filtered out to prevent build errors
-- **bzlmod extensions**: Extensions typically call `http_archive` directly and handle `repo_mapping` through the extension context
+- **bzlmod builds**: `repo_mapping` is preserved and passed through to `http_archive` where it's supported
 - **All other arguments**: Preserved unchanged (patches, patch_args, build_file_content, etc.)
 
 **Affected Wrappers**:
 - `envoy_http_archive` - Core wrapper in `api/bazel/envoy_http_archive.bzl`
 - `external_http_archive` - Convenience wrapper that calls `envoy_http_archive`
 
-This ensures that code using `external_http_archive` with `repo_mapping` (like `_rules_fuzzing()`) works correctly in both WORKSPACE and bzlmod contexts.
+This ensures that code using `external_http_archive` with `repo_mapping` (like `_rules_fuzzing()`) works correctly in both WORKSPACE and bzlmod contexts while preserving the repository name remapping functionality where it's supported.
 
 ## Problem Being Solved
 

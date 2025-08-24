@@ -1,5 +1,8 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Detect bzlmod vs WORKSPACE context - in bzlmod, labels start with @@
+_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
+
 def envoy_http_archive(name, locations, location_name = None, **kwargs):
     # `existing_rule_keys` contains the names of repositories that have already
     # been defined in the Bazel workspace. By skipping repos with existing keys,
@@ -8,19 +11,17 @@ def envoy_http_archive(name, locations, location_name = None, **kwargs):
     if name not in native.existing_rules():
         location = locations[location_name or name]
 
-        # Filter out repo_mapping for WORKSPACE compatibility.
+        # Context-aware repo_mapping handling.
         # The repo_mapping attribute is only supported in bzlmod module extensions,
-        # not in native Bazel rules used in WORKSPACE builds. Since this function
-        # is primarily used in WORKSPACE context (bzlmod extensions typically call
-        # http_archive directly), we filter it out to avoid build errors.
-        #
-        # This ensures that code using external_http_archive with repo_mapping
-        # (like _rules_fuzzing(), _com_google_absl(), etc.) works correctly in
-        # both WORKSPACE and bzlmod contexts.
+        # not in WORKSPACE builds with native http_archive. We detect the context
+        # using label inspection and only filter repo_mapping in WORKSPACE builds.
         filtered_kwargs = {}
         for key, value in kwargs.items():
-            if key != "repo_mapping":
-                filtered_kwargs[key] = value
+            # Only filter repo_mapping in WORKSPACE builds (not bzlmod)
+            if key == "repo_mapping" and not _IS_BZLMOD:
+                # Skip repo_mapping in WORKSPACE builds where it's not supported
+                continue
+            filtered_kwargs[key] = value
 
         # HTTP tarball at a given URL. Add a BUILD file if requested.
         http_archive(
