@@ -34,10 +34,10 @@ All repository setup functions are now organized in dedicated per-module extensi
 - `dependency_imports` - Toolchain imports and registrations
 - `dependency_imports_extra` - Additional dependency imports
 - `repo` - Repository metadata setup
+- `api_binding` - API repository binding setup (kept here to avoid circular dependencies)
 
 **API Module (@envoy_api//bazel/extensions/):**
 - `api_dependencies` - API-specific dependencies
-- `api_binding` - API repository binding setup
 
 **Mobile Module (@envoy_mobile//bazel/extensions/):**
 - `mobile` - Mobile-specific dependencies (Swift, Kotlin, Android)
@@ -230,7 +230,7 @@ envoy_imports_extra = use_extension("@envoy//bazel/extensions:dependency_imports
 envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
 
 # API extensions from API module
-envoy_api_binding = use_extension("@envoy_api//bazel/extensions:api_binding.bzl", "api_binding")
+envoy_api_binding = use_extension("@envoy//bazel/extensions:api_binding.bzl", "api_binding")
 envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
 
 # Mobile-specific extensions using local module with simplified naming
@@ -284,7 +284,7 @@ envoy_api_binding = use_extension("//bazel/extensions:api_binding.bzl", "api_bin
 - ❌ ~~envoy_dependency_imports()~~ → ✅ `dependency_imports` (@envoy//bazel/extensions:)
 - ❌ ~~envoy_dependency_imports_extra()~~ → ✅ `dependency_imports_extra` (@envoy//bazel/extensions:)
 - ❌ ~~envoy_python_dependencies()~~ → ✅ upstream `@rules_python` extensions
-- ❌ ~~envoy_api_binding()~~ → ✅ `api_binding` (@envoy_api//bazel/extensions:)
+- ❌ ~~envoy_api_binding()~~ → ✅ `api_binding` (@envoy//bazel/extensions:)
 - ❌ ~~api_dependencies()~~ → ✅ `api_dependencies` (@envoy_api//bazel/extensions:)
 - ❌ ~~envoy_repo()~~ → ✅ `repo` (@envoy//bazel/extensions:)
 - ❌ ~~envoy_mobile_repositories()~~ → ✅ `repos` (@envoy_mobile//bazel/extensions:)
@@ -663,7 +663,7 @@ The bzlmod migration is now complete with Bazel 8.0 readiness achieved:
 | `envoy_dependency_imports_extra()` | `dependency_imports_extra` | `@envoy//bazel/extensions:dependency_imports_extra.bzl` |
 | `envoy_repo()` | `repo` | `@envoy//bazel/extensions:repo.bzl` |
 | `api_dependencies()` | `api_dependencies` | `@envoy_api//bazel/extensions:api_dependencies.bzl` |
-| `envoy_api_binding()` | `api_binding` | `@envoy_api//bazel/extensions:api_binding.bzl` |
+| `envoy_api_binding()` | `api_binding` | `@envoy//bazel/extensions:api_binding.bzl` |
 | `envoy_mobile_dependencies()` | `mobile` | `@envoy_mobile//bazel/extensions:mobile.bzl` |
 | `envoy_mobile_repositories()` | `repos` | `@envoy_mobile//bazel/extensions:repos.bzl` |
 | `envoy_mobile_toolchains()` | `toolchains` | `@envoy_mobile//bazel/extensions:toolchains.bzl` |

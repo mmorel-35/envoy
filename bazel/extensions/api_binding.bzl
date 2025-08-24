@@ -1,6 +1,6 @@
 """Extension for Envoy API binding."""
 
-load("@envoy//bazel:api_binding.bzl", "envoy_api_binding")
+load("//bazel:api_binding.bzl", "envoy_api_binding")
 
 def _api_binding_impl(module_ctx):
     """Implementation for api_binding extension.

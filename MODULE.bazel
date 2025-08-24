@@ -134,6 +134,10 @@ envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra
 envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
 # Repository metadata setup
 
+# API binding extension - kept in main module to avoid circular dependencies
+envoy_api_binding = use_extension("//bazel/extensions:api_binding.bzl", "api_binding")
+# API repository binding and setup
+
 # Python dependencies using upstream rules_python extensions (replaces custom envoy_python_dependencies_ext)
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
