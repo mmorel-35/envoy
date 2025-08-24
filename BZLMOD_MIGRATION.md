@@ -50,7 +50,7 @@ All repository setup functions are now organized in dedicated per-module extensi
 
 ### Native Bindings Compatibility
 
-**Problem**: Bazel's `native.bind()` calls are not supported in bzlmod mode, but Envoy has many legacy bindings that are still needed for WORKSPACE builds.
+**Problem**: Bazel's `native.bind()` and `native.new_local_repository()` calls are not supported in bzlmod mode, but Envoy has many legacy bindings and repository rules that are still needed for WORKSPACE builds.
 
 **Solution**: A comprehensive native bindings compatibility wrapper that:
 
@@ -65,13 +65,20 @@ All repository setup functions are now organized in dedicated per-module extensi
 envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
 envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
 envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
+
+# Repository rule wrapper
+envoy_native_new_local_repository(
+    name = "antlr4-cpp-runtime",
+    path = ".",
+    build_file_content = "...",
+)
 ```
 
 **Behavior**:
-- **WORKSPACE builds**: Execute all native bindings normally
-- **bzlmod builds**: Skip bindings with warnings directing users to `//third_party` compatibility layer
+- **WORKSPACE builds**: Execute all native bindings and repository rules normally
+- **bzlmod builds**: Skip bindings/repository rules with warnings directing users to proper bzlmod mechanisms
 
-**Affected Bindings**: 35+ legacy bindings now use the compatibility wrapper:
+**Affected Native Calls**: 35+ legacy bindings now use the compatibility wrapper:
 - SSL/TLS dependencies (ssl, crypto, libssl, libcrypto)
 - Protocol buffer dependencies (protobuf, protobuf_clib, upb_*)
 - gRPC components (grpc, grpc_health_proto, grpc_alts_*)
@@ -81,6 +88,7 @@ envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
 - Regular expressions (re2)
 - DNS resolution (cares)
 - API bindings (api_httpbody_protos, http_api_protos)
+- Repository rules (antlr4-cpp-runtime alias)
 
 ### Legacy //external: Compatibility Layer
 
@@ -232,6 +240,15 @@ envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
 envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
 # WORKSPACE: Executes native.bind() calls  
 # bzlmod: Skips with guidance to //third_party compatibility layer
+
+# Repository rules also have bzlmod compatibility
+envoy_native_new_local_repository(
+    name = "antlr4-cpp-runtime",
+    path = ".",
+    build_file_content = "...",
+)
+# WORKSPACE: Executes native.new_local_repository()
+# bzlmod: Skips with guidance to use proper bzlmod mechanisms
 ```
 
 ### Usage Patterns
