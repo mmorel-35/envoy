@@ -16,7 +16,7 @@ This document describes the **completed** bzlmod migration implemented for Envoy
 
 This migration implements a comprehensive approach for **full Bazel 8.0 compatibility**. It includes:
 
-1. **Complete bzlmod migration** - All 13 dependency functions now use extensions  
+1. **Complete bzlmod migration** - All 12 dependency functions now use extensions  
 2. **WORKSPACE.bzlmod elimination** - Pure bzlmod architecture across all modules
 3. **Per-module organization** - Extensions organized by module ownership and responsibility
 4. **Upstream rules_python integration** - Standard pip and python toolchain extensions
@@ -25,7 +25,7 @@ This migration implements a comprehensive approach for **full Bazel 8.0 compatib
 
 ## Completed Bzlmod Extensions
 
-### Per-Module Extension Organization (13 total)
+### Per-Module Extension Organization (12 total)
 All repository setup functions are now organized in dedicated per-module extensions with simplified naming:
 
 **Main Module (@envoy//bazel/extensions/):**
@@ -34,7 +34,6 @@ All repository setup functions are now organized in dedicated per-module extensi
 - `dependency_imports` - Toolchain imports and registrations
 - `dependency_imports_extra` - Additional dependency imports
 - `repo` - Repository metadata setup
-- `api_binding` - API repository binding setup (kept here to avoid circular dependencies)
 
 **API Module (@envoy_api//bazel/extensions/):**
 - `api_dependencies` - API-specific dependencies

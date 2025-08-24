@@ -41,19 +41,6 @@ def envoy_api_binding():
             actual = "@com_google_googleapis//google/api:annotations_cc_proto",
         )
 
-def _envoy_api_binding_impl(module_ctx):
-    """Implementation of the envoy_api_binding extension."""
-    # Call the api binding function
-    envoy_api_binding()
-
-# Module extension for envoy_api_binding following consistent naming convention
-envoy_api_binding_ext = module_extension(
-    implementation = _envoy_api_binding_impl,
-    doc = """
-    Extension for Envoy's API binding setup.
-    
-    This extension wraps the envoy_api_binding() function to make it
-    available as a bzlmod module extension, following the consistent
-    naming convention envoy_*_ext across all Envoy modules.
-    """,
-)
+# Note: This file is maintained for WORKSPACE compatibility.
+# In bzlmod mode, the envoy_api module is handled directly via MODULE.bazel
+# without requiring the api_binding extension wrapper.
