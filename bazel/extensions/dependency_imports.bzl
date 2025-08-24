@@ -4,10 +4,11 @@ load("//bazel:dependency_imports.bzl", "envoy_dependency_imports")
 
 def _dependency_imports_impl(module_ctx):
     """Implementation for dependency_imports extension.
-    
+
     This extension wraps the envoy_dependency_imports() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the dependency imports function
     envoy_dependency_imports()
 

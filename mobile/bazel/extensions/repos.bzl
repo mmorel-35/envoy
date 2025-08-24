@@ -4,10 +4,11 @@ load("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories")
 
 def _envoy_mobile_repos_impl(module_ctx):
     """Implementation for envoy_mobile_repos extension.
-    
+
     This extension wraps the envoy_mobile_repositories() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the mobile repositories function
     envoy_mobile_repositories()
 

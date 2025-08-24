@@ -4,10 +4,11 @@ load("//bazel:repositories_extra.bzl", "envoy_dependencies_extra")
 
 def _dependencies_extra_impl(module_ctx):
     """Implementation for dependencies_extra extension.
-    
+
     This extension wraps the envoy_dependencies_extra() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the extra dependencies function
     envoy_dependencies_extra()
 

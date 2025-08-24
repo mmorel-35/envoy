@@ -9,7 +9,7 @@ package(default_visibility = ["//visibility:public"])
 #
 # Extension naming follows simplified conventions:
 #   - dependencies: Core dependency setup
-#   - dependency_imports: Toolchain imports and registrations  
+#   - dependency_imports: Toolchain imports and registrations
 #   - api_*: API-related extensions
 #   - repo: Repository metadata setup
 #

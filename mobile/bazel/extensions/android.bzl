@@ -4,10 +4,11 @@ load("//bazel:android_configure.bzl", "android_configure")
 
 def _envoy_android_impl(module_ctx):
     """Implementation for envoy_android extension.
-    
+
     This extension wraps the android_configure() repository rule to make it
     available as a bzlmod module extension.
     """
+
     # Configure Android SDK/NDK with the same parameters as used in WORKSPACE.bzlmod
     android_configure(
         name = "local_config_android",

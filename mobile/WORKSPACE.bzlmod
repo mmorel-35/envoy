@@ -4,7 +4,7 @@ workspace(name = "envoy_mobile")
 #
 # Core Envoy dependencies:
 # - envoy_dependencies_ext from "@envoy//bazel:repositories.bzl"
-# - envoy_dependencies_extra_ext from "@envoy//bazel:repositories_extra.bzl"  
+# - envoy_dependencies_extra_ext from "@envoy//bazel:repositories_extra.bzl"
 # - envoy_dependency_imports_ext from "@envoy//bazel:dependency_imports.bzl"
 # - envoy_dependency_imports_extra_ext from "@envoy//bazel:dependency_imports.bzl"
 #

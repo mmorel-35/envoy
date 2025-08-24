@@ -13,7 +13,7 @@ alias(
 )
 
 alias(
-    name = "crypto", 
+    name = "crypto",
     actual = "@envoy//bazel:boringcrypto",
 )
 
@@ -35,7 +35,7 @@ alias(
 
 alias(
     name = "grpc_transcoding",
-    actual = "@grpc_httpjson_transcoding//src:transcoding", 
+    actual = "@grpc_httpjson_transcoding//src:transcoding",
 )
 
 # Compression libraries
@@ -62,7 +62,7 @@ alias(
 )
 
 alias(
-    name = "abseil_flat_hash_set", 
+    name = "abseil_flat_hash_set",
     actual = "@com_google_absl//absl/container:flat_hash_set",
 )
 
@@ -104,7 +104,7 @@ alias(
 )
 
 alias(
-    name = "upb_mem_lib", 
+    name = "upb_mem_lib",
     actual = "@com_google_protobuf//upb:mem",
 )
 
@@ -179,7 +179,7 @@ alias(
 )
 
 alias(
-    name = "wasmtime", 
+    name = "wasmtime",
     actual = "@com_github_wasmtime//:wasmtime_lib",
 )
 

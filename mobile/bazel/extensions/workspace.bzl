@@ -4,10 +4,11 @@ load("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace")
 
 def _envoy_mobile_workspace_impl(module_ctx):
     """Implementation for envoy_mobile_workspace extension.
-    
+
     This extension wraps the envoy_mobile_workspace() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the mobile workspace function
     envoy_mobile_workspace()
 

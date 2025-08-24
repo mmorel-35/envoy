@@ -4,10 +4,11 @@ load("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
 
 def _envoy_mobile_impl(module_ctx):
     """Implementation for envoy_mobile extension.
-    
+
     This extension wraps the envoy_mobile_dependencies() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the mobile dependencies function
     envoy_mobile_dependencies()
 

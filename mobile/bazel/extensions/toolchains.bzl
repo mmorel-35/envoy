@@ -4,10 +4,11 @@ load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
 
 def _envoy_mobile_toolchains_impl(module_ctx):
     """Implementation for envoy_mobile_toolchains extension.
-    
+
     This extension wraps the envoy_mobile_toolchains() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the mobile toolchains function
     envoy_mobile_toolchains()
 

@@ -4,10 +4,11 @@ load("//bazel:repositories.bzl", "api_dependencies")
 
 def _api_dependencies_impl(module_ctx):
     """Implementation for api_dependencies extension.
-    
+
     This extension wraps the api_dependencies() function to make it
     available as a bzlmod module extension.
     """
+
     # Call the API dependencies function
     api_dependencies()
 
