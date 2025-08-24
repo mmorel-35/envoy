@@ -5,16 +5,12 @@
 # For bzlmod builds, bindings are skipped with clear logging and migration guidance.
 #
 # Usage:
-#   load(":native_binding_wrapper.bzl", "envoy_native_bind", "envoy_conditional_native_bind_group")
+#   load(":native_binding_wrapper.bzl", "envoy_native_bind")
 #
 #   # Individual binding
 #   envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
-#
-#   # Batch binding for related dependencies
-#   envoy_conditional_native_bind_group([
-#       {"name": "protobuf", "actual": "@com_google_protobuf//:protobuf"},
-#       {"name": "grpc", "actual": "@com_github_grpc_grpc//:grpc++"},
-#   ])
+#   envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+#   envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
 #
 # Migration Path:
 #   1. WORKSPACE builds: Execute native bindings normally (backward compatible)
@@ -46,24 +42,3 @@ def envoy_native_bind(name, actual = None, **kwargs):
         # or through the //third_party compatibility layer.
         print("WARNING: Skipping native.bind(name='{}', actual='{}') in bzlmod mode. ".format(name, actual) +
               "Use direct @repo//:target references or //third_party:{} alias instead.".format(name))
-
-def envoy_conditional_native_bind_group(bindings):
-    """
-    Apply native bindings conditionally based on bzlmod context.
-    
-    This function provides a clean way to apply multiple native bindings
-    that should all be skipped in bzlmod mode.
-    
-    Args:
-        bindings: List of dictionaries with 'name' and 'actual' keys
-    """
-    if not _IS_BZLMOD:
-        # Legacy WORKSPACE mode - execute all native bindings
-        for binding in bindings:
-            native.bind(name = binding["name"], actual = binding["actual"])
-    else:
-        # bzlmod mode - log skipped bindings
-        binding_names = [b["name"] for b in bindings]
-        print("INFO: Skipping {} native bindings in bzlmod mode: {}. ".format(
-            len(bindings), ", ".join(binding_names)) +
-              "Use direct @repo//:target references or //third_party compatibility layer instead.")

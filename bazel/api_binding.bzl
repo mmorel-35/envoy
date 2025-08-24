@@ -1,4 +1,4 @@
-load(":native_binding_wrapper.bzl", "envoy_conditional_native_bind_group")
+load(":native_binding_wrapper.bzl", "envoy_native_bind")
 
 def _default_envoy_api_impl(ctx):
     ctx.file("WORKSPACE", "")
@@ -32,10 +32,14 @@ def envoy_api_binding():
 
     # API bindings (skipped in bzlmod mode)
     # TODO(https://github.com/envoyproxy/envoy/issues/7719) need to remove both bindings and use canonical rules
-    envoy_conditional_native_bind_group([
-        {"name": "api_httpbody_protos", "actual": "@com_google_googleapis//google/api:httpbody_cc_proto"},
-        {"name": "http_api_protos", "actual": "@com_google_googleapis//google/api:annotations_cc_proto"},
-    ])
+    envoy_native_bind(
+        name = "api_httpbody_protos",
+        actual = "@com_google_googleapis//google/api:httpbody_cc_proto",
+    )
+    envoy_native_bind(
+        name = "http_api_protos",
+        actual = "@com_google_googleapis//google/api:annotations_cc_proto",
+    )
 
 # Note: This file is maintained for WORKSPACE compatibility.
 # In bzlmod mode, the envoy_api module is handled directly via MODULE.bazel

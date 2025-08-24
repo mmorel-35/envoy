@@ -38,12 +38,8 @@ Native `bind()` calls are not supported in bzlmod mode, but are still needed for
 ```starlark
 # Individual binding with automatic context detection
 envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
-
-# Batch wrapper for related bindings
-envoy_conditional_native_bind_group([
-    {"name": "protobuf", "actual": "@com_google_protobuf//:protobuf"},
-    {"name": "grpc", "actual": "@com_github_grpc_grpc//:grpc++"},
-])
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
 ```
 
 **Behavior:**

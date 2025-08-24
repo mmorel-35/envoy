@@ -63,12 +63,8 @@ All repository setup functions are now organized in dedicated per-module extensi
 ```starlark
 # Individual binding wrapper
 envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
-
-# Batch binding wrapper for related dependencies
-envoy_conditional_native_bind_group([
-    {"name": "protobuf", "actual": "@com_google_protobuf//:protobuf"},
-    {"name": "grpc", "actual": "@com_github_grpc_grpc//:grpc++"},
-])
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
 ```
 
 **Behavior**:
@@ -232,13 +228,10 @@ envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
 # WORKSPACE: Executes native.bind()
 # bzlmod: Skips with warning to use //third_party:ssl
 
-# Batch wrapper for related bindings
-envoy_conditional_native_bind_group([
-    {"name": "protobuf", "actual": "@com_google_protobuf//:protobuf"},
-    {"name": "grpc", "actual": "@com_github_grpc_grpc//:grpc++"},
-])
-# WORKSPACE: Executes all native.bind() calls
-# bzlmod: Skips all with guidance to //third_party compatibility layer
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
+# WORKSPACE: Executes native.bind() calls  
+# bzlmod: Skips with guidance to //third_party compatibility layer
 ```
 
 ### Usage Patterns

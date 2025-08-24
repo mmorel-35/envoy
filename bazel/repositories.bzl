@@ -2,7 +2,7 @@ load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_languag
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repository_locations.bzl", "PROTOC_VERSIONS", "REPOSITORY_LOCATIONS_SPEC")
-load(":native_binding_wrapper.bzl", "envoy_native_bind", "envoy_conditional_native_bind_group")
+load(":native_binding_wrapper.bzl", "envoy_native_bind")
 
 # Bzlmod context detection - in bzlmod, labels start with @@
 _IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
@@ -463,10 +463,14 @@ def _net_zlib():
     )
 
     # Bind for grpc and protobuf (skipped in bzlmod mode)
-    envoy_conditional_native_bind_group([
-        {"name": "madler_zlib", "actual": "@envoy//bazel/foreign_cc:zlib"},
-        {"name": "zlib", "actual": "@envoy//bazel/foreign_cc:zlib"},
-    ])
+    envoy_native_bind(
+        name = "madler_zlib",
+        actual = "@envoy//bazel/foreign_cc:zlib",
+    )
+    envoy_native_bind(
+        name = "zlib",
+        actual = "@envoy//bazel/foreign_cc:zlib",
+    )
 
 def _com_github_zlib_ng_zlib_ng():
     external_http_archive(
@@ -644,12 +648,22 @@ def _com_google_absl():
 
     # Abseil bindings (skipped in bzlmod mode)
     # Keep these until jwt_verify_lib is updated
-    envoy_conditional_native_bind_group([
-        {"name": "abseil_flat_hash_map", "actual": "@com_google_absl//absl/container:flat_hash_map"},
-        {"name": "abseil_flat_hash_set", "actual": "@com_google_absl//absl/container:flat_hash_set"},
-        {"name": "abseil_strings", "actual": "@com_google_absl//absl/strings:strings"},
-        {"name": "abseil_time", "actual": "@com_google_absl//absl/time:time"},
-    ])
+    envoy_native_bind(
+        name = "abseil_flat_hash_map",
+        actual = "@com_google_absl//absl/container:flat_hash_map",
+    )
+    envoy_native_bind(
+        name = "abseil_flat_hash_set",
+        actual = "@com_google_absl//absl/container:flat_hash_set",
+    )
+    envoy_native_bind(
+        name = "abseil_strings",
+        actual = "@com_google_absl//absl/strings:strings",
+    )
+    envoy_native_bind(
+        name = "abseil_time",
+        actual = "@com_google_absl//absl/time:time",
+    )
 
 def _com_google_protobuf():
     external_http_archive(
@@ -681,19 +695,47 @@ def _com_google_protobuf():
 
     # Protobuf and UPB bindings (skipped in bzlmod mode)
     # Needed by grpc, jwt_verify_lib, maybe others
-    envoy_conditional_native_bind_group([
-        {"name": "protobuf", "actual": "@com_google_protobuf//:protobuf"},
-        {"name": "protobuf_clib", "actual": "@com_google_protobuf//:protoc_lib"},
-        {"name": "protocol_compiler", "actual": "@com_google_protobuf//:protoc"},
-        {"name": "python_headers", "actual": "//bazel:python_headers"},
-        # UPB bindings - needed by grpc until we update again
-        {"name": "upb_base_lib", "actual": "@com_google_protobuf//upb:base"},
-        {"name": "upb_mem_lib", "actual": "@com_google_protobuf//upb:mem"},
-        {"name": "upb_message_lib", "actual": "@com_google_protobuf//upb:message"},
-        {"name": "upb_json_lib", "actual": "@com_google_protobuf//upb:json"},
-        {"name": "upb_textformat_lib", "actual": "@com_google_protobuf//upb:text"},
-        {"name": "upb_reflection", "actual": "@com_google_protobuf//upb:reflection"},
-    ])
+    envoy_native_bind(
+        name = "protobuf",
+        actual = "@com_google_protobuf//:protobuf",
+    )
+    envoy_native_bind(
+        name = "protobuf_clib",
+        actual = "@com_google_protobuf//:protoc_lib",
+    )
+    envoy_native_bind(
+        name = "protocol_compiler",
+        actual = "@com_google_protobuf//:protoc",
+    )
+    envoy_native_bind(
+        name = "python_headers",
+        actual = "//bazel:python_headers",
+    )
+    # UPB bindings - needed by grpc until we update again
+    envoy_native_bind(
+        name = "upb_base_lib",
+        actual = "@com_google_protobuf//upb:base",
+    )
+    envoy_native_bind(
+        name = "upb_mem_lib",
+        actual = "@com_google_protobuf//upb:mem",
+    )
+    envoy_native_bind(
+        name = "upb_message_lib",
+        actual = "@com_google_protobuf//upb:message",
+    )
+    envoy_native_bind(
+        name = "upb_json_lib",
+        actual = "@com_google_protobuf//upb:json",
+    )
+    envoy_native_bind(
+        name = "upb_textformat_lib",
+        actual = "@com_google_protobuf//upb:text",
+    )
+    envoy_native_bind(
+        name = "upb_reflection",
+        actual = "@com_google_protobuf//upb:reflection",
+    )
 
 def _v8():
     external_http_archive(
@@ -791,17 +833,42 @@ def _com_github_grpc_grpc():
 
     # gRPC and related bindings (skipped in bzlmod mode)
     # Rebind some stuff to match what the gRPC Bazel is expecting
-    envoy_conditional_native_bind_group([
-        {"name": "protobuf_headers", "actual": "@com_google_protobuf//:protobuf_headers"},
-        {"name": "libssl", "actual": "//third_party:ssl"},
-        {"name": "libcrypto", "actual": "//third_party:crypto"},
-        {"name": "cares", "actual": "@envoy//bazel/foreign_cc:ares"},
-        {"name": "grpc", "actual": "@com_github_grpc_grpc//:grpc++"},
-        {"name": "grpc_health_proto", "actual": "@envoy//bazel:grpc_health_proto"},
-        {"name": "grpc_alts_fake_handshaker_server", "actual": "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:fake_handshaker_lib"},
-        {"name": "grpc_alts_handshaker_proto", "actual": "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:handshaker_proto"},
-        {"name": "grpc_alts_transport_security_common_proto", "actual": "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:transport_security_common_proto"},
-    ])
+    envoy_native_bind(
+        name = "protobuf_headers",
+        actual = "@com_google_protobuf//:protobuf_headers",
+    )
+    envoy_native_bind(
+        name = "libssl",
+        actual = "//third_party:ssl",
+    )
+    envoy_native_bind(
+        name = "libcrypto",
+        actual = "//third_party:crypto",
+    )
+    envoy_native_bind(
+        name = "cares",
+        actual = "@envoy//bazel/foreign_cc:ares",
+    )
+    envoy_native_bind(
+        name = "grpc",
+        actual = "@com_github_grpc_grpc//:grpc++",
+    )
+    envoy_native_bind(
+        name = "grpc_health_proto",
+        actual = "@envoy//bazel:grpc_health_proto",
+    )
+    envoy_native_bind(
+        name = "grpc_alts_fake_handshaker_server",
+        actual = "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:fake_handshaker_lib",
+    )
+    envoy_native_bind(
+        name = "grpc_alts_handshaker_proto",
+        actual = "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:handshaker_proto",
+    )
+    envoy_native_bind(
+        name = "grpc_alts_transport_security_common_proto",
+        actual = "@com_github_grpc_grpc//test/core/tsi/alts/fake_handshaker:transport_security_common_proto",
+    )
 
 def _rules_proto_grpc():
     external_http_archive("rules_proto_grpc")
