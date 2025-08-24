@@ -105,6 +105,46 @@ The `envoy_external_dep_path()` function now redirects to `//third_party:` inste
 
 See `THIRD_PARTY_MIGRATION.md` for detailed migration strategy.
 
+### HTTP Archive Wrapper Compatibility
+
+**Problem**: The `repo_mapping` attribute is only supported in bzlmod module extensions, not in native Bazel rules used in WORKSPACE builds. This causes build errors when wrappers like `envoy_http_archive` and `external_http_archive` pass through `repo_mapping` to the native `http_archive` rule.
+
+**Solution**: The `envoy_http_archive` wrapper automatically filters out `repo_mapping` when running in WORKSPACE context, ensuring compatibility between WORKSPACE and bzlmod builds.
+
+**Implementation (`api/bazel/envoy_http_archive.bzl`)**:
+```starlark
+def envoy_http_archive(name, locations, location_name = None, **kwargs):
+    if name not in native.existing_rules():
+        location = locations[location_name or name]
+
+        # Filter out repo_mapping for WORKSPACE compatibility
+        # The repo_mapping attribute is only supported in bzlmod module extensions,
+        # not in native Bazel rules used in WORKSPACE builds.
+        filtered_kwargs = {}
+        for key, value in kwargs.items():
+            if key != "repo_mapping":
+                filtered_kwargs[key] = value
+
+        http_archive(
+            name = name,
+            urls = location["urls"],
+            sha256 = location["sha256"],
+            strip_prefix = location.get("strip_prefix", ""),
+            **filtered_kwargs
+        )
+```
+
+**Behavior**:
+- **WORKSPACE builds**: `repo_mapping` is automatically filtered out to prevent build errors
+- **bzlmod extensions**: Extensions typically call `http_archive` directly and handle `repo_mapping` through the extension context
+- **All other arguments**: Preserved unchanged (patches, patch_args, build_file_content, etc.)
+
+**Affected Wrappers**:
+- `envoy_http_archive` - Core wrapper in `api/bazel/envoy_http_archive.bzl`
+- `external_http_archive` - Convenience wrapper that calls `envoy_http_archive`
+
+This ensures that code using `external_http_archive` with `repo_mapping` (like `_rules_fuzzing()`) works correctly in both WORKSPACE and bzlmod contexts.
+
 ## Problem Being Solved
 
 Bazel 8.0 will drop support for the traditional WORKSPACE system, requiring migration to the MODULE.bazel (bzlmod) system. This migration must preserve all existing custom patches that Envoy requires and make the dependency management functions available to all submodules.
