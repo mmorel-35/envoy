@@ -45,6 +45,4 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
 # Handles API-specific dependencies and external archives
 
-# API binding extension - from main envoy module to avoid circular dependencies
-envoy_api_binding = use_extension("@envoy//bazel/extensions:api_binding.bzl", "api_binding")
-# Handles API repository binding and setup
+

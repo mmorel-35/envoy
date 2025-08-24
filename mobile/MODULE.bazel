@@ -71,9 +71,10 @@ envoy_imports_extra = use_extension("@envoy//bazel/extensions:dependency_imports
 # Envoy API and repository extensions - inherited from parent envoy module
 envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
 
-# API extensions from main envoy module (api_binding moved to avoid circular dependencies)
-envoy_api_binding = use_extension("@envoy//bazel/extensions:api_binding.bzl", "api_binding")
+# API extensions from API module
 envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+
+
 
 # Mobile-specific extensions using local module
 envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
