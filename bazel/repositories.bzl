@@ -2,7 +2,7 @@ load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_languag
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repository_locations.bzl", "PROTOC_VERSIONS", "REPOSITORY_LOCATIONS_SPEC")
-load(":native_binding_wrapper.bzl", "envoy_native_bind")
+load(":native_binding_wrapper.bzl", "envoy_native_bind", "envoy_native_new_local_repository")
 
 PPC_SKIP_TARGETS = ["envoy.string_matcher.lua", "envoy.filters.http.lua", "envoy.router.cluster_specifier_plugin.lua"]
 
@@ -517,7 +517,7 @@ def _com_google_cel_cpp():
     # cel-cpp references ``@antlr4-cpp-runtime//:antlr4-cpp-runtime`` but it internally
     # defines ``antlr4_runtimes`` with a cpp target.
     # We are creating a repository alias to avoid duplicating the ANTLR4 dependency.
-    native.new_local_repository(
+    envoy_native_new_local_repository(
         name = "antlr4-cpp-runtime",
         path = ".",
         build_file_content = """
