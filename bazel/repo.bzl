@@ -198,20 +198,3 @@ _envoy_repo = repository_rule(
 def envoy_repo():
     if "envoy_repo" not in native.existing_rules().keys():
         _envoy_repo(name = "envoy_repo")
-
-def _envoy_repo_impl(module_ctx):
-    """Implementation of the envoy_repo extension."""
-    # Call the repo function
-    envoy_repo()
-
-# Module extension for envoy_repo following consistent naming convention
-envoy_repo_ext = module_extension(
-    implementation = _envoy_repo_impl,
-    doc = """
-    Extension for Envoy's repository metadata setup.
-    
-    This extension wraps the envoy_repo() function to make it
-    available as a bzlmod module extension, following the consistent
-    naming convention envoy_*_ext across all Envoy modules.
-    """,
-)

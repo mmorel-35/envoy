@@ -37,20 +37,3 @@ def envoy_dependencies_extra(
         proto_bazel_features(name = "proto_bazel_features")
 
     envoy_examples_env()
-
-def _envoy_dependencies_extra_impl(module_ctx):
-    """Implementation of the envoy_dependencies_extra extension."""
-    # Call the extra dependencies function
-    envoy_dependencies_extra()
-
-# Module extension for envoy_dependencies_extra
-envoy_dependencies_extra_ext = module_extension(
-    implementation = _envoy_dependencies_extra_impl,
-    doc = """
-    Extension for Envoy's extra dependencies.
-    
-    This extension wraps the envoy_dependencies_extra() function to make it
-    available as a bzlmod module extension. These are dependencies that rely  
-    on a first stage of dependency loading in envoy_dependencies().
-    """,
-)

@@ -230,20 +230,3 @@ def crates_repositories():
         lockfile = Label("@envoy//source/extensions/dynamic_modules/sdk/rust:Cargo.Bazel.lock"),
         manifests = ["@envoy//source/extensions/dynamic_modules/sdk/rust:Cargo.toml"],
     )
-
-def _envoy_dependency_imports_impl(module_ctx):
-    """Implementation of the envoy_dependency_imports extension."""
-    # Call the dependency imports function
-    envoy_dependency_imports()
-
-# Module extension for envoy_dependency_imports  
-envoy_dependency_imports_ext = module_extension(
-    implementation = _envoy_dependency_imports_impl,
-    doc = """
-    Extension for Envoy's dependency imports.
-    
-    This extension wraps the envoy_dependency_imports() function to make it
-    available as a bzlmod module extension. This handles toolchain imports
-    and registrations that depend on repositories loaded in earlier stages.
-    """,
-)

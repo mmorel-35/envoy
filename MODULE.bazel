@@ -165,7 +165,3 @@ use_repo(
     "dev_pip3",
     "fuzzing_pip3",
 )
-
-# Python toolchain setup using upstream extension (replaces system_python from custom extension)
-python_configure = use_extension("@rules_python//python/extensions:python.bzl", "python")
-python_configure.toolchain(python_version = "3.7")  # minimum version requirement

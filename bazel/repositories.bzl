@@ -1045,27 +1045,3 @@ def _com_github_maxmind_libmaxminddb():
         name = "com_github_maxmind_libmaxminddb",
         build_file_content = BUILD_ALL_CONTENT,
     )
-
-# Bzlmod extension for dependencies not yet migrated to MODULE.bazel
-def _envoy_dependencies_impl(module_ctx):
-    """Implementation of the envoy_dependencies extension."""
-    # Call the main dependencies function
-    envoy_dependencies()
-
-# Module extension for envoy_dependencies  
-envoy_dependencies_ext = module_extension(
-    implementation = _envoy_dependencies_impl,
-    doc = """
-    Extension for Envoy's main dependencies.
-    
-    This extension wraps the envoy_dependencies() function to make it
-    available as a bzlmod module extension, following the conservative 
-    bzlmod migration strategy.
-    """,
-)
-
-# Note: The non_module_dependencies_rule extension has been replaced by
-# individual extensions for each major function:
-# - envoy_dependencies_ext for envoy_dependencies()  
-# - envoy_dependencies_extra_ext for envoy_dependencies_extra()
-# - envoy_dependency_imports_ext for envoy_dependency_imports()

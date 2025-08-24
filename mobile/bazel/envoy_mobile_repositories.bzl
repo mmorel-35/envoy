@@ -111,20 +111,3 @@ def android_repos():
         sha256 = "65aedff0cd728bee394f6fb8e65ba39c4c5efb11b29b766356922d4a74c623f5",
         strip_prefix = "rules_android_ndk-0.1.2",
     )
-
-def _envoy_mobile_repositories_impl(module_ctx):
-    """Implementation of the envoy_mobile_repositories extension."""
-    # Call the mobile repositories function
-    envoy_mobile_repositories()
-
-# Module extension for envoy_mobile_repositories following consistent naming convention
-envoy_mobile_repositories_ext = module_extension(
-    implementation = _envoy_mobile_repositories_impl,
-    doc = """
-    Extension for Envoy Mobile's repository setup.
-    
-    This extension wraps the envoy_mobile_repositories() function to make it
-    available as a bzlmod module extension, following the consistent
-    naming convention envoy_*_ext across all Envoy modules.
-    """,
-)
