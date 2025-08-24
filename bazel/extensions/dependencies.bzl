@@ -2,9 +2,6 @@
 
 load("//bazel:repositories.bzl", "envoy_dependencies")
 
-# Bzlmod context detection - in bzlmod, labels start with @@
-_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
-
 def _dependencies_impl(module_ctx):
     """Implementation for dependencies extension.
 

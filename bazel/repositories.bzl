@@ -4,9 +4,6 @@ load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repository_locations.bzl", "PROTOC_VERSIONS", "REPOSITORY_LOCATIONS_SPEC")
 load(":native_binding_wrapper.bzl", "envoy_native_bind")
 
-# Bzlmod context detection - in bzlmod, labels start with @@
-_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
-
 PPC_SKIP_TARGETS = ["envoy.string_matcher.lua", "envoy.filters.http.lua", "envoy.router.cluster_specifier_plugin.lua"]
 
 WINDOWS_SKIP_TARGETS = [
@@ -96,15 +93,14 @@ def _cc_deps():
         patches = ["@envoy//bazel:proto_processing_lib.patch"],
     )
     external_http_archive("ocp")
-    if not _IS_BZLMOD:
-        native.bind(
-            name = "path_matcher",
-            actual = "@grpc_httpjson_transcoding//src:path_matcher",
-        )
-        native.bind(
-            name = "grpc_transcoding",
-            actual = "@grpc_httpjson_transcoding//src:transcoding",
-        )
+    envoy_native_bind(
+        name = "path_matcher",
+        actual = "@grpc_httpjson_transcoding//src:path_matcher",
+    )
+    envoy_native_bind(
+        name = "grpc_transcoding",
+        actual = "@grpc_httpjson_transcoding//src:transcoding",
+    )
 
 def _go_deps(skip_targets):
     # Keep the skip_targets check around until Istio Proxy has stopped using
@@ -140,15 +136,14 @@ def envoy_dependencies(skip_targets = []):
     _boringssl()
     _boringssl_fips()
     _aws_lc()
-    if not _IS_BZLMOD:
-        native.bind(
-            name = "ssl",
-            actual = "@envoy//bazel:boringssl",
-        )
-        native.bind(
-            name = "crypto",
-            actual = "@envoy//bazel:boringcrypto",
-        )
+    envoy_native_bind(
+        name = "ssl",
+        actual = "@envoy//bazel:boringssl",
+    )
+    envoy_native_bind(
+        name = "crypto",
+        actual = "@envoy//bazel:boringcrypto",
+    )
 
     # The long repo names (`com_github_fmtlib_fmt` instead of `fmtlib`) are
     # semi-standard in the Bazel community, intended to avoid both duplicate
@@ -258,11 +253,11 @@ def envoy_dependencies(skip_targets = []):
             python = True,
             grpc = True,
         )
-    if not _IS_BZLMOD:
-        native.bind(
-            name = "bazel_runfiles",
-            actual = "@bazel_tools//tools/cpp/runfiles",
-        )
+
+    envoy_native_bind(
+        name = "bazel_runfiles",
+        actual = "@bazel_tools//tools/cpp/runfiles",
+    )
 
 def _boringssl():
     external_http_archive(name = "boringssl")
@@ -687,11 +682,11 @@ def _com_google_protobuf():
             build_file = "@envoy//bazel/protoc:BUILD.protoc",
         )
 
-        external_http_archive(
-            "com_google_protobuf",
-            patches = ["@envoy//bazel:protobuf.patch"],
-            patch_args = ["-p1"],
-        )
+    external_http_archive(
+        "com_google_protobuf",
+        patches = ["@envoy//bazel:protobuf.patch"],
+        patch_args = ["-p1"],
+    )
 
     # Protobuf and UPB bindings (skipped in bzlmod mode)
     # Needed by grpc, jwt_verify_lib, maybe others
