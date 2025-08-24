@@ -24,6 +24,16 @@ load("//bazel:python_dependencies.bzl", "envoy_python_dependencies")
 
 envoy_python_dependencies()
 
+load("@base_pip3//:requirements.bzl", pip_dependencies = "install_deps")
+load("@dev_pip3//:requirements.bzl", pip_dev_dependencies = "install_deps")
+load("@fuzzing_pip3//:requirements.bzl", pip_fuzzing_dependencies = "install_deps")
+
+pip_dependencies()
+
+pip_dev_dependencies()
+
+pip_fuzzing_dependencies()
+
 load("//bazel:dependency_imports.bzl", "envoy_dependency_imports")
 
 envoy_dependency_imports()
