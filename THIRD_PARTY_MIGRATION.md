@@ -31,7 +31,24 @@ def envoy_external_dep_path(dep):
 
 This automatically migrates all usage through Envoy's build macros.
 
-### 3. Updated bind() References
+### 3. Native Bindings Compatibility Wrapper
+
+Native `bind()` calls are not supported in bzlmod mode, but are still needed for WORKSPACE builds. We've implemented a compatibility wrapper in `bazel/native_binding_wrapper.bzl`:
+
+```starlark
+# Individual binding with automatic context detection
+envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
+```
+
+**Behavior:**
+- **WORKSPACE builds**: Execute native bindings normally (backward compatible)
+- **bzlmod builds**: Skip bindings with clear warnings directing to `//third_party:` aliases
+
+**Coverage**: 35+ legacy bindings now use the wrapper including SSL/TLS, Protocol Buffers, gRPC, compression libraries, WebAssembly runtimes, and API bindings.
+
+### 4. Updated bind() References
 
 Legacy bind() calls that created circular references have been updated:
 
@@ -43,7 +60,7 @@ native.bind(name = "libssl", actual = "//external:ssl")
 native.bind(name = "libssl", actual = "//third_party:ssl")
 ```
 
-### 4. External BUILD File Updates
+### 5. External BUILD File Updates
 
 External dependency BUILD files have been updated to use the compatibility layer:
 
@@ -87,6 +104,7 @@ deps = ["//external:protobuf"]
 
 ✅ third_party/ compatibility layer created  
 ✅ //external: references redirected to //third_party:  
+✅ Native bindings compatibility wrapper implemented (35+ bindings)
 ✅ Circular bind() references resolved  
 ✅ External BUILD files updated  
 ✅ Per-module bzlmod extensions implemented (13 total)

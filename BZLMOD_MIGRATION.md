@@ -48,6 +48,40 @@ All repository setup functions are now organized in dedicated per-module extensi
 
 ## Dependencies and External References Migration
 
+### Native Bindings Compatibility
+
+**Problem**: Bazel's `native.bind()` calls are not supported in bzlmod mode, but Envoy has many legacy bindings that are still needed for WORKSPACE builds.
+
+**Solution**: A comprehensive native bindings compatibility wrapper that:
+
+1. **Automatic Context Detection**: Uses bzlmod detection to determine the build context
+2. **Backward Compatibility**: Preserves all existing WORKSPACE functionality  
+3. **Clear Migration Guidance**: Provides informative warnings in bzlmod mode with specific guidance
+4. **Centralized Management**: Single wrapper handles all native binding concerns
+
+**Implementation (`bazel/native_binding_wrapper.bzl`)**:
+```starlark
+# Individual binding wrapper
+envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
+```
+
+**Behavior**:
+- **WORKSPACE builds**: Execute all native bindings normally
+- **bzlmod builds**: Skip bindings with warnings directing users to `//third_party` compatibility layer
+
+**Affected Bindings**: 35+ legacy bindings now use the compatibility wrapper:
+- SSL/TLS dependencies (ssl, crypto, libssl, libcrypto)
+- Protocol buffer dependencies (protobuf, protobuf_clib, upb_*)
+- gRPC components (grpc, grpc_health_proto, grpc_alts_*)
+- Compression libraries (zlib, madler_zlib, nghttp2)
+- Container types (abseil_flat_hash_map, abseil_flat_hash_set)
+- WebAssembly runtimes (wee8, wamr, wasmtime)
+- Regular expressions (re2)
+- DNS resolution (cares)
+- API bindings (api_httpbody_protos, http_api_protos)
+
 ### Legacy //external: Compatibility Layer
 
 A `third_party/BUILD.bazel` compatibility layer provides aliases for all legacy `//external:foo` references:
@@ -183,15 +217,21 @@ mobile = module_extension(
 
 #### 2. Context-Aware Behavior
 
-Extensions use bzlmod context detection to exclude problematic operations:
+Extensions and dependency functions use bzlmod context detection to exclude problematic operations:
 
 ```starlark
-# Bzlmod context detection
+# Bzlmod context detection (centralized in native_binding_wrapper.bzl)
 _IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
 
-# Exclude native.bind() calls in bzlmod context
-if not _IS_BZLMOD:
-    native.bind(name = "ssl", actual = "@envoy//bazel:boringssl")
+# Native bindings compatibility wrapper handles context automatically
+envoy_native_bind(name = "ssl", actual = "@envoy//bazel:boringssl")
+# WORKSPACE: Executes native.bind()
+# bzlmod: Skips with warning to use //third_party:ssl
+
+envoy_native_bind(name = "protobuf", actual = "@com_google_protobuf//:protobuf")
+envoy_native_bind(name = "grpc", actual = "@com_github_grpc_grpc//:grpc++")
+# WORKSPACE: Executes native.bind() calls  
+# bzlmod: Skips with guidance to //third_party compatibility layer
 ```
 
 ### Usage Patterns
