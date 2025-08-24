@@ -8,11 +8,21 @@ def envoy_http_archive(name, locations, location_name = None, **kwargs):
     if name not in native.existing_rules():
         location = locations[location_name or name]
 
+        # Filter out repo_mapping for WORKSPACE compatibility
+        # The repo_mapping attribute is only supported in bzlmod module extensions,
+        # not in native Bazel rules used in WORKSPACE builds. Since this function
+        # is primarily used in WORKSPACE context (bzlmod extensions call their own
+        # http_archive directly), we filter it out to avoid build errors.
+        filtered_kwargs = {}
+        for key, value in kwargs.items():
+            if key != "repo_mapping":
+                filtered_kwargs[key] = value
+
         # HTTP tarball at a given URL. Add a BUILD file if requested.
         http_archive(
             name = name,
             urls = location["urls"],
             sha256 = location["sha256"],
             strip_prefix = location.get("strip_prefix", ""),
-            **kwargs
+            **filtered_kwargs
         )
