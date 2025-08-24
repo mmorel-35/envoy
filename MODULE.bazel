@@ -120,6 +120,7 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 # Envoy dependencies extensions - organized in dedicated extensions directory
 envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
 # Core repository definitions
+use_repo(envoy_deps, "rules_fuzzing")
 
 envoy_deps_extra = use_extension("//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
 # Second-stage dependencies
