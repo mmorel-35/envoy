@@ -23,6 +23,10 @@ bazel_dep(
     repo_name = "com_envoyproxy_protoc_gen_validate",
 )
 bazel_dep(
+    name = "rules_buf",
+    version = "0.5.0",
+)
+bazel_dep(
     name = "rules_go",
     version = "0.53.0",
     repo_name = "io_bazel_rules_go",
@@ -43,4 +47,5 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 
 # API dependencies extension - using local module
 envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+
 # Handles API-specific dependencies and external archives
