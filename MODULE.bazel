@@ -50,6 +50,11 @@ bazel_dep(
     repo_name = "com_envoyproxy_protoc_gen_validate",
 )
 bazel_dep(
+    name = "re2",
+    version = "2023-11-01",
+    repo_name = "com_googlesource_code_re2",
+)
+bazel_dep(
     name = "spdlog",
     version = "1.15.3",
     repo_name = "com_github_gabime_spdlog",
@@ -131,8 +136,10 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
 buf.toolchains(
-    version = "v1.50.0",
+    version = "v1.56.0",
+    sha256 = "5790beb45aaf51a6d7e68ca2255b22e1b14c9ae405a6c472cdcfc228c66abfc1",
 )
+use_repo(buf, "rules_buf_toolchains")
 
 # Envoy dependencies extensions - organized in dedicated extensions directory
 envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
@@ -188,7 +195,6 @@ use_repo(
     "com_google_cel_spec",
     "com_google_googletest",
     "com_google_protobuf",
-    "com_googlesource_code_re2",
     "com_googlesource_googleurl",
     "confluentinc_librdkafka",
     "dragonbox",
