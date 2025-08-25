@@ -9,7 +9,10 @@ module(
 # Note: Legacy //external: references are now redirected to //third_party:
 # compatibility layer. New code should use direct @repo//:target dependencies.
 # See THIRD_PARTY_MIGRATION.md for details.
-
+bazel_dep(
+    name = "aspect_rules_js",
+    version = "2.5.0",
+)
 bazel_dep(
     name = "bazel_skylib",
     version = "1.8.1",
@@ -72,7 +75,7 @@ bazel_dep(
 )
 bazel_dep(
     name = "rules_buf",
-    version = "0.5.0",
+    version = "0.5.1",
 )
 bazel_dep(
     name = "rules_cc",
@@ -86,6 +89,10 @@ bazel_dep(
 bazel_dep(
     name = "rules_license",
     version = "1.0.0",
+)
+bazel_dep(
+    name = "rules_nodejs",
+    version = "6.5.0",
 )
 bazel_dep(
     name = "rules_pkg",
@@ -136,8 +143,8 @@ use_repo(switched_rules, "com_google_googleapis_imports")
 
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
 buf.toolchains(
-    version = "v1.56.0",
     sha256 = "5790beb45aaf51a6d7e68ca2255b22e1b14c9ae405a6c472cdcfc228c66abfc1",
+    version = "v1.56.0",
 )
 use_repo(buf, "rules_buf_toolchains")
 
@@ -155,6 +162,7 @@ use_repo(
     "build_bazel_rules_apple",
     "com_github_alibaba_hessian2_codec",
     "com_github_awslabs_aws_c_auth",
+    "com_github_chrusty_protoc_gen_jsonschema",
     "com_github_axboe_liburing",
     "com_github_bazelbuild_buildtools",
     "com_github_c_ares_c_ares",
@@ -237,20 +245,16 @@ use_repo(
     "v8",
 )
 
-
 envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "dependency_imports")
 
 # Toolchain imports and registrations
 use_repo(
     envoy_imports,
-    "aspect_rules_js",
     "bazel_features_globals",
     "bazel_features_version",
-    "com_github_chrusty_protoc_gen_jsonschema",
     "dynamic_modules_rust_sdk_crate_index",
     "proto_bazel_features",
     "rules_fuzzing_oss_fuzz",
-    "rules_nodejs",
     "rules_python_internal",
 )
 
