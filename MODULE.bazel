@@ -156,6 +156,15 @@ bazel_dep(
     name = "highway",
     version = "1.2.0",
 )
+bazel_dep(
+    name = "fast_float",
+    version = "7.0.0",
+)
+bazel_dep(
+    name = "gperftools",
+    version = "2.10",
+    repo_name = "com_github_gperftools_gperftools",
+)
 
 # Local module overrides for internal Envoy modules
 bazel_dep(
@@ -219,7 +228,6 @@ use_repo(
     "com_github_google_perfetto",
     "com_github_google_quiche",
     "com_github_google_tcmalloc",
-    "com_github_gperftools_gperftools",
     "com_github_grpc_grpc",
     "com_github_intel_ipp_crypto_crypto_mb",
     "com_github_intel_qatlib",
@@ -249,7 +257,6 @@ use_repo(
     "emsdk",
     "envoy_examples",
     "envoy_toolshed",
-    "fast_float",
     "fips_cmake_linux_aarch64",
     "fips_cmake_linux_x86_64",
     "fips_go_linux_amd64",

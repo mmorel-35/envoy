@@ -11,7 +11,7 @@ This document describes the **completed** bzlmod migration implemented for Envoy
 - ✅ API module: Extension-based setup
 - ✅ Build config module: Clean MODULE.bazel only
 - ✅ **WORKSPACE.bzlmod files eliminated** - Pure bzlmod architecture achieved
-- ✅ **24 dependencies migrated to bazel_dep** - Including recently added flatbuffers and highway
+- ✅ **27 dependencies migrated to bazel_dep** - Including fast_float and gperftools
 
 ## Overview
 
@@ -779,16 +779,16 @@ The Envoy repository is now fully prepared for Bazel 8.0's removal of WORKSPACE 
 
 Total dependencies analyzed: **109**
 - **Available in BCR**: 35 modules  
-- **Successfully migrated to bazel_dep**: 24 dependencies
+- **Successfully migrated to bazel_dep**: 27 dependencies
 - **Dependencies with patches (cannot migrate)**: 33 dependencies
 - **Should be added to BCR**: 11 general-purpose libraries
-- **Must remain in extensions**: 76 dependencies
+- **Must remain in extensions**: 82 dependencies
 
 ### Dependencies Migrated to bazel_dep
 
-These 24 clean dependencies have been migrated from extensions to direct `bazel_dep` declarations in MODULE.bazel:
+These 27 clean dependencies have been migrated from extensions to direct `bazel_dep` declarations in MODULE.bazel:
 
-#### Core Libraries (9 recently migrated):
+#### Core Libraries (12 recently migrated):
 - **boringssl** (0.20250514.0) - SSL/TLS cryptographic library
 - **zstd** (1.5.7) → com_github_facebook_zstd - Fast compression algorithm
 - **yaml-cpp** (0.8.0) → com_github_jbeder_yaml_cpp - YAML parser and emitter
@@ -798,6 +798,8 @@ These 24 clean dependencies have been migrated from extensions to direct `bazel_
 - **boost** (1.84.0) → org_boost - C++ utility libraries (header-only subset)
 - **flatbuffers** (24.12.23) → com_github_google_flatbuffers - Cross-platform serialization library
 - **highway** (1.2.0) - Portable SIMD library for performance-critical applications
+- **fast_float** (7.0.0) - High-performance floating-point parsing library
+- **gperftools** (2.10) → com_github_gperftools_gperftools - CPU profiler and heap checker
 
 #### Utility Libraries (5 previously migrated):
 - **fmt** (11.2.0) → com_github_fmtlib_fmt - Safe formatting library
@@ -827,14 +829,12 @@ These dependencies are available in the Bazel Central Registry and could potenti
 #### Recently Migrated:
 1. **com_github_google_flatbuffers** → flatbuffers - Migrated to BCR version 24.12.23
 2. **highway** → highway - Migrated to BCR version 1.2.0
+3. **fast_float** → fast_float - Migrated to BCR version 7.0.0
+4. **com_github_gperftools_gperftools** → gperftools - Migrated to BCR version 2.10
 
 #### Available but with Constraints:  
-3. **com_github_maxmind_libmaxminddb** → libmaxminddb - Available in BCR, but uses custom BUILD_ALL_CONTENT
-4. **emsdk** - Available in BCR, but has patches so cannot migrate
-
-#### Should Be Added to BCR:
-5. **fast_float** → fast_float - High-performance floating-point parsing library
-6. **aws_lc** → aws-lc - AWS's OpenSSL-compatible cryptography library
+5. **com_github_maxmind_libmaxminddb** → libmaxminddb - Available in BCR, but uses custom BUILD_ALL_CONTENT
+6. **emsdk** - Available in BCR, but has patches so cannot migrate
 
 #### Medium Priority:
 7. **com_github_msgpack_cpp** → msgpack - Binary serialization format implementation
@@ -844,9 +844,9 @@ These dependencies are available in the Bazel Central Registry and could potenti
 11. **com_github_mirror_tclap** → tclap - Command line argument parsing library
 
 #### Lower Priority:
-12. **com_github_google_libsxg** → libsxg - Signed HTTP Exchange format library
-13. **com_github_openhistogram_libcircllhist** → libcircllhist - Circllhist data structure implementation
-14. **com_github_zlib_ng_zlib_ng** → zlib-ng - High-performance zlib replacement
+8. **com_github_google_libsxg** → libsxg - Signed HTTP Exchange format library
+9. **com_github_openhistogram_libcircllhist** → libcircllhist - Circllhist data structure implementation
+10. **com_github_zlib_ng_zlib_ng** → zlib-ng - High-performance zlib replacement
 
 ### Dependencies That Must Remain in Extensions
 
@@ -898,7 +898,7 @@ These dependencies are available in the Bazel Central Registry and could potenti
 - **Parallel fetching**: BCR modules can be fetched concurrently
 
 #### Maintenance Benefits:
-- **Simplified extensions**: 24 fewer dependencies managed in custom extensions
+- **Simplified extensions**: 27 fewer dependencies managed in custom extensions
 - **Automatic updates**: BCR modules can be updated via automated tools
 - **Version consistency**: Standard versioning across the ecosystem
 

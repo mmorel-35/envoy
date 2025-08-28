@@ -190,6 +190,7 @@ def envoy_dependencies(skip_targets = []):
     _com_google_protobuf()
     _v8()
     _fast_float()
+    _highway()
     _dragonbox()
     _fp16()
     _simdutf()
@@ -218,6 +219,7 @@ def envoy_dependencies(skip_targets = []):
     _com_google_cel_cpp()
     _com_github_google_perfetto()
     _rules_ruby()
+    external_http_archive("com_github_google_flatbuffers")
     external_http_archive("bazel_features")
     external_http_archive("bazel_toolchains")
     external_http_archive("bazel_compdb")
@@ -765,6 +767,11 @@ def _v8():
 def _fast_float():
     external_http_archive(
         name = "fast_float",
+    )
+
+def _highway():
+    external_http_archive(
+        name = "highway",
     )
 
 def _dragonbox():
