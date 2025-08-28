@@ -7,26 +7,13 @@ bazel_dep(name = "envoy", version = "0.0.0-dev")
 bazel_dep(name = "envoy_api", version = "0.0.0-dev")
 bazel_dep(name = "envoy_build_config", version = "0.0.0-dev")
 bazel_dep(name = "gazelle", version = "0.45.0", repo_name = "bazel_gazelle")
-bazel_dep(
-    name = "googleapis",
-    version = "0.0.0-20250703-f9d6fe4a",
-    repo_name = "com_google_googleapis",
-)
-bazel_dep(
-    name = "rules_pkg",
-    version = "1.1.0",
-)
-bazel_dep(
-    name = "rules_python",
-    version = "0.35.0",
-)
+bazel_dep(name = "googleapis", version = "0.0.0-20250703-f9d6fe4a", repo_name = "com_google_googleapis")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
+bazel_dep(name = "rules_python", version = "0.35.0")
 
 # rules_foreign_cc override needed for mobile builds until upstream issue is resolved
 # TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
-bazel_dep(
-    name = "rules_foreign_cc",
-    version = "0.11.1",  # This will be overridden below
-)
+bazel_dep(name = "rules_foreign_cc", version = "0.11.1")  # This will be overridden below
 archive_override(
     module_name = "rules_foreign_cc",
     integrity = "sha256-bbc605fd36048923939845d6843464197df6e6ffd188db704423952825e4760a",
