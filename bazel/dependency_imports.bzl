@@ -11,6 +11,7 @@ load("@envoy_toolshed//coverage/grcov:grcov_repository.bzl", "grcov_repository")
 load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("@proxy_wasm_rust_sdk//bazel:dependencies.bzl", "proxy_wasm_rust_sdk_dependencies")
 load("@rules_buf//buf:repositories.bzl", "rules_buf_toolchains")
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_fuzzing//fuzzing:repositories.bzl", "rules_fuzzing_dependencies")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_toolchains")
@@ -18,6 +19,9 @@ load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 load("@rules_rust//rust:defs.bzl", "rust_common")
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains", "rust_repository_set")
+
+# Bzlmod detection - check if we're running in bzlmod mode
+_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
 
 # go version for rules_go
 GO_VERSION = "1.24.6"
@@ -34,6 +38,11 @@ def envoy_dependency_imports(
         yq_version = YQ_VERSION,
         buf_sha = BUF_SHA,
         buf_version = BUF_VERSION):
+    # Only call rules_foreign_cc_dependencies when not in bzlmod mode
+    # In bzlmod mode, rules_foreign_cc is managed via bazel_dep in MODULE.bazel
+    if not _IS_BZLMOD:
+        rules_foreign_cc_dependencies()
+    
     go_rules_dependencies()
     go_register_toolchains(go_version)
     if go_version != "host":

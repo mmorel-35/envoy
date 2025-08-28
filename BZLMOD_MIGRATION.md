@@ -658,7 +658,7 @@ Core dependencies including:
 
 **dependencies_extra**  
 Second-stage dependencies including:
-- **rules_foreign_cc** - Foreign C/C++ build rules
+- **rules_foreign_cc** - Foreign C/C++ build rules (now managed via bazel_dep with WORKSPACE fallback)
 - **rules_rust** - Rust build rules with platform-specific patches
 - **proxy_wasm_cpp_host** - WebAssembly support
 - Python toolchain registrations
@@ -671,7 +671,7 @@ Toolchain imports and registrations including:
 - Pip dependency installations (base, dev, fuzzing)
 - Emscripten toolchain registration
 - Protobuf gRPC toolchain registrations
-- Foreign CC dependencies setup
+- Foreign CC dependencies setup (conditional on bzlmod detection)
 
 #### API Module Extensions (@envoy_api//bazel/extensions/)
 
@@ -854,7 +854,7 @@ These dependencies are available in the Bazel Central Registry and could potenti
 - **com_github_grpc_grpc** → grpc (grpc.patch)
 - **com_google_googletest** → googletest (googletest.patch)
 - **net_zlib** → zlib (zlib.patch)
-- **rules_foreign_cc** (rules_foreign_cc.patch)
+- **rules_foreign_cc** (rules_foreign_cc.patch) - Now uses conditional bzlmod/WORKSPACE setup
 - **rules_rust** (rules_rust.patch, rules_rust_ppc64le.patch)
 - **emsdk** (emsdk.patch)
 - **aspect_bazel_lib** (aspect.patch)

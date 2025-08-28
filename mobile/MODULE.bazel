@@ -13,16 +13,7 @@ bazel_dep(name = "rules_python", version = "0.35.0")
 
 # rules_foreign_cc override needed for mobile builds until upstream issue is resolved
 # TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
-bazel_dep(name = "rules_foreign_cc", version = "0.11.1")  # This will be overridden below
-archive_override(
-    module_name = "rules_foreign_cc",
-    integrity = "sha256-bbc605fd36048923939845d6843464197df6e6ffd188db704423952825e4760a",
-    strip_prefix = "rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b",
-    urls = [
-        "https://storage.googleapis.com/engflow-tools-public/rules_foreign_cc-a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
-        "https://github.com/EngFlow/rules_foreign_cc/archive/a473d42bada74afac4e32b767964c1785232e07b.tar.gz",
-    ],
-)
+bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
 
 local_path_override(
     module_name = "envoy",
