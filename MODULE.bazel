@@ -27,6 +27,7 @@ bazel_dep(name = "protoc-gen-validate", version = "1.2.1.bcr.1", repo_name = "co
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1", repo_name = "com_googlesource_code_re2")
 bazel_dep(name = "rules_buf", version = "0.5.1")
 bazel_dep(name = "rules_cc", version = "0.1.4")
+bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
 bazel_dep(name = "rules_go", version = "0.53.0", repo_name = "io_bazel_rules_go")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.5.0")

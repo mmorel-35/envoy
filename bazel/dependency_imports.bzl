@@ -11,7 +11,6 @@ load("@envoy_toolshed//coverage/grcov:grcov_repository.bzl", "grcov_repository")
 load("@io_bazel_rules_go//go:deps.bzl", "go_download_sdk", "go_register_toolchains", "go_rules_dependencies")
 load("@proxy_wasm_rust_sdk//bazel:dependencies.bzl", "proxy_wasm_rust_sdk_dependencies")
 load("@rules_buf//buf:repositories.bzl", "rules_buf_toolchains")
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_fuzzing//fuzzing:repositories.bzl", "rules_fuzzing_dependencies")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_toolchains")
@@ -35,7 +34,6 @@ def envoy_dependency_imports(
         yq_version = YQ_VERSION,
         buf_sha = BUF_SHA,
         buf_version = BUF_VERSION):
-    rules_foreign_cc_dependencies()
     go_rules_dependencies()
     go_register_toolchains(go_version)
     if go_version != "host":
