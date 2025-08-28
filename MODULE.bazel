@@ -112,6 +112,42 @@ bazel_dep(
     repo_name = "com_github_aignas_rules_shellcheck",
 )
 
+# Clean dependencies migrated from extensions (no patches, available in BCR)
+bazel_dep(
+    name = "boringssl",
+    version = "0.20250514.0",
+)
+bazel_dep(
+    name = "zstd",
+    version = "1.5.7",
+    repo_name = "com_github_facebook_zstd",
+)
+bazel_dep(
+    name = "yaml-cpp",
+    version = "0.8.0",
+    repo_name = "com_github_jbeder_yaml_cpp",
+)
+bazel_dep(
+    name = "lz4",
+    version = "1.10.0",
+    repo_name = "com_github_lz4_lz4",
+)
+bazel_dep(
+    name = "nlohmann_json",
+    version = "3.12.0",
+    repo_name = "com_github_nlohmann_json",
+)
+bazel_dep(
+    name = "brotli",
+    version = "1.1.0",
+    repo_name = "org_brotli",
+)
+bazel_dep(
+    name = "boost",
+    version = "1.84.0",
+    repo_name = "org_boost",
+)
+
 # Local module overrides for internal Envoy modules
 bazel_dep(
     name = "envoy_api",
@@ -157,7 +193,6 @@ use_repo(
     "aspect_bazel_lib",
     "aws_lc",
     "bazel_toolchains",
-    "boringssl",
     "boringssl_fips",
     "build_bazel_rules_apple",
     "com_github_alibaba_hessian2_codec",
@@ -168,7 +203,6 @@ use_repo(
     "com_github_c_ares_c_ares",
     "com_github_datadog_dd_trace_cpp",
     "com_github_envoyproxy_sqlparser",
-    "com_github_facebook_zstd",
     "com_github_fdio_vpp_vcl",
     "com_github_google_jwt_verify",
     "com_github_google_libprotobuf_mutator",
@@ -181,16 +215,13 @@ use_repo(
     "com_github_intel_ipp_crypto_crypto_mb",
     "com_github_intel_qatlib",
     "com_github_intel_qatzip",
-    "com_github_jbeder_yaml_cpp",
     "com_github_libevent_libevent",
     "com_github_luajit_luajit",
-    "com_github_lz4_lz4",
     "com_github_maxmind_libmaxminddb",
     "com_github_mirror_tclap",
     "com_github_msgpack_cpp",
     "com_github_ncopa_suexec",
     "com_github_nghttp2_nghttp2",
-    "com_github_nlohmann_json",
     "com_github_openhistogram_libcircllhist",
     "com_github_qat_zstd",
     "com_github_skyapm_cpp2sky",
@@ -228,8 +259,6 @@ use_repo(
     "net_colm_open_source_colm",
     "net_colm_open_source_ragel",
     "net_zlib",
-    "org_boost",
-    "org_brotli",
     "org_llvm_releases_compiler_rt",
     "proxy_wasm_cpp_host",
     "proxy_wasm_cpp_sdk",
