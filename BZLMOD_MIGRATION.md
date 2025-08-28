@@ -11,6 +11,7 @@ This document describes the **completed** bzlmod migration implemented for Envoy
 - ✅ API module: Extension-based setup
 - ✅ Build config module: Clean MODULE.bazel only
 - ✅ **WORKSPACE.bzlmod files eliminated** - Pure bzlmod architecture achieved
+- ✅ **24 dependencies migrated to bazel_dep** - Including recently added flatbuffers and highway
 
 ## Overview
 
@@ -778,16 +779,16 @@ The Envoy repository is now fully prepared for Bazel 8.0's removal of WORKSPACE 
 
 Total dependencies analyzed: **109**
 - **Available in BCR**: 35 modules  
-- **Successfully migrated to bazel_dep**: 22 dependencies
+- **Successfully migrated to bazel_dep**: 24 dependencies
 - **Dependencies with patches (cannot migrate)**: 33 dependencies
-- **Should be added to BCR**: 13 general-purpose libraries
-- **Must remain in extensions**: 74 dependencies
+- **Should be added to BCR**: 11 general-purpose libraries
+- **Must remain in extensions**: 76 dependencies
 
 ### Dependencies Migrated to bazel_dep
 
-These 22 clean dependencies have been migrated from extensions to direct `bazel_dep` declarations in MODULE.bazel:
+These 24 clean dependencies have been migrated from extensions to direct `bazel_dep` declarations in MODULE.bazel:
 
-#### Core Libraries (7 recently migrated):
+#### Core Libraries (9 recently migrated):
 - **boringssl** (0.20250514.0) - SSL/TLS cryptographic library
 - **zstd** (1.5.7) → com_github_facebook_zstd - Fast compression algorithm
 - **yaml-cpp** (0.8.0) → com_github_jbeder_yaml_cpp - YAML parser and emitter
@@ -795,6 +796,8 @@ These 22 clean dependencies have been migrated from extensions to direct `bazel_
 - **nlohmann_json** (3.12.0) → com_github_nlohmann_json - Modern C++ JSON library
 - **brotli** (1.1.0) → org_brotli - Generic lossless compression
 - **boost** (1.84.0) → org_boost - C++ utility libraries (header-only subset)
+- **flatbuffers** (24.12.23) → com_github_google_flatbuffers - Cross-platform serialization library
+- **highway** (1.2.0) - Portable SIMD library for performance-critical applications
 
 #### Utility Libraries (5 previously migrated):
 - **fmt** (11.2.0) → com_github_fmtlib_fmt - Safe formatting library
@@ -817,28 +820,33 @@ These 22 clean dependencies have been migrated from extensions to direct `bazel_
 - **gazelle** (0.45.0) → bazel_gazelle - BUILD file generator
 - **bazel_features** (1.33.0) - Bazel feature detection
 
-### Dependencies That Should Be Added to BCR
+### Dependencies Available in BCR (Potential Migration Candidates)
 
-These general-purpose libraries would benefit the broader Bazel ecosystem if added to BCR:
+These dependencies are available in the Bazel Central Registry and could potentially be migrated:
 
-#### High Priority (Widely Useful):
-1. **com_github_google_flatbuffers** → flatbuffers - Cross-platform serialization library
-2. **fast_float** → fast_float - High-performance floating-point parsing library
-3. **highway** → highway - Portable SIMD library for performance-critical applications
-4. **aws_lc** → aws-lc - AWS's OpenSSL-compatible cryptography library
-5. **com_github_maxmind_libmaxminddb** → libmaxminddb - MaxMind DB file format reader library
+#### Recently Migrated:
+1. **com_github_google_flatbuffers** → flatbuffers - Migrated to BCR version 24.12.23
+2. **highway** → highway - Migrated to BCR version 1.2.0
+
+#### Available but with Constraints:  
+3. **com_github_maxmind_libmaxminddb** → libmaxminddb - Available in BCR, but uses custom BUILD_ALL_CONTENT
+4. **emsdk** - Available in BCR, but has patches so cannot migrate
+
+#### Should Be Added to BCR:
+5. **fast_float** → fast_float - High-performance floating-point parsing library
+6. **aws_lc** → aws-lc - AWS's OpenSSL-compatible cryptography library
 
 #### Medium Priority:
-6. **com_github_msgpack_cpp** → msgpack - Binary serialization format implementation
-7. **dragonbox** → dragonbox - Floating-point to string conversion algorithm
-8. **fp16** → fp16 - Half-precision floating-point library
-9. **simdutf** → simdutf - Fast UTF-8/UTF-16/UTF-32 validation and conversion
-10. **com_github_mirror_tclap** → tclap - Command line argument parsing library
+7. **com_github_msgpack_cpp** → msgpack - Binary serialization format implementation
+8. **dragonbox** → dragonbox - Floating-point to string conversion algorithm
+9. **fp16** → fp16 - Half-precision floating-point library
+10. **simdutf** → simdutf - Fast UTF-8/UTF-16/UTF-32 validation and conversion
+11. **com_github_mirror_tclap** → tclap - Command line argument parsing library
 
 #### Lower Priority:
-11. **com_github_google_libsxg** → libsxg - Signed HTTP Exchange format library
-12. **com_github_openhistogram_libcircllhist** → libcircllhist - Circllhist data structure implementation
-13. **com_github_zlib_ng_zlib_ng** → zlib-ng - High-performance zlib replacement
+12. **com_github_google_libsxg** → libsxg - Signed HTTP Exchange format library
+13. **com_github_openhistogram_libcircllhist** → libcircllhist - Circllhist data structure implementation
+14. **com_github_zlib_ng_zlib_ng** → zlib-ng - High-performance zlib replacement
 
 ### Dependencies That Must Remain in Extensions
 
@@ -890,7 +898,7 @@ These general-purpose libraries would benefit the broader Bazel ecosystem if add
 - **Parallel fetching**: BCR modules can be fetched concurrently
 
 #### Maintenance Benefits:
-- **Simplified extensions**: 22 fewer dependencies managed in custom extensions
+- **Simplified extensions**: 24 fewer dependencies managed in custom extensions
 - **Automatic updates**: BCR modules can be updated via automated tools
 - **Version consistency**: Standard versioning across the ecosystem
 
