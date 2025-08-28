@@ -134,8 +134,7 @@ def envoy_dependencies(skip_targets = []):
     # - BoringSSL FIPS from @boringssl_fips//:ssl,
     # - non-FIPS BoringSSL from @boringssl//:ssl.
     # Note: regular boringssl is now managed via bazel_dep in MODULE.bazel
-    if "boringssl" not in native.existing_rules():
-        _boringssl()
+    _boringssl()
     _boringssl_fips()
     _aws_lc()
     envoy_native_bind(
@@ -175,10 +174,8 @@ def envoy_dependencies(skip_targets = []):
     _com_github_intel_qatzip()
     _com_github_qat_zstd()
     # Note: lz4 and yaml-cpp are now managed via bazel_dep in MODULE.bazel
-    if "com_github_lz4_lz4" not in native.existing_rules():
-        _com_github_lz4_lz4()
-    if "com_github_jbeder_yaml_cpp" not in native.existing_rules():
-        _com_github_jbeder_yaml_cpp()
+    _com_github_lz4_lz4()
+    _com_github_jbeder_yaml_cpp()
     _com_github_libevent_libevent()
     _com_github_luajit_luajit()
     _com_github_nghttp2_nghttp2()
@@ -186,8 +183,7 @@ def envoy_dependencies(skip_targets = []):
     _com_github_skyapm_cpp2sky()
     _com_github_alibaba_hessian2_codec()
     # Note: nlohmann_json is now managed via bazel_dep in MODULE.bazel
-    if "com_github_nlohmann_json" not in native.existing_rules():
-        _com_github_nlohmann_json()
+    _com_github_nlohmann_json()
     _com_github_ncopa_suexec()
     _com_google_absl()
     _com_google_googletest()
@@ -210,13 +206,10 @@ def envoy_dependencies(skip_targets = []):
     _intel_dlb()
     _com_github_zlib_ng_zlib_ng()
     # Note: boost is now managed via bazel_dep in MODULE.bazel  
-    if "org_boost" not in native.existing_rules():
-        _org_boost()
+    _org_boost()
     # Note: brotli and zstd are now managed via bazel_dep in MODULE.bazel
-    if "org_brotli" not in native.existing_rules():
-        _org_brotli()
-    if "com_github_facebook_zstd" not in native.existing_rules():
-        _com_github_facebook_zstd()
+    _org_brotli()
+    _com_github_facebook_zstd()
     _re2()
     _proxy_wasm_cpp_sdk()
     _proxy_wasm_cpp_host()
