@@ -1,173 +1,160 @@
-# Bzlmod Migration for Envoy - COMPLETE
+# Bzlmod Migration for Envoy
 
-This document describes the **completed** bzlmod migration implemented for Envoy to achieve full Bazel 8.0 compatibility.
+This document provides practical guidance for using Envoy's bzlmod (MODULE.bazel) setup for Bazel 8.0+ compatibility.
 
-## Migration Status: ✅ COMPLETE
+## Current Status: 🔄 Ongoing Migration
 
-**All WORKSPACE.bzlmod files have been eliminated** and all repository setup has been migrated to dedicated module extensions with per-module organization.
+Envoy has established a strong bzlmod foundation while maintaining WORKSPACE compatibility during the transition:
 
-### ✅ Pure Bzlmod Architecture Achieved
+- ✅ **MODULE.bazel foundation**: 47+ clean dependencies migrated to direct bazel_dep declarations
+- ✅ **Extension architecture**: Complex dependencies managed through focused module extensions  
+- ✅ **Multi-module support**: Main, API, Mobile, and build config modules all have MODULE.bazel
+- ⚠️ **Hybrid approach**: WORKSPACE builds still supported alongside bzlmod
+- 🔄 **Ongoing**: Continuous migration of dependencies from extensions to BCR when possible
 
-All modules are now fully bzlmod-compatible:
+## Quick Start for Downstream Projects
 
-- ✅ Main module: 5 extensions in `@envoy//bazel/extensions/`
-- ✅ API module: 1 extension in `@envoy_api//bazel/extensions/`  
-- ✅ Mobile module: 6 extensions in `@envoy_mobile//bazel/extensions/`
-- ✅ Build config module: Clean MODULE.bazel only
-- ✅ **No WORKSPACE.bzlmod files** - Pure bzlmod architecture achieved
+### Using Envoy as a Dependency
 
-### Multi-Component Architecture
+For new projects that want to depend on Envoy using bzlmod:
 
-```
-├── MODULE.bazel                              # Root Envoy dependencies
-├── api/
-│   └── MODULE.bazel                          # API module
-├── mobile/
-│   ├── MODULE.bazel                          # Mobile dependencies  
-│   └── envoy_build_config/
-│       └── MODULE.bazel                      # Build config
-```
-
-### 🔧 Complete Bzlmod Migration
-
-**All dependency functions migrated to 12 dedicated per-module extensions:**
-
-**Main Module Extensions:**
-- `dependencies` - Core dependency definitions
-- `dependencies_extra` - Second-stage dependencies
-- `dependency_imports` - Toolchain imports
-- `dependency_imports_extra` - Additional imports  
-- `repo` - Repository metadata
-
-**API Module Extensions:**
-- `api_dependencies` - API-specific dependencies
-
-**Mobile Module Extensions:**
-- `mobile` - Mobile dependencies (Swift, Kotlin, Android)
-- `repos` - Mobile repository setup
-- `toolchains` - Mobile toolchain registration
-- `android` - Android SDK/NDK configuration
-- `android_workspace` - Android workspace setup
-- `workspace` - Xcode and provisioning setup
-### Key Benefits
-
-**✅ Bazel 8.0 Ready**: Pure bzlmod architecture with zero WORKSPACE dependencies across all modules
-
-**✅ Per-Module Organization**: Each module manages its own extensions in dedicated `bazel/extensions/` directories
-
-**✅ Simplified Naming**: Clear extension names without redundant prefixes leveraging directory structure for context
-
-**✅ Standards Compliance**: Uses upstream extensions where available (rules_python) while maintaining custom extensions only where necessary
-
-**✅ Third_party Compatibility**: Incremental migration layer allows gradual transition from //external: to @repo//:target patterns
-
-## Extension Organization
-
-### Main Module (@envoy//bazel/extensions/)
-- `dependencies.bzl` - Core dependency definitions with patches
-- `dependencies_extra.bzl` - Second-stage dependencies  
-- `dependency_imports.bzl` - Toolchain imports and registrations
-- `dependency_imports_extra.bzl` - Additional dependency imports
-- `repo.bzl` - Repository metadata setup
-
-### API Module (@envoy_api//bazel/extensions/)
-- `api_dependencies.bzl` - API-specific dependencies
-
-### Mobile Module (@envoy_mobile//bazel/extensions/)  
-- `mobile.bzl` - Mobile-specific dependencies (Swift, Kotlin, Android)
-- `repos.bzl` - Mobile repository setup
-- `toolchains.bzl` - Mobile toolchain registration
-- `android.bzl` - Android SDK/NDK configuration
-- `android_workspace.bzl` - Android workspace setup
-- `workspace.bzl` - Xcode and provisioning setup
-
-## Usage in MODULE.bazel
-
-### Main Module
 ```starlark
-# Core extensions
-envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
-envoy_deps_extra = use_extension("//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
-envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "dependency_imports")
-envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
-envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
+# MODULE.bazel
+module(name = "my_envoy_project", version = "1.0.0")
 
-# Upstream Python extensions (replacing custom envoy_python_dependencies_ext)
+# When Envoy is published to BCR (future):
+# bazel_dep(name = "envoy", version = "1.32.0")
+
+# For development with local Envoy:
+bazel_dep(name = "envoy", version = "0.0.0-dev")
+local_path_override(module_name = "envoy", path = "third_party/envoy")
+```
+
+### Migrating from WORKSPACE to bzlmod
+
+1. **Create MODULE.bazel** alongside your existing WORKSPACE:
+   ```starlark
+   module(name = "your_project", version = "1.0.0")
+   
+   # Start with basic dependencies available in BCR
+   bazel_dep(name = "rules_cc", version = "0.2.2")
+   bazel_dep(name = "googletest", version = "1.17.0")
+   ```
+
+2. **Test with bzlmod enabled**:
+   ```bash
+   bazel build --enable_bzlmod //your/target
+   ```
+
+3. **Gradually migrate dependencies** as they become available in BCR
+
+## Understanding Envoy's Architecture
+
+### Direct Dependencies (MODULE.bazel)
+Clean dependencies from Bazel Central Registry:
+```starlark
+bazel_dep(name = "abseil-cpp", version = "20241220.1")
+bazel_dep(name = "protobuf", version = "27.5")
+bazel_dep(name = "grpc", version = "1.68.1")
+bazel_dep(name = "rules_python", version = "1.3.0")
+```
+
+### Extension-Managed Dependencies
+Complex dependencies requiring patches or custom setup:
+```starlark
+# Core Envoy dependencies with custom patches
+envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
+
+# Python toolchains (using upstream extensions - BEST PRACTICE)
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 ```
 
-### API Module
-```starlark
-envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "api_dependencies")
-```
+### Per-Module Organization
 
-### Mobile Module
-```starlark
-# Mobile-specific extensions
-envoy_mobile_deps = use_extension("//bazel/extensions:mobile.bzl", "mobile")
-envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
-envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
-envoy_android_config = use_extension("//bazel/extensions:android.bzl", "android")
-envoy_android_workspace = use_extension("//bazel/extensions:android_workspace.bzl", "android_workspace")
-envoy_mobile_workspace = use_extension("//bazel/extensions:workspace.bzl", "workspace")
-```
+Extensions are organized by module ownership:
+- **@envoy//bazel/extensions/**: Main Envoy dependencies
+- **@envoy_api//bazel/extensions/**: API-specific dependencies  
+- **@envoy_mobile//bazel/extensions/**: Mobile platform dependencies
 
-## Legacy Support
+## Validation and Testing
 
-### WORKSPACE Compatibility
-The original functions in `bazel/*.bzl` files are preserved for WORKSPACE compatibility:
-- `envoy_dependencies()` in `bazel/repositories.bzl`
-- `envoy_api_binding()` in `bazel/api_binding.bzl`  
-- Mobile functions in `mobile/bazel/*.bzl`
-
-These files maintain their original API for projects still using WORKSPACE mode, while bzlmod uses the dedicated extensions.
-
-### Third_party Migration Layer
-The `third_party/BUILD.bazel` compatibility layer provides aliases for legacy //external: references:
-
-```starlark
-alias(name = "zlib", actual = "@zlib//:zlib")
-alias(name = "ssl", actual = "@envoy//bazel:boringssl")
-```
-
-This enables incremental migration from bind() patterns to direct @repo//:target references.
-
-## Validation Commands
-
-### Check bzlmod dependency graph
+### Check Module Dependencies
 ```bash
+# View dependency graph
 bazel mod graph
-```
 
-### Validate MODULE.bazel extensions
-```bash
+# Show extension-provided repositories  
 bazel mod show_extension_repos
+
+# Explain specific dependency resolution
+bazel mod explain @some_dependency
 ```
 
-### Test core builds
+### Build Testing
 ```bash
-bazel build //source/common/...
-bazel test //test/common/...
+# Test core functionality with bzlmod
+bazel build --enable_bzlmod //source/common/common:version_lib
+
+# Compare WORKSPACE vs bzlmod builds
+bazel build //source/exe:envoy-static --nobuild
+bazel build --enable_bzlmod //source/exe:envoy-static --nobuild
 ```
 
-## Resources
+### Debug Common Issues
+```bash
+# Repository not found
+bazel query @missing_repo//:all
 
-- [Bazel Migration Guide](https://bazel.build/external/migration)
-- [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry)
-- [Bzlmod User Guide](https://bazel.build/external/mod)
-- [Module Resolution](https://bazel.build/external/mod#resolution)
+# Extension loading problems  
+bazel mod show_extension --extension=//path:extension.bzl
 
-## Troubleshooting
+# Version conflicts
+bazel mod graph | grep conflicting_dep
+```
 
-### Common Issues
+## Best Practices Alignment
 
-1. **Module resolution errors**: Check extension paths match actual file locations
-2. **Missing dependencies**: Verify all required modules are listed in MODULE.bazel
-3. **Extension loading errors**: Ensure extension functions are properly exported
+Envoy's bzlmod implementation follows [official Bazel migration guidelines](https://bazel.build/external/migration):
 
-### Getting Help
+### ✅ What Envoy Does Well
+- **Gradual migration**: Starting with BCR-available dependencies
+- **Minimal extensions**: Only used when patches/complex setup required
+- **Upstream integration**: Using @rules_python extensions instead of custom ones
+- **Clear organization**: Extensions grouped by logical module boundaries
 
-- Check the [Bazel Community Slack](https://slack.bazel.build/) #bzlmod channel
-- Review existing migration examples in the BCR
-- Open issues in the [bazel-central-registry](https://github.com/bazelbuild/bazel-central-registry) for missing modules
+### 🔄 Ongoing Improvements  
+- **BCR contributions**: Working to upstream patches and reduce custom extensions
+- **Extension consolidation**: Simplifying and focusing extension scope
+- **Documentation**: Streamlining migration guidance for downstream projects
+
+### ⚠️ Necessary Deviations
+- **Custom patches**: Some Envoy-specific modifications not suitable for BCR
+- **Legacy compatibility**: WORKSPACE support maintained during transition
+- **Complex toolchains**: Mobile/platform setup requires specialized extensions
+
+## Migration Strategy
+
+### For Library Authors
+1. **Check BCR availability**: Visit https://registry.bazel.build/
+2. **Start with clean dependencies**: Migrate unpached libraries first
+3. **Use upstream extensions**: Prefer @rules_python, @rules_go, etc. over custom
+4. **Plan patch upstreaming**: Work with maintainers to upstream modifications
+
+### For Application Developers
+1. **Create MODULE.bazel**: Start alongside existing WORKSPACE
+2. **Test incrementally**: Use --enable_bzlmod flag for validation
+3. **Document dependencies**: Clear bazel_dep declarations improve maintenance
+4. **Plan transition timeline**: Set dates for full bzlmod adoption
+
+## Getting Help
+
+### Envoy-Specific Resources
+- [BZLMOD_MIGRATION.md](../../BZLMOD_MIGRATION.md) - Detailed implementation guide
+- [bazel/README.md](../../bazel/README.md) - Build system documentation
+- [examples/bzlmod/](../../examples/bzlmod/) - Practical usage examples
+
+### Community Resources  
+- [Bazel Slack #bzlmod](https://slack.bazel.build/) - Community support channel
+- [BCR GitHub](https://github.com/bazelbuild/bazel-central-registry) - Module registry
+- [Official Migration Guide](https://bazel.build/external/migration) - Bazel's guidance

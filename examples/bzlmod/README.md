@@ -1,94 +1,266 @@
-# Bzlmod Migration Example
+# Bzlmod Examples and Quick Start
 
-This directory contains examples and documentation for working with Envoy's bzlmod migration.
+This directory provides practical examples for using Envoy with bzlmod (MODULE.bazel) instead of the traditional WORKSPACE system.
 
-## Quick Start
+## Getting Started with Bzlmod
 
-After the migration, you can use the following commands to explore the new dependency management:
+### Basic Project Setup
 
-### View Module Dependencies
+Create a new project using Envoy with bzlmod:
+
+```starlark
+# MODULE.bazel
+module(name = "my_envoy_app", version = "1.0.0")
+
+# Core dependencies from Bazel Central Registry
+bazel_dep(name = "rules_cc", version = "0.2.2")
+bazel_dep(name = "protobuf", version = "27.5")
+bazel_dep(name = "abseil-cpp", version = "20241220.1")
+
+# Envoy dependency (when available in BCR)
+# bazel_dep(name = "envoy", version = "1.32.0")
+
+# For development - using local path
+bazel_dep(name = "envoy", version = "0.0.0-dev")
+local_path_override(module_name = "envoy", path = "third_party/envoy")
+```
+
+### Exploring Dependencies
+
 ```bash
-# Show all external repositories managed by bzlmod
+# View your project's dependency graph
+bazel mod graph
+
+# Show all available repositories
 bazel mod show_extension_repos
 
-# Display the full dependency graph
-bazel mod graph
+# Check specific dependency resolution
+bazel mod explain @envoy
 ```
 
-### Validate Migration
-```bash
-# Run the validation script
-./tools/bzlmod_validate.sh
-```
+### Building with Bzlmod
 
-### Test Core Builds
 ```bash
-# Test basic library builds
-bazel build //source/common/common:version_lib
-bazel build //source/common/protobuf:utility_lib
+# Enable bzlmod for your builds
+bazel build --enable_bzlmod //my_app:target
 
-# Test analysis phase for larger targets
-bazel query "deps(//source/exe:envoy-static)" --output=label_kind
+# Or set it permanently in .bazelrc
+echo "build --enable_bzlmod" >> .bazelrc
+bazel build //my_app:target
 ```
 
 ## Migration Examples
 
-### Adding a New Bzlmod Dependency
+### Example 1: Simple Library Migration
 
-If you want to migrate an additional dependency from WORKSPACE to MODULE.bazel:
-
-1. **Check if it's available in BCR**: Visit https://registry.bazel.build/
-2. **Add to MODULE.bazel**:
-   ```starlark
-   bazel_dep(name = "module_name", version = "x.y.z", repo_name = "original_repo_name")
-   ```
-3. **Remove from WORKSPACE**: Comment out or remove the corresponding `http_archive` or similar rule
-4. **Test**: Ensure your build still works
-
-### Example: Migrating re2
+**Before (WORKSPACE):**
 ```starlark
-# In MODULE.bazel
-bazel_dep(name = "re2", version = "2024.12.01", repo_name = "com_googlesource_code_re2")
+# WORKSPACE
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_google_absl",
+    sha256 = "...",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/..."],
+)
 ```
 
-### Example: Migrating zlib
+**After (MODULE.bazel):**
 ```starlark
-# In MODULE.bazel  
-bazel_dep(name = "zlib", version = "1.3.1", repo_name = "net_zlib")
+# MODULE.bazel
+bazel_dep(name = "abseil-cpp", version = "20241220.1")
+```
+
+### Example 2: Rules Migration
+
+**Before (WORKSPACE):**
+```starlark
+# WORKSPACE
+http_archive(
+    name = "rules_python",
+    sha256 = "...",
+    urls = ["https://github.com/bazelbuild/rules_python/releases/..."],
+)
+
+load("@rules_python//python:repositories.bzl", "python_rules_dependencies")
+python_rules_dependencies()
+```
+
+**After (MODULE.bazel):**
+```starlark
+# MODULE.bazel  
+bazel_dep(name = "rules_python", version = "1.3.0")
+
+# Python toolchain using upstream extension
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.12")
+
+# Python packages using upstream pip extension  
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip_deps",
+    python_version = "3.12", 
+    requirements_lock = "//requirements.txt"
+)
+use_repo(pip, "pip_deps")
+```
+
+### Example 3: Custom Extension Usage
+
+When you need complex setup that's not available in BCR:
+
+```starlark
+# MODULE.bazel
+# Use Envoy's custom extensions for complex dependencies
+envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+
+# The extension handles repositories with patches
+use_repo(envoy_deps, 
+    "com_google_protobuf",  # With Envoy-specific patches
+    "com_github_grpc_grpc", # With custom modifications
+    "boringssl_fips"        # FIPS variant
+)
+```
+
+## Best Practices
+
+### 1. Prefer BCR Dependencies
+Always check [Bazel Central Registry](https://registry.bazel.build/) first:
+```starlark
+# ✅ Good - using BCR
+bazel_dep(name = "googletest", version = "1.17.0")
+
+# ❌ Avoid if BCR version available  
+my_deps = use_extension("//bazel:deps.bzl", "my_deps")
+```
+
+### 2. Use Upstream Extensions
+Prefer official rule extensions over custom ones:
+```starlark
+# ✅ Good - upstream rules_python extension
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+
+# ❌ Less preferred - custom extension
+python_deps = use_extension("//tools:python_deps.bzl", "python_deps")
+```
+
+### 3. Version Pinning
+Pin to specific versions for reproducible builds:
+```starlark
+# ✅ Good - specific version
+bazel_dep(name = "protobuf", version = "27.5")
+
+# ❌ Avoid - floating versions not allowed in bzlmod anyway
+```
+
+### 4. Development Dependencies
+Mark test/development-only dependencies:
+```starlark
+bazel_dep(name = "googletest", version = "1.17.0", dev_dependency = True)
+bazel_dep(name = "rules_shellcheck", version = "0.3.3", dev_dependency = True)
 ```
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Repository name conflicts**: Use `repo_name` parameter to maintain compatibility
-2. **Version conflicts**: Bzlmod will automatically resolve to the highest compatible version
-3. **Missing modules**: Check BCR or create a custom module extension
-
-### Debugging Commands
+### Repository Not Found
+```
+ERROR: Repository '@missing_repo' not found
+```
+**Solution:** Check if the repository is provided by an extension:
 ```bash
-# Check what repositories are available
-bazel query "//external:*" --output=package
-
-# Debug module resolution
-bazel mod explain //external:some_repo
-
-# View module resolution trace
-bazel mod show_extension --debug
+bazel mod show_extension_repos | grep missing_repo
 ```
 
-## Migration Checklist
+### Version Conflicts
+```
+ERROR: Version conflict for module 'some_module'
+```
+**Solution:** Bzlmod automatically resolves to the highest compatible version. Check the resolution:
+```bash
+bazel mod graph | grep some_module
+```
 
-- [ ] Core C++ libraries (protobuf, abseil, googletest) ✅ DONE
-- [ ] Build rules (rules_cc, rules_proto, etc.) ✅ DONE
-- [ ] gRPC and related dependencies
-- [ ] Platform-specific rules (rules_apple, etc.)
-- [ ] Envoy-specific repositories (envoy_api, etc.)
-- [ ] Extension and contrib dependencies
+### Extension Loading Errors
+```
+ERROR: Error in extension 'my_extension'
+```
+**Solution:** Verify extension syntax and that referenced files exist:
+```bash
+# Check extension definition
+ls -la bazel/extensions/my_extension.bzl
+
+# Test loading without building
+bazel build --nobuild //... 2>&1 | grep -i extension
+```
+
+### Migration Testing
+Test both WORKSPACE and bzlmod side by side:
+```bash
+# Test WORKSPACE build
+bazel build --noexperimental_enable_bzlmod //...
+
+# Test bzlmod build  
+bazel build --enable_bzlmod //...
+
+# Compare outputs
+diff <(bazel build --noexperimental_enable_bzlmod //... 2>&1) \
+     <(bazel build --enable_bzlmod //... 2>&1)
+```
+
+## Sample Projects
+
+### Minimal C++ Application
+```starlark
+# MODULE.bazel
+module(name = "envoy_hello_world", version = "1.0.0")
+
+bazel_dep(name = "rules_cc", version = "0.2.2")
+bazel_dep(name = "envoy", version = "0.0.0-dev")
+
+local_path_override(module_name = "envoy", path = "../..")
+```
+
+```starlark
+# BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "hello_envoy",
+    srcs = ["main.cc"],
+    deps = ["@envoy//source/common/common:version_lib"],
+)
+```
+
+### Python Extension with Envoy
+```starlark
+# MODULE.bazel
+module(name = "envoy_python_extension", version = "1.0.0")
+
+bazel_dep(name = "rules_python", version = "1.3.0")
+bazel_dep(name = "envoy", version = "0.0.0-dev")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.12")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pypi",
+    python_version = "3.12",
+    requirements_lock = "requirements.txt"
+)
+use_repo(pip, "pypi")
+```
+
+## Next Steps
+
+1. **Start small**: Migrate one dependency at a time
+2. **Test frequently**: Use `--enable_bzlmod` flag during transition  
+3. **Check BCR regularly**: New modules are added frequently
+4. **Share learnings**: Contribute back to the community
 
 ## Resources
 
-- [Bazel Migration Guide](https://bazel.build/external/migration)
-- [Bazel Central Registry](https://registry.bazel.build/)
-- [MODULE.bazel Reference](https://bazel.build/external/mod)
+- [Official Bazel Migration Guide](https://bazel.build/external/migration)
+- [Bazel Central Registry](https://registry.bazel.build/)  
 - [Envoy Migration Documentation](../docs/root/start/migrating/bzlmod.md)
+- [Community Slack #bzlmod](https://slack.bazel.build/)
