@@ -1,10 +1,10 @@
-"""Consolidated toolchains extension for Envoy Mobile platform toolchains and workspace setup.
+"""Toolchains extension for Envoy Mobile platform toolchains and workspace setup.
 
-This extension consolidates the following mobile functionality:
-- Mobile toolchains (toolchains.bzl)
-- Android configuration (android.bzl)
-- Android workspace setup (android_workspace.bzl)
-- Mobile workspace setup (workspace.bzl)
+This extension provides:
+- Mobile toolchains configuration
+- Android SDK/NDK configuration
+- Mobile workspace setup
+- Platform-specific setup
 """
 
 load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
@@ -25,12 +25,11 @@ _post_android_setup = repository_rule(
     implementation = _post_android_setup_impl,
 )
 
-def _mobile_toolchains_impl(module_ctx):
-    """Implementation for mobile_toolchains extension.
+def _toolchains_impl(module_ctx):
+    """Implementation for toolchains extension.
 
-    This extension consolidates mobile toolchain registration, Android
-    configuration, and workspace setup into a single extension for
-    better maintainability.
+    This extension provides mobile toolchain registration, Android
+    configuration, and workspace setup for Envoy Mobile applications.
     """
 
     # Call the mobile toolchains function
@@ -50,15 +49,14 @@ def _mobile_toolchains_impl(module_ctx):
     # Call the mobile workspace function
     envoy_mobile_workspace()
 
-# Module extension for consolidated mobile toolchains functionality
-mobile_toolchains = module_extension(
-    implementation = _mobile_toolchains_impl,
+# Module extension for mobile toolchains functionality
+toolchains = module_extension(
+    implementation = _toolchains_impl,
     doc = """
-    Consolidated extension for Envoy Mobile toolchains and platform setup.
+    Toolchains extension for Envoy Mobile platform setup.
     
-    This extension combines mobile toolchain registration, Android
-    configuration, and workspace setup into a single streamlined
-    extension, following bzlmod best practices for reducing extension
-    complexity.
+    This extension provides mobile toolchain registration, Android
+    configuration, and workspace setup for Envoy Mobile applications,
+    following bzlmod best practices.
     """,
 )

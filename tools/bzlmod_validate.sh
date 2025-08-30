@@ -175,7 +175,7 @@ fi
 
 # Extension organization (30 points) - Recognizes consolidated architecture
 MAIN_CONSOLIDATED=$(grep -c "core\.bzl\|toolchains\.bzl" MODULE.bazel 2>/dev/null || echo "0")
-MOBILE_CONSOLIDATED=$(grep -c "mobile_core\.bzl\|mobile_toolchains\.bzl" mobile/MODULE.bazel 2>/dev/null || echo "0")
+MOBILE_CONSOLIDATED=$(grep -c '^envoy_mobile.*use_extension.*//bazel/extensions:' mobile/MODULE.bazel 2>/dev/null || echo "0")
 
 # Remove any potential newlines
 MAIN_CONSOLIDATED=$(echo "$MAIN_CONSOLIDATED" | tr -d '\n')

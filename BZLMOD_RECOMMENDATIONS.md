@@ -48,17 +48,17 @@ envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "envoy
 ### Envoy Mobile Module - 2 Extensions (Optimal)
 ```starlark
 # Mobile core dependencies and repositories  
-envoy_mobile_core = use_extension("//bazel/extensions:mobile_core.bzl", "mobile_core")
+envoy_mobile_core = use_extension("//bazel/extensions:core.bzl", "core")
 
 # Mobile toolchains and platform setup
-envoy_mobile_toolchains = use_extension("//bazel/extensions:mobile_toolchains.bzl", "mobile_toolchains")
+envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
 ```
 
 #### Mobile Extension Details
-- **`mobile_core.bzl`**: Mobile dependencies and repository setup
+- **`core.bzl`**: Mobile dependencies and repository setup
   - Handles mobile-specific dependencies
   - Manages mobile repository configuration
-- **`mobile_toolchains.bzl`**: Mobile toolchains and platform configuration
+- **`toolchains.bzl`**: Mobile toolchains and platform configuration
   - Android SDK/NDK configuration
   - Mobile toolchain registration
   - Workspace and platform setup
