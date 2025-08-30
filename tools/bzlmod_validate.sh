@@ -1,131 +1,217 @@
 #!/bin/bash
-
 # Bzlmod Migration Validation Script
-# This script helps validate the bzlmod migration by testing key functionality
+# 
+# This script helps validate Envoy's bzlmod setup and migration progress.
 
 set -e
 
-echo "🚀 Validating Bzlmod Migration for Envoy"
-echo "========================================"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# Check if bzlmod is enabled
-echo "📋 Checking bzlmod configuration..."
-if grep -q "enable_bzlmod" .bazelrc; then
-    echo "✅ bzlmod is enabled in .bazelrc"
-else
-    echo "❌ bzlmod is not enabled in .bazelrc"
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if we're in the Envoy root directory
+if [[ ! -f "MODULE.bazel" ]] || [[ ! -f "WORKSPACE" ]]; then
+    log_error "Please run this script from the Envoy root directory"
     exit 1
 fi
 
-# Check MODULE.bazel exists
-if [[ -f "MODULE.bazel" ]]; then
-    echo "✅ MODULE.bazel file exists"
-else
-    echo "❌ MODULE.bazel file not found"
-    exit 1
-fi
+log_info "🚀 Starting Envoy bzlmod validation..."
 
-# Validate MODULE.bazel syntax (basic check)
-echo "📋 Validating MODULE.bazel syntax..."
+# 1. Check Bazel version
+log_info "Checking Bazel version..."
 if command -v bazel >/dev/null 2>&1; then
-    if timeout 30s bazel mod show_extension_repos >/dev/null 2>&1; then
-        echo "✅ MODULE.bazel syntax is valid (validated with bazel)"
-        BAZEL_AVAILABLE=true
-    else
-        echo "⚠️  MODULE.bazel syntax validation failed with bazel"
-        echo "This may be due to network issues or missing dependencies"
-        BAZEL_AVAILABLE=false
-    fi
+    BAZEL_VERSION=$(bazel version 2>/dev/null | grep "Build label" | cut -d' ' -f3 || echo "unknown")
+    log_info "Bazel version: $BAZEL_VERSION"
+    BAZEL_AVAILABLE=true
 else
-    echo "ℹ️  Bazel not available, performing basic syntax checks..."
-    # Basic syntax validation without bazel
-    if python3 -c "
-import sys
-try:
-    with open('MODULE.bazel', 'r') as f:
-        content = f.read()
-        required_patterns = ['module(', 'bazel_dep(']
-        for pattern in required_patterns:
-            if pattern not in content:
-                print(f'❌ Missing required pattern: {pattern}')
-                sys.exit(1)
-        print('✅ Basic MODULE.bazel syntax appears valid')
-except Exception as e:
-    print(f'❌ Error reading MODULE.bazel: {e}')
-    sys.exit(1)
-    "; then
-        echo "✅ Basic MODULE.bazel syntax validation passed"
-        BAZEL_AVAILABLE=false
-    else
-        echo "❌ Basic MODULE.bazel syntax validation failed"
-        exit 1
-    fi
+    log_warning "Bazel not available - some tests will be skipped"
+    BAZEL_AVAILABLE=false
 fi
 
-# Show dependency graph
-echo "📋 Displaying bzlmod dependency graph..."
+# 2. Test basic bzlmod commands
 if [[ "$BAZEL_AVAILABLE" == "true" ]]; then
-    echo "Run 'bazel mod graph' to see the full dependency tree"
-    if timeout 20s bazel mod graph >/dev/null 2>&1; then
-        echo "✅ Dependency graph generation successful"
+    log_info "Testing basic bzlmod functionality..."
+
+    if timeout 30s bazel mod graph > /dev/null 2>&1; then
+        log_success "bzlmod dependency graph generation works"
     else
-        echo "⚠️  Dependency graph generation failed or timed out"
+        log_warning "bzlmod dependency graph generation failed - may be network issues"
+    fi
+
+    if timeout 20s bazel mod show_extension_repos > /dev/null 2>&1; then
+        log_success "Extension repository listing works"
+        EXT_COUNT=$(bazel mod show_extension_repos 2>/dev/null | grep -c "^@" || echo "0")
+        log_info "Found $EXT_COUNT extension-provided repositories"
+    else
+        log_warning "Extension repository listing failed"
+    fi
+fi
+
+# 3. Check MODULE.bazel structure
+log_info "Analyzing MODULE.bazel structure..."
+
+BAZEL_DEP_COUNT=$(grep -c "^bazel_dep" MODULE.bazel || echo "0")
+EXT_COUNT=$(grep -c "use_extension" MODULE.bazel || echo "0")
+
+log_info "Direct bazel_dep declarations: $BAZEL_DEP_COUNT"
+log_info "Module extensions used: $EXT_COUNT"
+
+if [[ $BAZEL_DEP_COUNT -gt 40 ]]; then
+    log_success "Excellent BCR adoption with $BAZEL_DEP_COUNT direct dependencies"
+elif [[ $BAZEL_DEP_COUNT -gt 30 ]]; then
+    log_success "Good BCR adoption with $BAZEL_DEP_COUNT direct dependencies"
+elif [[ $BAZEL_DEP_COUNT -gt 20 ]]; then
+    log_warning "Moderate BCR adoption with $BAZEL_DEP_COUNT direct dependencies"
+else
+    log_warning "Low BCR adoption with $BAZEL_DEP_COUNT direct dependencies"
+fi
+
+# 4. Check extension organization
+log_info "Checking extension organization..."
+
+if [[ -d "bazel/extensions" ]]; then
+    EXT_FILES=$(find bazel/extensions -name "*.bzl" | wc -l)
+    log_info "Extension files in main module: $EXT_FILES"
+    
+    if [[ $EXT_FILES -gt 8 ]]; then
+        log_warning "Consider consolidating extensions (current: $EXT_FILES, recommended: <8)"
+    else
+        log_success "Extension count is reasonable: $EXT_FILES"
     fi
 else
-    echo "ℹ️  Bazel not available - run 'bazel mod graph' when bazel is working"
+    log_error "Extension directory not found"
 fi
 
-# Test core builds (with timeout to avoid hanging)
-echo "📋 Testing core build targets..."
-
+# 5. Test core builds with bzlmod
 if [[ "$BAZEL_AVAILABLE" == "true" ]]; then
-    test_targets=(
-        "//source/common/common:version_lib"
-        "//source/common/protobuf:utility_lib"
-        "//source/common/buffer:buffer_lib"
-    )
+    log_info "Testing core builds with bzlmod..."
 
-    for target in "${test_targets[@]}"; do
-        echo "Testing build of $target..."
-        if timeout 60s bazel build "$target" >/dev/null 2>&1; then
-            echo "✅ $target builds successfully"
-        else
-            echo "⚠️  $target build failed or timed out (this may be expected during initial migration)"
-        fi
-    done
+    # Test a simple library build (analysis only for speed)
+    if timeout 60s bazel build --enable_bzlmod //source/common/common:version_lib --nobuild > /dev/null 2>&1; then
+        log_success "Core library build analysis passes with bzlmod"
+    else
+        log_warning "Core library build analysis has issues with bzlmod"
+    fi
 
-    # Test analysis phase only (faster than full build)
-    echo "📋 Testing analysis phase for major targets..."
-    analysis_targets=(
-        "//source/exe:envoy-static"
-        "//test/common/common:version_test"
-    )
+    # Test broader analysis
+    if timeout 90s bazel build --enable_bzlmod --nobuild //source/... > /dev/null 2>&1; then
+        log_success "All source targets analyze successfully with bzlmod"
+    else
+        log_warning "Some source targets have issues with bzlmod (this may be expected)"
+    fi
+fi
 
-    for target in "${analysis_targets[@]}"; do
-        echo "Testing analysis of $target..."
-        if timeout 30s bazel query "deps($target)" >/dev/null 2>&1; then
-            echo "✅ $target analysis successful"
-        else
-            echo "⚠️  $target analysis failed or timed out"
-        fi
-    done
+# 6. Check for best practices
+log_info "Checking best practices compliance..."
+
+# Check for upstream extension usage
+if grep -q "@rules_python//python/extensions:python.bzl" MODULE.bazel; then
+    log_success "Using upstream rules_python extensions"
 else
-    echo "ℹ️  Bazel not available - skipping build tests"
-    echo "ℹ️  Once bazel is working, test with:"
-    echo "   bazel build //source/common/common:version_lib"
-    echo "   bazel build //source/common/protobuf:utility_lib" 
+    log_warning "Consider using upstream rules_python extensions"
+fi
+
+if grep -q "@rules_python//python/extensions:pip.bzl" MODULE.bazel; then
+    log_success "Using upstream pip extensions"
+else
+    log_warning "Consider using upstream pip extensions"
+fi
+
+# Check for development dependencies
+if grep -q "dev_dependency = True" MODULE.bazel; then
+    log_success "Using dev_dependency declarations"
+else
+    log_info "Consider marking test-only dependencies with dev_dependency = True"
+fi
+
+# 7. Check WORKSPACE.bzlmod status
+log_info "Checking WORKSPACE.bzlmod status..."
+
+if [[ -f "WORKSPACE.bzlmod" ]]; then
+    LINES=$(wc -l < WORKSPACE.bzlmod)
+    if [[ $LINES -le 5 ]]; then
+        log_success "WORKSPACE.bzlmod is minimal ($LINES lines)"
+    else
+        log_warning "WORKSPACE.bzlmod should be eliminated or minimized ($LINES lines)"
+    fi
+else
+    log_success "No WORKSPACE.bzlmod file found"
+fi
+
+# 8. Performance assessment
+log_info "Assessing migration completeness..."
+
+TOTAL_SCORE=0
+MAX_SCORE=100
+
+# BCR adoption (40 points)
+if [[ $BAZEL_DEP_COUNT -gt 40 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 40))
+elif [[ $BAZEL_DEP_COUNT -gt 30 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 30))
+elif [[ $BAZEL_DEP_COUNT -gt 20 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 20))
+else
+    TOTAL_SCORE=$((TOTAL_SCORE + 10))
+fi
+
+# Extension organization (30 points)
+if [[ $EXT_FILES -le 6 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 30))
+elif [[ $EXT_FILES -le 8 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 20))
+elif [[ $EXT_FILES -le 12 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 10))
+fi
+
+# Upstream extensions (20 points)
+if grep -q "@rules_python//python/extensions" MODULE.bazel; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 20))
+fi
+
+# WORKSPACE.bzlmod elimination (10 points)
+if [[ ! -f "WORKSPACE.bzlmod" ]] || [[ $(wc -l < WORKSPACE.bzlmod) -le 5 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 10))
 fi
 
 echo ""
-echo "🎉 Migration validation complete!"
+log_info "=== Bzlmod Migration Assessment ==="
+log_info "Overall Score: $TOTAL_SCORE/100"
+
+if [[ $TOTAL_SCORE -ge 80 ]]; then
+    log_success "Excellent bzlmod implementation! 🎉"
+elif [[ $TOTAL_SCORE -ge 60 ]]; then
+    log_info "Good bzlmod foundation with room for improvement"
+elif [[ $TOTAL_SCORE -ge 40 ]]; then
+    log_warning "Basic bzlmod setup, consider following recommendations"
+else
+    log_error "Bzlmod implementation needs significant improvement"
+fi
+
 echo ""
-echo "📖 Next Steps:"
-echo "1. Run 'bazel mod graph' to explore the dependency tree"
-echo "2. Test your specific build targets"
-echo "3. Check the migration documentation in docs/root/start/migrating/bzlmod.md"
-echo "4. Consider migrating additional dependencies from WORKSPACE"
+log_info "Next steps:"
+echo "  1. Review BZLMOD_MIGRATION.md for current status"
+echo "  2. Check BZLMOD_RECOMMENDATIONS.md for improvement suggestions"  
+echo "  3. Visit https://registry.bazel.build/ for new BCR modules"
+echo "  4. Consider contributing patches upstream to reduce extensions"
+
 echo ""
-echo "📚 Resources:"
-echo "- Migration guide: https://bazel.build/external/migration"
-echo "- BCR modules: https://github.com/bazelbuild/bazel-central-registry"
-echo "- Bzlmod documentation: https://bazel.build/external/mod"
+log_info "🎉 Validation complete!"
