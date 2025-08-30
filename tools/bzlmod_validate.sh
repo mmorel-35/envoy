@@ -173,13 +173,32 @@ else
     TOTAL_SCORE=$((TOTAL_SCORE + 10))
 fi
 
-# Extension organization (30 points)
-if [[ $EXT_FILES -le 6 ]]; then
+# Extension organization (30 points) - Updated for consolidation
+LEGACY_EXTENSIONS=$(grep -c "dependencies\.bzl\|dependencies_extra\.bzl\|dependency_imports\.bzl\|dependency_imports_extra\.bzl\|repo\.bzl" MODULE.bazel 2>/dev/null || echo "0")
+CONSOLIDATED_EXTENSIONS=$(grep -c "core\.bzl\|toolchains\.bzl" MODULE.bazel 2>/dev/null || echo "0")
+
+# Remove any potential newlines
+LEGACY_EXTENSIONS=$(echo "$LEGACY_EXTENSIONS" | tr -d '\n')
+CONSOLIDATED_EXTENSIONS=$(echo "$CONSOLIDATED_EXTENSIONS" | tr -d '\n')
+
+log_info "Legacy extensions in use: $LEGACY_EXTENSIONS"
+log_info "Consolidated extensions in use: $CONSOLIDATED_EXTENSIONS"
+
+if [[ "$CONSOLIDATED_EXTENSIONS" -ge 2 ]] && [[ "$LEGACY_EXTENSIONS" -eq 0 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 30))
-elif [[ $EXT_FILES -le 8 ]]; then
+    log_success "Using consolidated extensions (core.bzl + toolchains.bzl)"
+elif [[ "$CONSOLIDATED_EXTENSIONS" -ge 1 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 20))
-elif [[ $EXT_FILES -le 12 ]]; then
+    log_info "Partially using consolidated extensions"
+elif [[ $EXT_FILES -le 6 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 15))
+    log_info "Reasonable extension count but consider consolidation"
+elif [[ $EXT_FILES -le 8 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 10))
+    log_warning "Too many extensions - consolidation recommended"
+elif [[ $EXT_FILES -le 12 ]]; then
+    TOTAL_SCORE=$((TOTAL_SCORE + 5))
+    log_warning "Extension proliferation detected - follow BZLMOD_RECOMMENDATIONS.md"
 fi
 
 # Upstream extensions (20 points)
@@ -209,9 +228,10 @@ fi
 echo ""
 log_info "Next steps:"
 echo "  1. Review BZLMOD_MIGRATION.md for current status"
-echo "  2. Check BZLMOD_RECOMMENDATIONS.md for improvement suggestions"  
-echo "  3. Visit https://registry.bazel.build/ for new BCR modules"
-echo "  4. Consider contributing patches upstream to reduce extensions"
+echo "  2. Check BZLMOD_RECOMMENDATIONS.md for improvement suggestions"
+echo "  3. See docs/extension_consolidation_migration.md for consolidation guidance"
+echo "  4. Visit https://registry.bazel.build/ for new BCR modules"
+echo "  5. Consider contributing patches upstream to reduce extensions"
 
 echo ""
 log_info "🎉 Validation complete!"
