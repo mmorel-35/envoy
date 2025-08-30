@@ -1,8 +1,7 @@
-"""Consolidated extension for Envoy's core dependencies.
+"""Core extension for Envoy's dependencies and repositories.
 
-This extension consolidates the functionality of dependencies.bzl and dependencies_extra.bzl
-to reduce extension proliferation and improve maintainability as recommended in 
-BZLMOD_RECOMMENDATIONS.md.
+This extension provides Envoy's core dependency management, handling
+over 100 repository definitions and complex dependency relationships.
 """
 
 load("//bazel:repositories.bzl", "envoy_dependencies")
@@ -20,12 +19,12 @@ PYTHON_MINOR_VERSION = _python_minor_version(PYTHON_VERSION)
 def _core_impl(module_ctx, python_version = PYTHON_VERSION, ignore_root_user_error = False):
     """Implementation for core extension.
 
-    This extension consolidates Envoy's core dependency setup, combining:
-    - Main dependencies (from dependencies.bzl)
-    - Extra dependencies (from dependencies_extra.bzl)
+    This extension provides Envoy's core dependency setup, handling:
+    - Main dependencies and repository definitions
+    - Rust crate repositories and configuration
+    - Protocol buffer features and setup
     
-    This reduces extension proliferation from 2 separate extensions to 1,
-    following bzlmod best practices for extension consolidation.
+    Manages 100+ repositories for Envoy's comprehensive dependency ecosystem.
     """
 
     # Core dependencies setup (from dependencies.bzl)
@@ -44,11 +43,11 @@ def _core_impl(module_ctx, python_version = PYTHON_VERSION, ignore_root_user_err
 core = module_extension(
     implementation = _core_impl,
     doc = """
-    Consolidated extension for Envoy's core dependencies.
+    Core extension for Envoy's dependencies and repositories.
     
-    This extension combines the functionality of:
-    - dependencies.bzl: Main Envoy dependencies with patches and complex setup
-    - dependencies_extra.bzl: Additional dependencies and crate repositories
+    This extension provides:
+    - Main Envoy dependencies with patches and complex setup
+    - Additional dependencies and crate repositories
     
     Provides repositories:
     - All repositories from envoy_dependencies() (100+ repos)
@@ -56,10 +55,10 @@ core = module_extension(
     - proto_bazel_features for protobuf integration
     - envoy_examples environment setup
     
-    Benefits of consolidation:
-    - Reduced extension count (2 → 1 for core deps)
-    - Simplified dependency graph 
-    - Easier maintenance and debugging
-    - Better alignment with bzlmod best practices
+    Features:
+    - Comprehensive dependency management
+    - Complex patch and configuration handling
+    - Rust ecosystem integration
+    - Protocol buffer feature configuration
     """,
 )

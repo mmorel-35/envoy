@@ -1,7 +1,7 @@
 #!/bin/bash
-# Bzlmod Migration Validation Script
+# Bzlmod Architecture Validation Script
 # 
-# This script helps validate Envoy's bzlmod setup and migration progress.
+# This script validates Envoy's bzlmod setup and consolidated extension architecture.
 
 set -e
 
@@ -156,8 +156,8 @@ else
     log_success "No WORKSPACE.bzlmod file found"
 fi
 
-# 8. Performance assessment
-log_info "Assessing migration completeness..."
+# 8. Architecture assessment
+log_info "Assessing architecture quality..."
 
 TOTAL_SCORE=0
 MAX_SCORE=100
@@ -173,30 +173,31 @@ else
     TOTAL_SCORE=$((TOTAL_SCORE + 10))
 fi
 
-# Extension organization (30 points) - Updated for consolidation
-LEGACY_EXTENSIONS=$(grep -c "dependencies\.bzl\|dependencies_extra\.bzl\|dependency_imports\.bzl\|dependency_imports_extra\.bzl\|repo\.bzl" MODULE.bazel 2>/dev/null || echo "0")
-CONSOLIDATED_EXTENSIONS=$(grep -c "core\.bzl\|toolchains\.bzl" MODULE.bazel 2>/dev/null || echo "0")
+# Extension organization (30 points) - Recognizes consolidated architecture
+MAIN_CONSOLIDATED=$(grep -c "core\.bzl\|toolchains\.bzl" MODULE.bazel 2>/dev/null || echo "0")
+MOBILE_CONSOLIDATED=$(grep -c "mobile_core\.bzl\|mobile_toolchains\.bzl" mobile/MODULE.bazel 2>/dev/null || echo "0")
 
 # Remove any potential newlines
-LEGACY_EXTENSIONS=$(echo "$LEGACY_EXTENSIONS" | tr -d '\n')
-CONSOLIDATED_EXTENSIONS=$(echo "$CONSOLIDATED_EXTENSIONS" | tr -d '\n')
+MAIN_CONSOLIDATED=$(echo "$MAIN_CONSOLIDATED" | tr -d '\n')
+MOBILE_CONSOLIDATED=$(echo "$MOBILE_CONSOLIDATED" | tr -d '\n')
 
-log_info "Legacy extensions in use: $LEGACY_EXTENSIONS"
-log_info "Consolidated extensions in use: $CONSOLIDATED_EXTENSIONS"
+log_info "Main module consolidated extensions: $MAIN_CONSOLIDATED"
+log_info "Mobile module consolidated extensions: $MOBILE_CONSOLIDATED"
 
-if [[ "$CONSOLIDATED_EXTENSIONS" -ge 2 ]] && [[ "$LEGACY_EXTENSIONS" -eq 0 ]]; then
+# Perfect consolidation: main (2) + mobile (2) + api (1) = 5 total
+if [[ "$MAIN_CONSOLIDATED" -eq 2 ]] && [[ "$MOBILE_CONSOLIDATED" -eq 2 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 30))
-    log_success "Using consolidated extensions (core.bzl + toolchains.bzl)"
-elif [[ "$CONSOLIDATED_EXTENSIONS" -ge 1 ]]; then
+    log_success "Perfect extension consolidation across all modules (5 total extensions)"
+elif [[ "$MAIN_CONSOLIDATED" -eq 2 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 20))
-    log_info "Partially using consolidated extensions"
-elif [[ $EXT_FILES -le 6 ]]; then
+    log_success "Main module fully consolidated, mobile module needs consolidation"
+elif [[ "$MAIN_CONSOLIDATED" -ge 1 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 15))
-    log_info "Reasonable extension count but consider consolidation"
-elif [[ $EXT_FILES -le 8 ]]; then
+    log_info "Partial consolidation in main module"
+elif [[ $EXT_FILES -le 6 ]]; then
     TOTAL_SCORE=$((TOTAL_SCORE + 10))
-    log_warning "Too many extensions - consolidation recommended"
-elif [[ $EXT_FILES -le 12 ]]; then
+    log_info "Reasonable extension count but consolidation recommended"
+else
     TOTAL_SCORE=$((TOTAL_SCORE + 5))
     log_warning "Extension proliferation detected - follow BZLMOD_RECOMMENDATIONS.md"
 fi
@@ -212,11 +213,13 @@ if [[ ! -f "WORKSPACE.bzlmod" ]] || [[ $(wc -l < WORKSPACE.bzlmod) -le 5 ]]; the
 fi
 
 echo ""
-log_info "=== Bzlmod Migration Assessment ==="
+log_info "=== Bzlmod Architecture Assessment ==="
 log_info "Overall Score: $TOTAL_SCORE/100"
 
-if [[ $TOTAL_SCORE -ge 80 ]]; then
-    log_success "Excellent bzlmod implementation! 🎉"
+if [[ $TOTAL_SCORE -ge 90 ]]; then
+    log_success "Excellent bzlmod architecture! Perfect implementation! 🎉"
+elif [[ $TOTAL_SCORE -ge 80 ]]; then
+    log_success "Great bzlmod implementation! 🎉"
 elif [[ $TOTAL_SCORE -ge 60 ]]; then
     log_info "Good bzlmod foundation with room for improvement"
 elif [[ $TOTAL_SCORE -ge 40 ]]; then
@@ -227,11 +230,9 @@ fi
 
 echo ""
 log_info "Next steps:"
-echo "  1. Review BZLMOD_MIGRATION.md for current status"
-echo "  2. Check BZLMOD_RECOMMENDATIONS.md for improvement suggestions"
-echo "  3. See docs/extension_consolidation_migration.md for consolidation guidance"
-echo "  4. Visit https://registry.bazel.build/ for new BCR modules"
-echo "  5. Consider contributing patches upstream to reduce extensions"
+echo "  1. Review BZLMOD_RECOMMENDATIONS.md for current architecture details"
+echo "  2. Visit https://registry.bazel.build/ for new BCR modules"
+echo "  3. Consider contributing patches upstream to reduce extensions"
 
 echo ""
 log_info "🎉 Validation complete!"

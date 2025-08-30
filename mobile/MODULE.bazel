@@ -39,33 +39,22 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
-# Envoy dependencies extensions - inherited from parent envoy module using new organization
-envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+# Envoy dependencies extensions - using consolidated extensions from parent envoy module
+envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")
 
-envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
-
-envoy_imports = use_extension("@envoy//bazel/extensions:dependency_imports.bzl", "dependency_imports")
-
-envoy_imports_extra = use_extension("@envoy//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
-
-# Envoy API and repository extensions - inherited from parent envoy module
-envoy_repo_setup = use_extension("@envoy//bazel/extensions:repo.bzl", "repo")
+envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains")
 
 # API extensions from API module
 envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
 
-# Mobile-specific extensions using local module
-envoy_mobile_repos = use_extension("//bazel/extensions:repos.bzl", "repos")
+# Consolidated Mobile extensions - reduced from 6 to 2 extensions for better maintainability
+# This follows bzlmod best practices as documented in BZLMOD_RECOMMENDATIONS.md
 
-envoy_mobile_deps = use_extension("//bazel/extensions:mobile.bzl", "mobile")
+# Mobile core extension (consolidates mobile + repos)
+envoy_mobile_core = use_extension("//bazel/extensions:mobile_core.bzl", "mobile_core")
 
-envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
-
-envoy_android_config = use_extension("//bazel/extensions:android.bzl", "android")
-
-envoy_android_workspace = use_extension("//bazel/extensions:android_workspace.bzl", "android_workspace")
-
-envoy_mobile_workspace = use_extension("//bazel/extensions:workspace.bzl", "workspace")
+# Mobile toolchains extension (consolidates toolchains + android + android_workspace + workspace)
+envoy_mobile_toolchains = use_extension("//bazel/extensions:mobile_toolchains.bzl", "mobile_toolchains")
 
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)

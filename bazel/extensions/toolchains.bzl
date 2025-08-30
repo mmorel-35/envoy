@@ -1,8 +1,7 @@
-"""Consolidated extension for Envoy's toolchains and imports.
+"""Toolchains extension for Envoy's toolchain management and imports.
 
-This extension consolidates the functionality of dependency_imports.bzl, 
-dependency_imports_extra.bzl, and repo.bzl to reduce extension proliferation 
-and improve maintainability as recommended in BZLMOD_RECOMMENDATIONS.md.
+This extension provides Envoy's toolchain configuration, dependency imports,
+and repository metadata setup.
 """
 
 load("//bazel:dependency_imports.bzl", "envoy_dependency_imports")
@@ -12,13 +11,12 @@ load("//bazel:repo.bzl", "envoy_repo")
 def _toolchains_impl(module_ctx):
     """Implementation for toolchains extension.
 
-    This extension consolidates Envoy's toolchain and import setup, combining:
-    - Dependency imports (from dependency_imports.bzl)
-    - Extra dependency imports (from dependency_imports_extra.bzl)  
-    - Repository setup (from repo.bzl)
+    This extension provides Envoy's toolchain and import setup:
+    - Dependency imports and toolchain registration
+    - Foreign CC and build tool configuration  
+    - Repository metadata and environment setup
     
-    This reduces extension proliferation from 3 separate extensions to 1,
-    following bzlmod best practices for extension consolidation.
+    Manages complex toolchain ecosystem for Envoy's build environment.
     """
 
     # Main dependency imports setup
@@ -30,16 +28,16 @@ def _toolchains_impl(module_ctx):
     # Repository metadata setup
     envoy_repo()
 
-# Consolidated module extension for Envoy toolchains and imports
+# Module extension for Envoy toolchains and imports
 toolchains = module_extension(
     implementation = _toolchains_impl,
     doc = """
-    Consolidated extension for Envoy's toolchains and imports.
+    Extension for Envoy's toolchains and imports.
     
-    This extension combines the functionality of:
-    - dependency_imports.bzl: Main toolchain imports and registrations
-    - dependency_imports_extra.bzl: Additional dependency imports
-    - repo.bzl: Repository metadata and tooling setup
+    This extension provides:
+    - Main toolchain imports and registrations
+    - Additional dependency imports
+    - Repository metadata and tooling setup
     
     Handles:
     - Go toolchain registration and dependencies
@@ -49,11 +47,10 @@ toolchains = module_extension(
     - Apple, shellcheck, and other development toolchains
     - Repository metadata and tooling configuration
     
-    Benefits of consolidation:
-    - Reduced extension count (3 → 1 for toolchains)
-    - Simplified dependency graph
-    - Easier maintenance and debugging  
-    - Better alignment with bzlmod best practices
-    - Single point of configuration for all toolchains
+    Features:
+    - Comprehensive toolchain management
+    - Multi-language support (Go, Python, Rust, C++)
+    - Development and testing tool integration
+    - Cross-platform build support
     """,
 )
