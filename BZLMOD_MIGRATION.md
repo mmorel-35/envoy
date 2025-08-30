@@ -27,7 +27,7 @@ According to the [official Bazel migration guide](https://bazel.build/external/m
 #### ✅ What We Do Well
 - **Gradual migration**: Starting with dependencies available in BCR
 - **bazel_dep preferred**: 47+ dependencies migrated to direct MODULE.bazel declarations
-- **Minimal extensions**: Extensions only used when necessary for patches/complex setup
+- **Streamlined extensions**: Consolidated from 5 to 2 main extensions for improved maintainability
 - **Clear organization**: Extensions grouped logically by functionality
 - **Proper versioning**: Using semantic versions from BCR where available
 

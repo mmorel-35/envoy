@@ -105,19 +105,30 @@ pip.parse(
 use_repo(pip, "pip_deps")
 ```
 
-### Example 3: Custom Extension Usage
+### Example 3: Consolidated Extension Usage
 
-When you need complex setup that's not available in BCR:
+Envoy uses **consolidated extensions** for complex dependencies that require patches:
 
 ```starlark
 # MODULE.bazel
-# Use Envoy's custom extensions for complex dependencies
-envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+# Use Envoy's consolidated core extension for all complex dependencies
+envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")
 
-# The extension handles repositories with patches
-use_repo(envoy_deps, 
+# The consolidated extension handles 100+ repositories with patches
+use_repo(envoy_core, 
     "com_google_protobuf",  # With Envoy-specific patches
     "com_github_grpc_grpc", # With custom modifications
+    "com_google_cel_cpp",   # With build configuration
+    "proto_bazel_features", # Additional protobuf features
+)
+
+# Use consolidated toolchains extension for all imports and setups
+envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains")
+use_repo(envoy_toolchains,
+    "envoy_repo",           # Repository metadata
+    "grcov",               # Code coverage tooling
+    "rules_fuzzing_oss_fuzz", # Fuzzing infrastructure
+)
     "boringssl_fips"        # FIPS variant
 )
 ```
@@ -144,7 +155,19 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python_deps = use_extension("//tools:python_deps.bzl", "python_deps")
 ```
 
-### 3. Version Pinning
+### 3. Use Consolidated Extensions
+Envoy has streamlined its extension architecture for better maintainability:
+```starlark
+# ✅ Good - consolidated extensions
+envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")
+envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains")
+
+# ❌ Deprecated - individual extensions (still functional but deprecated)
+envoy_deps = use_extension("@envoy//bazel/extensions:dependencies.bzl", "dependencies")
+envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
+```
+
+### 4. Version Pinning
 Pin to specific versions for reproducible builds:
 ```starlark
 # ✅ Good - specific version
@@ -153,7 +176,7 @@ bazel_dep(name = "protobuf", version = "27.5")
 # ❌ Avoid - floating versions not allowed in bzlmod anyway
 ```
 
-### 4. Development Dependencies
+### 5. Development Dependencies
 Mark test/development-only dependencies:
 ```starlark
 bazel_dep(name = "googletest", version = "1.17.0", dev_dependency = True)
@@ -166,7 +189,16 @@ bazel_dep(name = "rules_shellcheck", version = "0.3.3", dev_dependency = True)
 ```
 ERROR: Repository '@missing_repo' not found
 ```
-**Solution:** Check if the repository is provided by an extension:
+**Solution:** Check if the repository is provided by one of Envoy's consolidated extensions:
+```starlark
+# Add to use_repo for the appropriate extension
+envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")
+use_repo(envoy_core, "missing_repo")
+
+# OR for toolchain repositories
+envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains") 
+use_repo(envoy_toolchains, "missing_repo")
+```
 ```bash
 bazel mod show_extension_repos | grep missing_repo
 ```

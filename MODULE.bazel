@@ -163,14 +163,17 @@ buf.toolchains(
 )
 use_repo(buf, "rules_buf_toolchains")
 
-# Envoy dependencies extensions - organized in dedicated extensions directory
-envoy_deps = use_extension("//bazel/extensions:dependencies.bzl", "dependencies")
+# Consolidated Envoy extensions - reduced from 5 to 2 extensions for better maintainability
+# This follows bzlmod best practices as documented in BZLMOD_RECOMMENDATIONS.md
+
+# Core dependencies extension (consolidates dependencies + dependencies_extra)
+envoy_core = use_extension("//bazel/extensions:core.bzl", "core")
 
 # Core repository definitions
 use_repo(
-    envoy_deps,
+    envoy_core,
     "aws_lc",
-    "bazel_toolchains",
+    "bazel_toolchains", 
     "boringssl_fips",
     "build_bazel_rules_apple",
     "com_github_alibaba_hessian2_codec",
@@ -238,6 +241,7 @@ use_repo(
     "proxy_wasm_cpp_host",
     "proxy_wasm_cpp_sdk",
     "proxy_wasm_rust_sdk",
+    "proto_bazel_features",
     "rules_fuzzing",
     "rules_java",
     "rules_proto_grpc",
@@ -247,31 +251,15 @@ use_repo(
     "v8",
 )
 
-envoy_deps_extra = use_extension("@envoy//bazel/extensions:dependencies_extra.bzl", "dependencies_extra")
-use_repo(
-    envoy_deps_extra,
-    "proto_bazel_features",
-)
-
-envoy_imports = use_extension("//bazel/extensions:dependency_imports.bzl", "dependency_imports")
+# Toolchains extension (consolidates dependency_imports + dependency_imports_extra + repo)
+envoy_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
 
 # Toolchain imports and registrations
 use_repo(
-    envoy_imports,
+    envoy_toolchains,
+    "envoy_repo",
     "grcov",
     "rules_fuzzing_oss_fuzz",
-)
-
-envoy_imports_extra = use_extension("//bazel/extensions:dependency_imports_extra.bzl", "dependency_imports_extra")
-# Additional dependency imports
-
-# Repository setup extension
-envoy_repo_setup = use_extension("//bazel/extensions:repo.bzl", "repo")
-
-# Repository metadata setup
-use_repo(
-    envoy_repo_setup,
-    "envoy_repo",
 )
 
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")

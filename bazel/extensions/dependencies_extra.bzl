@@ -1,4 +1,10 @@
-"""Extension for Envoy's extra dependencies."""
+"""Extension for Envoy's extra dependencies.
+
+DEPRECATED: This extension has been consolidated into core.bzl for better maintainability.
+Please use //bazel/extensions:core.bzl instead.
+
+See BZLMOD_RECOMMENDATIONS.md for details on the consolidation effort.
+"""
 
 load("@proxy_wasm_cpp_host//bazel/cargo/wasmtime/remote:crates.bzl", "crate_repositories")
 load("@com_google_protobuf//bazel/private:proto_bazel_features.bzl", "proto_bazel_features")
@@ -16,6 +22,8 @@ def _dependencies_extra_impl(module_ctx, python_version = PYTHON_VERSION,
         ignore_root_user_error = False):
     """Implementation for dependencies_extra extension.
 
+    DEPRECATED: Use //bazel/extensions:core.bzl instead.
+
     This extension wraps the envoy_dependencies_extra() function to make it
     available as a bzlmod module extension.
     """
@@ -30,13 +38,15 @@ def _dependencies_extra_impl(module_ctx, python_version = PYTHON_VERSION,
     envoy_examples_env()
 
 # Module extension for envoy_dependencies_extra
+# DEPRECATED: Use //bazel/extensions:core.bzl instead
 dependencies_extra = module_extension(
     implementation = _dependencies_extra_impl,
     doc = """
-    Extension for Envoy's extra dependencies.
+    DEPRECATED: Extension for Envoy's extra dependencies.
     
-    This extension wraps the envoy_dependencies_extra() function to make it
-    available as a bzlmod module extension. These are dependencies that rely  
-    on a first stage of dependency loading in envoy_dependencies().
+    This extension has been consolidated into //bazel/extensions:core.bzl
+    for better maintainability and reduced extension proliferation.
+    
+    Please migrate to the consolidated core extension.
     """,
 )
