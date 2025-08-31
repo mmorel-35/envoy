@@ -105,11 +105,8 @@ python.toolchain(
 )
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip", dev_dependency = True)
-pip.parse(
-    hub_name = "base_pip3",
-    python_version = "3.12.3",
-    requirements_lock = "@envoy//tools/base:requirements.txt",
-)
+# Note: base_pip3 is defined in the parent envoy module, so we don't define it here
+# to avoid duplicate cross-module pip hub names
 use_repo(
     pip,
     "base_pip3",
