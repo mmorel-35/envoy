@@ -117,3 +117,45 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python", 
 python.toolchain(
     python_version = "3.12.3",
 )
+
+# Maven dependencies using native rules_jvm_external extension
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "com.google.code.findbugs:jsr305:3.0.2",
+        "androidx.annotation:annotation:1.5.0",
+        # Java Proto Lite
+        "com.google.protobuf:protobuf-javalite:3.24.4",
+        # Kotlin
+        "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21",
+        "org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21",
+        "org.jetbrains.kotlin:kotlin-stdlib:1.6.21",
+        "androidx.recyclerview:recyclerview:1.1.0",
+        "androidx.core:core:1.3.2",
+        # Dokka
+        "org.jetbrains.dokka:dokka-cli:1.5.31",
+        "org.jetbrains.dokka:javadoc-plugin:1.5.31",
+        # Test artifacts
+        "com.google.truth:truth:1.4.4",
+        "junit:junit:4.13.2",
+        "org.mockito:mockito-inline:5.2.0",
+        "org.mockito:mockito-core:5.14.2",
+        "com.squareup.okhttp3:okhttp:4.12.0",
+        "com.squareup.okhttp3:mockwebserver:4.12.0",
+        "io.netty:netty-all:4.1.115.Final",
+        # Android test artifacts
+        "androidx.test:core:1.5.0",
+        "androidx.test:rules:1.5.0",
+        "androidx.test:runner:1.5.0",
+        "androidx.test:monitor:1.5.0",
+        "androidx.test.ext:junit:1.1.5",
+        "org.robolectric:robolectric:4.8.2",
+        "org.hamcrest:hamcrest:3.0",
+    ],
+    version_conflict_policy = "pinned",
+    repositories = [
+        "https://repo1.maven.org/maven2",
+        "https://maven.google.com",
+    ],
+)
+use_repo(maven, "maven")

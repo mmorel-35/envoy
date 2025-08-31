@@ -13,6 +13,52 @@ This document describes Envoy's **completed** migration to the MODULE.bazel (bzl
 
 **Remaining Work**: Future enhancements focused on ecosystem contributions (upstreaming patches to BCR), not core functionality.
 
+## Recent Improvements (December 2024)
+
+### Native Extension Migrations Completed
+
+#### Maven Dependencies Migration ✅
+**Problem**: Envoy Mobile was using custom `maven_install()` calls in extension code
+**Solution**: Migrated to native `rules_jvm_external` extension  
+**Benefits**: 
+- Reduced custom extension code complexity
+- Better integration with Bazel ecosystem  
+- Automatic dependency resolution following BCR patterns
+- Future-proof against rules_jvm_external updates
+
+**Implementation**:
+```starlark
+# In mobile/MODULE.bazel
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")  
+maven.install(
+    artifacts = [...],
+    repositories = [...],
+)
+use_repo(maven, "maven")
+```
+
+#### New Mobile Dependencies Added ✅
+Added native support for mobile development through BCR dependencies:
+- `rules_android` (0.1.1) - Android SDK integration
+- `rules_android_ndk` (0.1.2) - NDK toolchain support
+- `rules_kotlin` (1.9.6) - Kotlin language support
+- `rules_detekt` (0.8.1.2) - Kotlin linting 
+- `rules_jvm_external` (6.6) - Maven artifact resolution
+
+### Future Native Extension Opportunities
+
+#### Android Toolchain Migration (Investigated)
+**Current**: Custom `android_configure` logic in mobile toolchains extension
+**Opportunity**: Investigate native `rules_android` and `rules_android_ndk` extensions
+**Complexity**: High - requires environment-dependent configuration analysis
+
+#### Kotlin Toolchain Migration (Identified)  
+**Current**: Custom `kotlin_repositories()` calls
+**Opportunity**: Use native `rules_kotlin` toolchain extensions if available
+**Priority**: Medium - would further reduce custom extension code
+
+---
+
 ## Migration Status: ✅ LARGELY COMPLETE
 
 **Current State:**
@@ -31,6 +77,7 @@ Envoy implements a **highly optimized bzlmod architecture** following Bazel's be
 2. **Streamlined module extensions**: 5 focused extensions total across all modules (2 per major module)
 3. **Minimal WORKSPACE.bzlmod**: Contains only workspace name declaration
 4. **Consistent patterns**: Standardized core + toolchains extension pattern across modules
+5. **Native extensions adoption**: Envoy Mobile now uses native rules_jvm_external and rules_python extensions
 
 ### Bazel Best Practices Alignment
 
@@ -43,6 +90,7 @@ According to the [official Bazel migration guide](https://bazel.build/external/m
 - **Clean organization**: Extensions grouped logically by functionality
 - **Proper versioning**: Using semantic versions from BCR where available
 - **Upstream integration**: Using @rules_python extensions instead of custom ones
+- **Native toolchain adoption**: Envoy Mobile uses native rules_jvm_external for Maven dependencies
 
 #### 🎯 Primary Remaining Work (Future Improvements)
 - **Upstream patch contributions**: Submit Envoy-specific patches to BCR maintainers
@@ -160,7 +208,7 @@ envoy_mobile_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl
 
 # Upstream extensions (BEST PRACTICE)
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
-pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 ```
 
 ## Dependency Migration Status
@@ -182,6 +230,13 @@ These clean dependencies have been moved from WORKSPACE to direct `bazel_dep` de
 - **rules_go** (0.57.0) - Clean BCR integration
 - **rules_proto** (7.1.0) - Standard proto support
 - **rules_rust** (0.63.0) - Would benefit from patch upstreaming
+
+#### Mobile-Specific Rules (NEW):
+- **rules_android** (0.1.1) - Native Android SDK support
+- **rules_android_ndk** (0.1.2) - Native NDK toolchain support
+- **rules_kotlin** (1.9.6) - Kotlin toolchain support  
+- **rules_jvm_external** (6.6) - Native Maven artifact resolution (NOW USING NATIVE EXTENSION)
+- **rules_detekt** (0.8.1.2) - Kotlin linting support
 
 #### Utility Libraries:
 - **fmt** (11.2.0) - Clean BCR migration success
@@ -285,6 +340,7 @@ grep "bazel_dep" MODULE.bazel | wc -l  # Should show 48+
 2. **Performance optimization**: Implement conditional loading and repository isolation features
 3. **WORKSPACE.bzlmod cleanup**: Remove minimal WORKSPACE.bzlmod if not needed
 4. **Documentation maintenance**: Keep migration guides current as BCR evolves
+5. **Mobile native toolchain expansion**: Explore native extensions for Android SDK/NDK configuration
 
 ### Medium Term (6-12 months)  
 1. **BCR ecosystem participation**: Work with Bazel team to potentially add Envoy to BCR
