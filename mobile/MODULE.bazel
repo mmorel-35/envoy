@@ -112,6 +112,17 @@ use_repo(
 # Mobile toolchains extension (toolchains and platform setup)
 envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
 
+# Configure Android SDK using native rules_android when available
+envoy_mobile_toolchains.android_sdk_repository(
+    api_level = 30,
+    build_tools_version = "30.0.2",
+)
+
+# Configure Android NDK using native rules_android_ndk when available  
+envoy_mobile_toolchains.android_ndk_repository(
+    api_level = 23,
+)
+
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(

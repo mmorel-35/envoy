@@ -37,7 +37,7 @@ maven.install(
 use_repo(maven, "maven")
 ```
 
-#### New Mobile Dependencies Added ✅
+#### Mobile Dependencies Added ✅
 Added native support for mobile development through BCR dependencies:
 - `rules_android` (0.1.1) - Android SDK integration
 - `rules_android_ndk` (0.1.2) - NDK toolchain support
@@ -45,15 +45,32 @@ Added native support for mobile development through BCR dependencies:
 - `rules_detekt` (0.8.1.2) - Kotlin linting 
 - `rules_jvm_external` (6.6) - Maven artifact resolution
 
-### Future Native Extension Opportunities
+#### Android Toolchain Migration ✅
+**Problem**: Envoy Mobile was using custom Android SDK/NDK configuration logic
+**Solution**: Migrated to native `rules_android` and `rules_android_ndk` extensions with WORKSPACE fallback
+**Benefits**:
+- Native Android toolchain configuration via BCR patterns
+- Automatic environment detection and toolchain registration
+- WORKSPACE mode compatibility preserved for mixed environments
+- Future-proof against Android rules updates
 
-#### Android Toolchain Migration (Investigated)
-**Current**: Custom `android_configure` logic in mobile toolchains extension
-**Opportunity**: Investigate native `rules_android` and `rules_android_ndk` extensions
-**Complexity**: High - requires environment-dependent configuration analysis
+**Implementation**:
+```starlark
+# In mobile/MODULE.bazel - native extension configuration
+envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
+envoy_mobile_toolchains.android_sdk_repository(
+    api_level = 30,
+    build_tools_version = "30.0.2",
+)
+envoy_mobile_toolchains.android_ndk_repository(
+    api_level = 23,
+)
+```
+
+### Future Extension Opportunities
 
 #### Kotlin Toolchain Migration (Identified)  
-**Current**: Custom `kotlin_repositories()` calls
+**Current**: Custom `kotlin_repositories()` calls  
 **Opportunity**: Use native `rules_kotlin` toolchain extensions if available
 **Priority**: Medium - would further reduce custom extension code
 
@@ -77,7 +94,7 @@ Envoy implements a **highly optimized bzlmod architecture** following Bazel's be
 2. **Streamlined module extensions**: 5 focused extensions total across all modules (2 per major module)
 3. **Minimal WORKSPACE.bzlmod**: Contains only workspace name declaration
 4. **Consistent patterns**: Standardized core + toolchains extension pattern across modules
-5. **Native extensions adoption**: Envoy Mobile now uses native rules_jvm_external and rules_python extensions
+5. **Native extensions adoption**: Envoy Mobile uses native rules_jvm_external, rules_python, and Android toolchain extensions
 
 ### Bazel Best Practices Alignment
 
@@ -90,7 +107,7 @@ According to the [official Bazel migration guide](https://bazel.build/external/m
 - **Clean organization**: Extensions grouped logically by functionality
 - **Proper versioning**: Using semantic versions from BCR where available
 - **Upstream integration**: Using @rules_python extensions instead of custom ones
-- **Native toolchain adoption**: Envoy Mobile uses native rules_jvm_external for Maven dependencies
+- **Native toolchain adoption**: Envoy Mobile uses native rules_jvm_external and Android toolchain extensions
 
 #### 🎯 Primary Remaining Work (Future Improvements)
 - **Upstream patch contributions**: Submit Envoy-specific patches to BCR maintainers
