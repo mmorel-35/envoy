@@ -59,11 +59,16 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "protobuf", version = "29.3", repo_name = "com_google_protobuf")
 bazel_dep(name = "protoc-gen-validate", version = "1.2.1.bcr.1", repo_name = "com_envoyproxy_protoc_gen_validate")
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1", repo_name = "com_googlesource_code_re2")
+bazel_dep(name = "rules_android", version = "0.1.1")
+bazel_dep(name = "rules_android_ndk", version = "0.1.2")
 bazel_dep(name = "rules_cc", version = "0.2.2")
+bazel_dep(name = "rules_detekt", version = "0.8.1.2")
 
 # rules_foreign_cc override needed for mobile builds until upstream issue is resolved
 # TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
 bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
+bazel_dep(name = "rules_jvm_external", version = "6.6")
+bazel_dep(name = "rules_kotlin", version = "1.9.6")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_python", version = "1.4.1")
 bazel_dep(name = "rules_rust", version = "0.63.0")
@@ -94,6 +99,15 @@ envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bz
 
 # Mobile core extension (dependencies and repositories)
 envoy_mobile_core = use_extension("//bazel/extensions:core.bzl", "core")
+use_repo(
+    envoy_mobile_core,
+    "com_github_buildbuddy_io_rules_xcodeproj",
+    "DrString",
+    "kotlin_formatter",
+    "robolectric",
+    "rules_java",
+    "SwiftLint",
+)
 
 # Mobile toolchains extension (toolchains and platform setup)
 envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
@@ -102,12 +116,4 @@ envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "to
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(
     python_version = "3.12.3",
-)
-
-pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip", dev_dependency = True)
-# Note: base_pip3 is defined in the parent envoy module, so we don't define it here
-# to avoid duplicate cross-module pip hub names
-use_repo(
-    pip,
-    "base_pip3",
 )
