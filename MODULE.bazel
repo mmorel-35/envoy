@@ -186,6 +186,7 @@ go_deps.module(
     sum = "h1:ujRGEVWJEoaxQ+8+HMl8YEpGaDAgohgZxJ5S+d2TTFQ=",
     version = "v0.6.1-0.20240409071808-615f978279ca",
 )
+
 # CNCF XDS Go library - required for Envoy's XDS functionality
 # Added to resolve missing repository build errors
 go_deps.module(
