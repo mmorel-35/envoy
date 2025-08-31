@@ -1,107 +1,49 @@
 """Toolchains extension for Envoy Mobile platform toolchains and workspace setup.
 
-This extension provides:
-- Mobile toolchains configuration  
-- Android SDK/NDK configuration using native extensions when available
-- Mobile workspace setup
-- Platform-specific setup
-- WORKSPACE mode compatibility
+This extension provides minimal custom mobile toolchain setup, as Android SDK/NDK
+configuration now uses native Bazel Central Registry extensions from rules_android
+and rules_android_ndk.
+
+This extension only handles:
+- Mobile toolchains registration
+- WORKSPACE mode compatibility for Android configuration
 """
 
 load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
 load("//bazel:android_configure.bzl", "android_configure")
-# load("//bazel:envoy_mobile_workspace.bzl", "envoy_mobile_workspace")
-
-def _post_android_setup_impl(repository_ctx):
-    """Repository rule to handle post-android configuration setup."""
-
-    # This will be called after @local_config_android is available
-    repository_ctx.file("BUILD.bazel", "")
-    repository_ctx.file("WORKSPACE", "")
-
-    # Create a dummy file to indicate setup is complete
-    repository_ctx.file("setup_complete.txt", "Android workspace setup complete")
-
-_post_android_setup = repository_rule(
-    implementation = _post_android_setup_impl,
-)
 
 def _toolchains_impl(module_ctx):
     """Implementation for toolchains extension.
 
-    This extension provides mobile toolchain registration, Android
-    configuration, and workspace setup for Envoy Mobile applications.
+    This extension provides minimal mobile toolchain setup for cases not covered
+    by native Android extensions. In bzlmod mode, Android SDK/NDK configuration
+    is handled by native extensions from rules_android and rules_android_ndk.
     
-    Uses native Android extensions when available in bzlmod mode, with
-    fallback to custom configuration for WORKSPACE compatibility.
+    For WORKSPACE compatibility, this still provides the android_configure fallback.
     """
 
-    # Call the mobile toolchains function
+    # Call the mobile toolchains function for platform registration
     envoy_mobile_toolchains()
     
-    # Check for native Android SDK and NDK configuration through tags
-    android_sdk_configured = False
-    android_ndk_configured = False
-    
-    for module in module_ctx.modules:
-        # Process Android SDK repository tags
-        if module.tags.android_sdk_repository:
-            android_sdk_configured = True
-            for tag in module.tags.android_sdk_repository:
-                # Note: For now we document the native extension pattern
-                # but fall back to custom configuration to ensure compatibility
-                # Future improvement: integrate with native rules_android extensions
-                pass
-        
-        # Process Android NDK repository tags  
-        if module.tags.android_ndk_repository:
-            android_ndk_configured = True
-            for tag in module.tags.android_ndk_repository:
-                # Note: For now we document the native extension pattern
-                # but fall back to custom configuration to ensure compatibility
-                # Future improvement: integrate with native rules_android_ndk extensions
-                pass
-    
-    # Always use custom configuration for now to ensure WORKSPACE compatibility
-    # This provides the foundation for future native extension integration
+    # Provide Android configuration fallback for WORKSPACE mode
+    # In bzlmod mode, this is overridden by native android_sdk_repository_extension
+    # and android_ndk_repository_extension
     android_configure(
         name = "local_config_android",
         build_tools_version = "30.0.2",
         ndk_api_level = 23,
         sdk_api_level = 30,
     )
-    
-    # Create a marker repository to ensure android workspace setup completes
-    _post_android_setup(name = "envoy_android_workspace_setup")
-    
-    # Call the mobile workspace function
-    # envoy_mobile_workspace()
 
 # Module extension for mobile toolchains functionality
+# Note: Android SDK/NDK configuration now handled by native extensions
 toolchains = module_extension(
     implementation = _toolchains_impl,
-    tag_classes = {
-        "android_sdk_repository": tag_class(attrs = {
-            "path": attr.string(doc = "Path to Android SDK"),
-            "api_level": attr.int(doc = "Android SDK API level", default = 30),
-            "build_tools_version": attr.string(doc = "Android build tools version", default = "30.0.2"),
-        }),
-        "android_ndk_repository": tag_class(attrs = {
-            "path": attr.string(doc = "Path to Android NDK"),
-            "api_level": attr.int(doc = "Android NDK API level", default = 23),
-        }),
-    },
     doc = """
-    Toolchains extension for Envoy Mobile platform setup.
+    Minimal toolchains extension for Envoy Mobile platform setup.
     
-    This extension provides mobile toolchain registration, Android
-    configuration, and workspace setup for Envoy Mobile applications.
-    
-    Supports both native Android extensions (bzlmod) and custom
-    configuration (WORKSPACE mode) for maximum compatibility.
-    
-    Tags:
-      android_sdk_repository: Configure Android SDK using native extension
-      android_ndk_repository: Configure Android NDK using native extension
+    This extension provides mobile toolchain registration and WORKSPACE
+    compatibility. Android SDK/NDK configuration is now handled by native
+    extensions from rules_android and rules_android_ndk in bzlmod mode.
     """,
 )

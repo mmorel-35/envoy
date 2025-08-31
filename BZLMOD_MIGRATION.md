@@ -47,24 +47,25 @@ Added native support for mobile development through BCR dependencies:
 
 #### Android Toolchain Migration ✅
 **Problem**: Envoy Mobile was using custom Android SDK/NDK configuration logic
-**Solution**: Migrated to native `rules_android` and `rules_android_ndk` extensions with WORKSPACE fallback
+**Solution**: Migrated to native `rules_android` and `rules_android_ndk` extensions with full WORKSPACE compatibility
+
 **Benefits**:
-- Native Android toolchain configuration via BCR patterns
-- Automatic environment detection and toolchain registration
-- WORKSPACE mode compatibility preserved for mixed environments
-- Future-proof against Android rules updates
+- Native Android toolchain support using official BCR extensions
+- Reduced custom extension complexity 
+- Automatic compatibility with upstream rules updates
+- Complete WORKSPACE mode preservation for legacy builds
 
 **Implementation**:
 ```starlark
-# In mobile/MODULE.bazel - native extension configuration
+# In mobile/MODULE.bazel - Native extensions directly
+android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
+android_sdk_repository_extension.configure(api_level = 30, build_tools_version = "30.0.2")
+
+android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension") 
+android_ndk_repository_extension.configure(api_level = 23)
+
+# Minimal custom extension for remaining mobile toolchain setup only
 envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
-envoy_mobile_toolchains.android_sdk_repository(
-    api_level = 30,
-    build_tools_version = "30.0.2",
-)
-envoy_mobile_toolchains.android_ndk_repository(
-    api_level = 23,
-)
 ```
 
 ### Future Extension Opportunities

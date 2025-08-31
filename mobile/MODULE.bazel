@@ -109,19 +109,21 @@ use_repo(
     "SwiftLint",
 )
 
-# Mobile toolchains extension (toolchains and platform setup)
-envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
-
-# Configure Android SDK using native rules_android when available
-envoy_mobile_toolchains.android_sdk_repository(
+# Native Android SDK configuration using rules_android extension
+android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
+android_sdk_repository_extension.configure(
     api_level = 30,
     build_tools_version = "30.0.2",
 )
 
-# Configure Android NDK using native rules_android_ndk when available  
-envoy_mobile_toolchains.android_ndk_repository(
+# Native Android NDK configuration using rules_android_ndk extension
+android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
+android_ndk_repository_extension.configure(
     api_level = 23,
 )
+
+# Mobile toolchains extension (remaining custom setup)
+envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
 
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
