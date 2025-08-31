@@ -83,21 +83,22 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "protobuf", version = "29.3", repo_name = "com_google_protobuf")
 bazel_dep(name = "protoc-gen-validate", version = "1.2.1.bcr.1", repo_name = "com_envoyproxy_protoc_gen_validate")
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1", repo_name = "com_googlesource_code_re2")
+
 # Mobile-specific build rules and dependencies
 # These provide native Android, iOS, and cross-platform mobile development support
-bazel_dep(name = "rules_android", version = "0.1.1")         # Android SDK integration
-bazel_dep(name = "rules_android_ndk", version = "0.1.2")     # Android NDK toolchain
-bazel_dep(name = "rules_cc", version = "0.2.2")              # C++ build rules
-bazel_dep(name = "rules_detekt", version = "0.8.1.2")        # Kotlin linting
+bazel_dep(name = "rules_android", version = "0.1.1")  # Android SDK integration
+bazel_dep(name = "rules_android_ndk", version = "0.1.2")  # Android NDK toolchain
+bazel_dep(name = "rules_cc", version = "0.2.2")  # C++ build rules
+bazel_dep(name = "rules_detekt", version = "0.8.1.2")  # Kotlin linting
 
 # rules_foreign_cc override needed for mobile builds until upstream issue is resolved
 # TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
 bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
-bazel_dep(name = "rules_jvm_external", version = "6.6")      # Maven dependency management
-bazel_dep(name = "rules_kotlin", version = "1.9.6")          # Kotlin language support
-bazel_dep(name = "rules_pkg", version = "1.1.0")             # Package building
-bazel_dep(name = "rules_python", version = "1.4.1")          # Python toolchain
-bazel_dep(name = "rules_rust", version = "0.63.0")           # Rust toolchain
+bazel_dep(name = "rules_jvm_external", version = "6.6")  # Maven dependency management
+bazel_dep(name = "rules_kotlin", version = "1.9.6")  # Kotlin language support
+bazel_dep(name = "rules_pkg", version = "1.1.0")  # Package building
+bazel_dep(name = "rules_python", version = "1.4.1")  # Python toolchain
+bazel_dep(name = "rules_rust", version = "0.63.0")  # Rust toolchain
 bazel_dep(name = "rules_swift", version = "2.1.1", repo_name = "build_bazel_rules_swift")  # iOS/Swift support
 
 switched_rules = use_extension("@com_google_googleapis//:extensions.bzl", "switched_rules")
@@ -129,27 +130,27 @@ envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bz
 envoy_mobile_core = use_extension("//bazel/extensions:core.bzl", "core")
 use_repo(
     envoy_mobile_core,
-    "com_github_buildbuddy_io_rules_xcodeproj",
     "DrString",
+    "SwiftLint",
+    "com_github_buildbuddy_io_rules_xcodeproj",
     "kotlin_formatter",
     "robolectric",
     "rules_java",
-    "SwiftLint",
 )
 
 # Native Android SDK configuration using rules_android extension
 # This replaces custom Android SDK setup with native bzlmod extension support
 android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
 android_sdk_repository_extension.configure(
-    api_level = 30,               # Target Android API level
+    api_level = 30,  # Target Android API level
     build_tools_version = "30.0.2",  # Android build tools version
 )
 
-# Native Android NDK configuration using rules_android_ndk extension  
+# Native Android NDK configuration using rules_android_ndk extension
 # This provides native C++ compilation support for Android targets
 android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
 android_ndk_repository_extension.configure(
-    api_level = 23,               # Minimum Android API level for NDK
+    api_level = 23,  # Minimum Android API level for NDK
 )
 
 # Mobile toolchains extension (remaining custom setup)
@@ -198,10 +199,10 @@ maven.install(
         "org.robolectric:robolectric:4.8.2",
         "org.hamcrest:hamcrest:3.0",
     ],
-    version_conflict_policy = "pinned",  # Use exact versions to ensure reproducible builds
     repositories = [
-        "https://repo1.maven.org/maven2",   # Maven Central
-        "https://maven.google.com",         # Google Maven Repository
+        "https://repo1.maven.org/maven2",  # Maven Central
+        "https://maven.google.com",  # Google Maven Repository
     ],
+    version_conflict_policy = "pinned",  # Use exact versions to ensure reproducible builds
 )
 use_repo(maven, "maven")
