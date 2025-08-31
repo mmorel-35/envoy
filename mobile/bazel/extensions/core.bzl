@@ -18,7 +18,7 @@ def _core_impl(module_ctx):
 
     # Call the mobile dependencies function
     envoy_mobile_dependencies()
-    
+
     # Call the mobile repositories function
     envoy_mobile_repositories()
 

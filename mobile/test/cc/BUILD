@@ -9,11 +9,11 @@ envoy_cc_test(
     srcs = ["engine_test.cc"],
     repository = "@envoy",
     deps = [
+        "@envoy//source/common/common:assert_lib",
+        "@envoy_build_config//:test_extensions",
         "@envoy_mobile//library/cc:engine_builder_lib",
         "@envoy_mobile//library/common:engine_types_lib",
         "@envoy_mobile//test/common/integration:engine_with_test_server",
         "@envoy_mobile//test/common/integration:test_server_lib",
-        "@envoy//source/common/common:assert_lib",
-        "@envoy_build_config//:test_extensions",
     ],
 )

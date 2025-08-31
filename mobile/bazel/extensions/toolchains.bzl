@@ -9,8 +9,8 @@ This extension only handles:
 - WORKSPACE mode compatibility for Android configuration
 """
 
-load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
 load("//bazel:android_configure.bzl", "android_configure")
+load("//bazel:envoy_mobile_toolchains.bzl", "envoy_mobile_toolchains")
 
 def _toolchains_impl(module_ctx):
     """Implementation for toolchains extension.
@@ -18,13 +18,13 @@ def _toolchains_impl(module_ctx):
     This extension provides minimal mobile toolchain setup for cases not covered
     by native Android extensions. In bzlmod mode, Android SDK/NDK configuration
     is handled by native extensions from rules_android and rules_android_ndk.
-    
+
     For WORKSPACE compatibility, this still provides the android_configure fallback.
     """
 
     # Call the mobile toolchains function for platform registration
     envoy_mobile_toolchains()
-    
+
     # Provide Android configuration fallback for WORKSPACE mode
     # In bzlmod mode, this is overridden by native android_sdk_repository_extension
     # and android_ndk_repository_extension
