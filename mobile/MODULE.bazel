@@ -32,7 +32,7 @@ git_override(
 bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
 git_override(
     module_name = "envoy-example-wasmcc",
-    commit = "234f96c39bb9865a9a3ffff39ad975dd1049fec9",
+    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
     remote = "https://github.com/envoyproxy/examples.git",
     strip_prefix = "wasm-cc/",
 )

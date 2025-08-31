@@ -110,7 +110,7 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
-go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.24.6")
 use_repo(
     go_sdk,
@@ -169,8 +169,14 @@ go_deps.module(
     sum = "h1:ujRGEVWJEoaxQ+8+HMl8YEpGaDAgohgZxJ5S+d2TTFQ=",
     version = "v0.6.1-0.20240409071808-615f978279ca",
 )
+go_deps.module(
+    path = "github.com/cncf/xds/go",
+    sum = "h1:JT2cFfgB9jT3Tt8OjKB8GWf6vweZzgb5pWZeXlGP7Ds=",
+    version = "v0.0.0-20240423153145-555b57ec207b",
+)
 use_repo(
     go_deps,
+    "com_github_cncf_xds_go",
     "com_github_iancoleman_strcase",
     "com_github_lyft_protoc_gen_star_v2",
     "com_github_planetscale_vtprotobuf",
