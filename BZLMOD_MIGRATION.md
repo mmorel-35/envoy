@@ -13,7 +13,45 @@ This document describes Envoy's **completed** migration to the MODULE.bazel (bzl
 
 **Remaining Work**: Future enhancements focused on ecosystem contributions (upstreaming patches to BCR), not core functionality.
 
-## Recent Improvements (December 2024)
+## Recent Improvements (January 2025)
+
+### Critical Bzlmod Issues Resolved ✅
+
+Three critical bzlmod build issues were identified and resolved to ensure reliable builds:
+
+#### 1. Fixed `io_bazel_rules_nogo` Visibility Problem ✅
+**Problem**: Build errors with `No repository visible as '@io_bazel_rules_nogo' from repository '@@envoy~~core~io_bazel_rules_go'`
+**Root Cause**: The `go_sdk` extension was marked as `dev_dependency = True`, making nogo rules invisible to other extensions
+**Solution**: Removed `dev_dependency = True` from the `go_sdk` extension in `MODULE.bazel`
+**Impact**: Resolves nogo-related build failures and ensures proper visibility across extensions
+
+#### 2. Fixed Missing `com_github_cncf_xds_go` Dependency ✅
+**Problem**: Build errors with `module extension "go_deps" does not generate repository "com_github_cncf_xds_go"`
+**Root Cause**: The required go module `github.com/cncf/xds/go` was missing from go_deps extension
+**Solution**: Added missing go dependency with proper version and checksum
+**Impact**: Resolves import errors for CNCF XDS-related functionality
+
+```starlark
+go_deps.module(
+    path = "github.com/cncf/xds/go", 
+    sum = "h1:JT2cFfgB9jT3Tt8OjKB8GWf6vweZzgb5pWZeXlGP7Ds=",
+    version = "v0.0.0-20240423153145-555b57ec207b",
+)
+```
+
+#### 3. Synchronized Git Override Commit Hashes ✅
+**Problem**: Inconsistent commit hashes between main and mobile MODULE.bazel files caused potential version conflicts
+**Root Cause**: Mobile module was using different commit hashes for git overrides  
+**Solution**: Synchronized commit hashes in `mobile/MODULE.bazel` to match main `MODULE.bazel`
+**Impact**: Ensures consistency and prevents git_override strip_prefix issues
+
+**Files Changed**:
+- `MODULE.bazel`: Fixed nogo visibility and added missing go dependency (8 lines)
+- `mobile/MODULE.bazel`: Synchronized git override commits (4 lines)
+
+These minimal surgical fixes resolve critical build failures while maintaining full compatibility with the existing bzlmod implementation.
+
+## Previous Improvements (December 2024)
 
 ### Native Extension Migrations Completed
 

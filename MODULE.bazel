@@ -3,12 +3,24 @@ module(
     version = "0.0.0-dev",
 )
 
-# All bazel_dep entries organized alphabetically for improved readability
-# Dependencies with patches remain in WORKSPACE.bzlmod and extensions
+# Envoy's bzlmod-based dependency management
 #
-# Note: Legacy //external: references are now redirected to //third_party:
-# compatibility layer. New code should use direct @repo//:target dependencies.
-# See THIRD_PARTY_MIGRATION.md for details.
+# This MODULE.bazel file implements Envoy's migration to bzlmod (Bazel 8.0+) following
+# official best practices. Key features:
+#
+# - 47+ dependencies migrated to direct bazel_dep declarations from BCR
+# - Streamlined 2-extension architecture per module (core + toolchains)
+# - Native upstream extensions (rules_python, rules_jvm_external) where possible
+# - Legacy WORKSPACE compatibility maintained via minimal extensions
+#
+# All bazel_dep entries organized alphabetically for improved readability.
+# Dependencies requiring patches remain in module extensions as documented in
+# BZLMOD_MIGRATION.md.
+#
+# Migration Guide:
+# - Legacy //external: references → direct @repo//:target dependencies
+# - See THIRD_PARTY_MIGRATION.md for detailed migration instructions
+# - See BZLMOD_MIGRATION.md for architecture and status documentation
 bazel_dep(name = "apple_support", version = "1.23.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "aspect_bazel_lib", version = "2.16.0")
 bazel_dep(name = "aspect_rules_js", version = "2.5.0")
@@ -110,6 +122,9 @@ switched_rules.use_languages(
 )
 use_repo(switched_rules, "com_google_googleapis_imports")
 
+# Go SDK and toolchain configuration
+# Note: dev_dependency = True was removed to fix nogo visibility issues.
+# The io_bazel_rules_nogo repository must be visible to other extensions.
 go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.24.6")
 use_repo(
@@ -118,6 +133,8 @@ use_repo(
     "io_bazel_rules_nogo",
 )
 
+# Go dependencies for Envoy's Go components
+# These modules provide protobuf and gRPC support for Go-based tooling
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
 go_deps.module(
     path = "google.golang.org/grpc",
@@ -169,6 +186,8 @@ go_deps.module(
     sum = "h1:ujRGEVWJEoaxQ+8+HMl8YEpGaDAgohgZxJ5S+d2TTFQ=",
     version = "v0.6.1-0.20240409071808-615f978279ca",
 )
+# CNCF XDS Go library - required for Envoy's XDS functionality
+# Added to resolve missing repository build errors
 go_deps.module(
     path = "github.com/cncf/xds/go",
     sum = "h1:JT2cFfgB9jT3Tt8OjKB8GWf6vweZzgb5pWZeXlGP7Ds=",
