@@ -52,6 +52,8 @@ envoy_cc_library(
 # TODO: Consider our own gperftools.BUILD file as we do with many other packages
 configure_make(
     name = "gperftools_build",
+    autogen = True,
+    configure_in_place = True,
     configure_options = [
         "--enable-shared=no",
         "--enable-frame-pointers",
@@ -60,7 +62,7 @@ configure_make(
         "//bazel:apple": ["AR=/usr/bin/ar"],
         "//conditions:default": [],
     }),
-    lib_source = "@com_github_gperftools_gperftools//:all",
+    lib_source = "@com_github_gperftools_gperftools//:tcmalloc",
     linkopts = ["-lpthread"],
     out_static_libs = select({
         "//bazel:debug_tcmalloc": ["libtcmalloc_debug.a"],
