@@ -22,19 +22,16 @@ absl::StatusOr<SpanContext> BaggagePropagator::extract(const Tracing::TraceConte
   return absl::InvalidArgumentError("Baggage propagator doesn't extract trace context");
 }
 
-void BaggagePropagator::inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) {
+void BaggagePropagator::inject(const SpanContext& span_context,
+                               Tracing::TraceContext& trace_context) {
   // Baggage injection would require baggage to be stored in the span context
   // For now, this is a no-op since we don't have baggage support in SpanContext
   // In a full implementation, baggage would be injected here
 }
 
-std::vector<std::string> BaggagePropagator::fields() const {
-  return {"baggage"};
-}
+std::vector<std::string> BaggagePropagator::fields() const { return {"baggage"}; }
 
-std::string BaggagePropagator::name() const {
-  return "baggage";
-}
+std::string BaggagePropagator::name() const { return "baggage"; }
 
 } // namespace OpenTelemetry
 } // namespace Tracers

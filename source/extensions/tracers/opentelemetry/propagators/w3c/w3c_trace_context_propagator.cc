@@ -37,7 +37,8 @@ bool isAllZeros(const absl::string_view& input) {
 W3CTraceContextPropagator::W3CTraceContextPropagator()
     : trace_parent_header_("traceparent"), trace_state_header_("tracestate") {}
 
-absl::StatusOr<SpanContext> W3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
+absl::StatusOr<SpanContext>
+W3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
   auto propagation_header = trace_parent_header_.get(trace_context);
   if (!propagation_header.has_value()) {
     return absl::InvalidArgumentError("No traceparent header found");
@@ -47,29 +48,29 @@ absl::StatusOr<SpanContext> W3CTraceContextPropagator::extract(const Tracing::Tr
   if (header_value_string.size() != kTraceparentHeaderSize) {
     return absl::InvalidArgumentError("Invalid traceparent header length");
   }
-  
+
   // Try to split it into its component parts:
   std::vector<absl::string_view> propagation_header_components =
       absl::StrSplit(header_value_string, '-', absl::SkipEmpty());
   if (propagation_header_components.size() != 4) {
     return absl::InvalidArgumentError("Invalid traceparent hyphenation");
   }
-  
+
   absl::string_view version = propagation_header_components[0];
   absl::string_view trace_id = propagation_header_components[1];
   absl::string_view span_id = propagation_header_components[2];
   absl::string_view trace_flags = propagation_header_components[3];
-  
+
   if (version.size() != kVersionHexSize || trace_id.size() != kTraceIdHexSize ||
       span_id.size() != kParentIdHexSize || trace_flags.size() != kTraceFlagsHexSize) {
     return absl::InvalidArgumentError("Invalid traceparent field sizes");
   }
-  
+
   if (!isValidHex(version) || !isValidHex(trace_id) || !isValidHex(span_id) ||
       !isValidHex(trace_flags)) {
     return absl::InvalidArgumentError("Invalid header hex");
   }
-  
+
   // As per the traceparent header definition, if the trace-id or parent-id are all zeros, they are
   // invalid and must be ignored.
   if (isAllZeros(trace_id)) {
@@ -95,17 +96,18 @@ absl::StatusOr<SpanContext> W3CTraceContextPropagator::extract(const Tracing::Tr
   return parent_context;
 }
 
-void W3CTraceContextPropagator::inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) {
+void W3CTraceContextPropagator::inject(const SpanContext& span_context,
+                                       Tracing::TraceContext& trace_context) {
   std::string trace_id_hex = span_context.traceId();
   std::string span_id_hex = span_context.spanId();
   std::vector<uint8_t> trace_flags_vec{span_context.sampled()};
   std::string trace_flags_hex = Hex::encode(trace_flags_vec);
   std::string traceparent_header_value =
       absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
-  
+
   // Set the traceparent in the trace_context.
   trace_parent_header_.setRefKey(trace_context, traceparent_header_value);
-  
+
   // Also set the tracestate if present.
   if (!span_context.tracestate().empty()) {
     trace_state_header_.setRefKey(trace_context, span_context.tracestate());
@@ -116,9 +118,7 @@ std::vector<std::string> W3CTraceContextPropagator::fields() const {
   return {"traceparent", "tracestate"};
 }
 
-std::string W3CTraceContextPropagator::name() const {
-  return "tracecontext";
-}
+std::string W3CTraceContextPropagator::name() const { return "tracecontext"; }
 
 } // namespace OpenTelemetry
 } // namespace Tracers

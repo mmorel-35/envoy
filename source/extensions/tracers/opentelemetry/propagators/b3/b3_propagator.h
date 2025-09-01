@@ -26,7 +26,7 @@ public:
 private:
   // Single header format
   const Tracing::TraceContextHandler b3_header_;
-  
+
   // Multi-header format
   const Tracing::TraceContextHandler x_b3_trace_id_header_;
   const Tracing::TraceContextHandler x_b3_span_id_header_;

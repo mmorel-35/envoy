@@ -72,6 +72,8 @@ envoy_extension_cc_test(
     rbe_pool = "6gig",
     deps = [
         "//source/extensions/tracers/opentelemetry:opentelemetry_tracer_lib",
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//test/mocks/api:api_mocks",
         "//test/test_common:status_utility_lib",
         "//test/test_common:utility_lib",
     ],
@@ -149,6 +151,50 @@ envoy_extension_cc_test(
         "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
         "//test/mocks/api:api_mocks",
         "//test/test_common:environment_lib",
+        "//test/test_common:utility_lib",
+    ],
+)
+
+envoy_extension_cc_test(
+    name = "b3_propagator_test",
+    srcs = ["b3_propagator_test.cc"],
+    extension_names = ["envoy.tracers.opentelemetry"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//test/test_common:utility_lib",
+    ],
+)
+
+envoy_extension_cc_test(
+    name = "w3c_trace_context_propagator_test",
+    srcs = ["w3c_trace_context_propagator_test.cc"],
+    extension_names = ["envoy.tracers.opentelemetry"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//test/test_common:utility_lib",
+    ],
+)
+
+envoy_extension_cc_test(
+    name = "baggage_propagator_test",
+    srcs = ["baggage_propagator_test.cc"],
+    extension_names = ["envoy.tracers.opentelemetry"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//test/test_common:utility_lib",
+    ],
+)
+
+envoy_extension_cc_test(
+    name = "composite_propagator_test",
+    srcs = ["composite_propagator_test.cc"],
+    extension_names = ["envoy.tracers.opentelemetry"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
         "//test/test_common:utility_lib",
     ],
 )

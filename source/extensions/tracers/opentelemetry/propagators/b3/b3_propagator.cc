@@ -49,9 +49,9 @@ bool parseB3Sampled(const absl::string_view& sampled_str) {
 } // namespace
 
 B3Propagator::B3Propagator()
-    : b3_header_("b3"), x_b3_trace_id_header_("X-B3-TraceId"),
-      x_b3_span_id_header_("X-B3-SpanId"), x_b3_sampled_header_("X-B3-Sampled"),
-      x_b3_flags_header_("X-B3-Flags"), x_b3_parent_span_id_header_("X-B3-ParentSpanId") {}
+    : b3_header_("b3"), x_b3_trace_id_header_("X-B3-TraceId"), x_b3_span_id_header_("X-B3-SpanId"),
+      x_b3_sampled_header_("X-B3-Sampled"), x_b3_flags_header_("X-B3-Flags"),
+      x_b3_parent_span_id_header_("X-B3-ParentSpanId") {}
 
 absl::StatusOr<SpanContext> B3Propagator::extract(const Tracing::TraceContext& trace_context) {
   // Try single header format first
@@ -64,14 +64,15 @@ absl::StatusOr<SpanContext> B3Propagator::extract(const Tracing::TraceContext& t
   return extractMultiHeader(trace_context);
 }
 
-absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
+absl::StatusOr<SpanContext>
+B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
   auto b3_header = b3_header_.get(trace_context);
   if (!b3_header.has_value()) {
     return absl::InvalidArgumentError("No b3 header found");
   }
 
   auto header_value = b3_header.value();
-  
+
   // Handle special cases
   if (header_value == "0") {
     return absl::InvalidArgumentError("B3 not sampled");
@@ -89,7 +90,7 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
 
   absl::string_view trace_id = parts[0];
   absl::string_view span_id = parts[1];
-  
+
   if (!isValidB3TraceId(trace_id) || !isValidB3SpanId(span_id)) {
     return absl::InvalidArgumentError("Invalid B3 trace or span ID");
   }
@@ -104,7 +105,8 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
   return span_context;
 }
 
-absl::StatusOr<SpanContext> B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
+absl::StatusOr<SpanContext>
+B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
   auto trace_id_header = x_b3_trace_id_header_.get(trace_context);
   auto span_id_header = x_b3_span_id_header_.get(trace_context);
 
@@ -156,9 +158,7 @@ std::vector<std::string> B3Propagator::fields() const {
   return {"b3", "X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags", "X-B3-ParentSpanId"};
 }
 
-std::string B3Propagator::name() const {
-  return "b3";
-}
+std::string B3Propagator::name() const { return "b3"; }
 
 } // namespace OpenTelemetry
 } // namespace Tracers

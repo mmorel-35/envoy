@@ -1056,7 +1056,7 @@ TEST_F(OpenTelemetryDriverTest, PropagatorsConfigurationTest) {
 
   // The setup should succeed with multiple propagators configured
   EXPECT_NE(driver_, nullptr);
-  
+
   // Verify the configuration was parsed correctly
   EXPECT_EQ(3, opentelemetry_config.propagators_size());
   EXPECT_EQ("tracecontext", opentelemetry_config.propagators(0));
@@ -1065,7 +1065,8 @@ TEST_F(OpenTelemetryDriverTest, PropagatorsConfigurationTest) {
 }
 
 TEST_F(OpenTelemetryDriverTest, DefaultPropagatorsTest) {
-  // Test that driver works without explicit propagators configuration (should default to tracecontext)
+  // Test that driver works without explicit propagators configuration (should default to
+  // tracecontext)
   const std::string yaml_string = R"EOF(
     grpc_service:
       envoy_grpc:
@@ -1099,7 +1100,7 @@ TEST_F(OpenTelemetryDriverTest, B3PropagatorExtractionTest) {
   // Create B3 multi-header format request
   Tracing::TestTraceContextImpl request_headers{
       {":authority", "test.com"}, {":path", "/"}, {":method", "GET"}};
-  
+
   const std::string trace_id = "0000000000000001";
   const std::string span_id = "0000000000000002";
   request_headers.set("X-B3-TraceId", trace_id);
@@ -1107,8 +1108,8 @@ TEST_F(OpenTelemetryDriverTest, B3PropagatorExtractionTest) {
   request_headers.set("X-B3-Sampled", "1");
 
   Tracing::SpanPtr span = driver_->startSpan(mock_tracing_config_, request_headers, stream_info_,
-                                            operation_name_, tracing_decision_);
-  
+                                             operation_name_, tracing_decision_);
+
   // Verify span was created successfully
   EXPECT_NE(nullptr, span.get());
 }

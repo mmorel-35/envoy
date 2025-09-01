@@ -20,7 +20,8 @@ public:
   /**
    * Create a composite propagator from configuration and environment variables.
    * Priority: explicit config > OTEL_PROPAGATORS env var > default (tracecontext).
-   * @param propagator_names List of propagator names from config (e.g., "tracecontext", "b3", "baggage").
+   * @param propagator_names List of propagator names from config (e.g., "tracecontext", "b3",
+   * "baggage").
    * @param api API interface for reading environment variables.
    * @return CompositePropagator containing the specified propagators.
    */
