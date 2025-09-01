@@ -55,8 +55,6 @@ configure_make(
     autogen = True,
     configure_in_place = True,
     configure_options = [
-        "AUTOMAKE=automake",
-        "ACLOCAL=aclocal",
         "--enable-shared=no",
         "--enable-frame-pointers",
         "--disable-libunwind",
@@ -72,7 +70,7 @@ configure_make(
     }),
     tags = ["skip_on_windows"],
     targets = [
-        "install",
+        "install-libLTLIBRARIES install-perftoolsincludeHEADERS",
     ],
     alwayslink = True,
 )
