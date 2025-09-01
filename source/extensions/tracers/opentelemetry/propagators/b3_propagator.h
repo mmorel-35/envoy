@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/extensions/tracers/opentelemetry/propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 
 namespace Envoy {
 namespace Extensions {

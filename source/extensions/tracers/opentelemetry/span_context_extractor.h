@@ -7,7 +7,7 @@
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
-#include "source/extensions/tracers/opentelemetry/propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 
 namespace Envoy {
 namespace Extensions {

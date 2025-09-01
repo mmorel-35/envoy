@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/extensions/tracers/opentelemetry/propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -8,15 +8,13 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 /**
- * W3C Baggage propagator.
- * Handles baggage header for cross-cutting concerns.
- * Note: This propagator only handles baggage, not trace context.
- * It should be used in combination with trace context propagators.
- * See: https://w3c.github.io/baggage/
+ * W3C Trace Context propagator.
+ * Handles traceparent and tracestate headers.
+ * See: https://www.w3.org/TR/trace-context/
  */
-class BaggagePropagator : public TextMapPropagator {
+class W3CTraceContextPropagator : public TextMapPropagator {
 public:
-  BaggagePropagator();
+  W3CTraceContextPropagator();
 
   // TextMapPropagator
   absl::StatusOr<SpanContext> extract(const Tracing::TraceContext& trace_context) override;
@@ -25,7 +23,8 @@ public:
   std::string name() const override;
 
 private:
-  const Tracing::TraceContextHandler baggage_header_;
+  const Tracing::TraceContextHandler trace_parent_header_;
+  const Tracing::TraceContextHandler trace_state_header_;
 };
 
 } // namespace OpenTelemetry

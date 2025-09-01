@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/baggage_propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/baggage_propagator.h"
 
 #include "source/common/tracing/trace_context_impl.h"
 

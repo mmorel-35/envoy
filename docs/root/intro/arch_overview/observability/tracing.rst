@@ -127,6 +127,34 @@ Alternatively the trace context can be manually propagated by the service:
   X-Ray-specific HTTP headers (
   :ref:`config_http_conn_man_headers_x-amzn-trace-id`).
 
+* When using the OpenTelemetry tracer, Envoy supports configurable trace context propagation 
+  formats through the ``propagators`` configuration field. The tracer can handle multiple 
+  propagation formats simultaneously:
+
+  - ``tracecontext``: W3C Trace Context (:ref:`traceparent <config_http_conn_man_headers_traceparent>` 
+    and :ref:`tracestate <config_http_conn_man_headers_tracestate>` headers) - default format
+  - ``baggage``: W3C Baggage (:ref:`baggage <config_http_conn_man_headers_baggage>` header)
+  - ``b3``: Zipkin B3 format (auto-detects single-header ``b3`` and multi-header ``X-B3-*`` formats)
+
+  For extraction (inbound requests), propagators are tried in the configured order and the first 
+  successful match is used. For injection (outbound requests), all configured propagators are used 
+  to maximize downstream compatibility. When no propagators are explicitly configured, the tracer 
+  defaults to W3C Trace Context for backward compatibility.
+
+  Example configuration:
+
+  .. code-block:: yaml
+
+    tracing:
+      http:
+        name: envoy.tracers.opentelemetry
+        typed_config:
+          "@type": type.googleapis.com/envoy.config.trace.v3.OpenTelemetryConfig
+          propagators:
+            - tracecontext
+            - baggage
+            - b3
+
 What data each trace contains
 -----------------------------
 An end-to-end trace is comprised of one or more spans. A

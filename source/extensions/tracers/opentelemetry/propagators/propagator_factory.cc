@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/propagator_factory.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator_factory.h"
 
 #include "source/common/common/logger.h"
 

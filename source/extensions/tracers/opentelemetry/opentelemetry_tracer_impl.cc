@@ -18,7 +18,7 @@
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
 #include "source/extensions/tracers/opentelemetry/trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/tracer.h"
-#include "source/extensions/tracers/opentelemetry/propagator_factory.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator_factory.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 #include "opentelemetry/proto/trace/v1/trace.pb.h"

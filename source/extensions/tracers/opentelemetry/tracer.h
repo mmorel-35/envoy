@@ -15,7 +15,7 @@
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 #include "source/extensions/tracers/opentelemetry/samplers/sampler.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
-#include "source/extensions/tracers/opentelemetry/propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 
 #include "absl/strings/escaping.h"
 
