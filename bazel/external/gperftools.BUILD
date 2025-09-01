@@ -10,10 +10,27 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
-# Provide all source files for configure_make rule
+# Provide source files needed for configure_make rule with autogen = True
+# This is more targeted than using glob(["**"]) and includes only what's needed
 filegroup(
-    name = "all",
-    srcs = glob(["**"], exclude=["bazel-*"]),
+    name = "autotools_files",
+    srcs = [
+        "autogen.sh",
+        "configure.ac", 
+        "configure.in",
+        "Makefile.am",
+        "Makefile.in",
+    ] + glob([
+        "src/**",
+        "vendor/**", 
+        "benchmark/**",
+        "generic-config/**",
+        "*.m4",
+        "*.am",
+        "*.in",
+        "*.ac",
+        "*.sh",
+    ]),
     visibility = ["//visibility:public"],
 )
 
