@@ -928,7 +928,6 @@ def _com_github_google_tcmalloc():
 def _com_github_gperftools_gperftools():
     external_http_archive(
         name = "com_github_gperftools_gperftools",
-        build_file_content = BUILD_ALL_CONTENT,
     )
 
 def _com_github_wamr():
