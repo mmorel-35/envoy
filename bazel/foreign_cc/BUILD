@@ -70,7 +70,7 @@ configure_make(
     }),
     tags = ["skip_on_windows"],
     targets = [
-        "install-libLTLIBRARIES install-perftoolsincludeHEADERS",
+        "install",
     ],
     alwayslink = True,
 )
