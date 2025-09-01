@@ -28,12 +28,22 @@ envoy_cc_library(
         "opentelemetry_tracer_impl.cc",
         "span_context_extractor.cc",
         "tracer.cc",
+        "propagator.cc",
+        "propagator_factory.cc",
+        "w3c_trace_context_propagator.cc",
+        "b3_propagator.cc",
+        "baggage_propagator.cc",
     ],
     hdrs = [
         "opentelemetry_tracer_impl.h",
         "span_context.h",
         "span_context_extractor.h",
         "tracer.h",
+        "propagator.h",
+        "propagator_factory.h",
+        "w3c_trace_context_propagator.h",
+        "b3_propagator.h",
+        "baggage_propagator.h",
     ],
     copts = [
         # Make sure that headers included from opentelemetry-api use Abseil from Envoy

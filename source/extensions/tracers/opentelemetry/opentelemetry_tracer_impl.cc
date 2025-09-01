@@ -18,6 +18,7 @@
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
 #include "source/extensions/tracers/opentelemetry/trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/tracer.h"
+#include "source/extensions/tracers/opentelemetry/propagator_factory.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 #include "opentelemetry/proto/trace/v1/trace.pb.h"
@@ -90,9 +91,22 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
   // Create the sampler if configured
   SamplerSharedPtr sampler = tryCreateSamper(opentelemetry_config, context);
 
+  // Create propagators based on configuration
+  CompositePropagatorPtr propagator;
+  if (opentelemetry_config.propagators_size() > 0) {
+    std::vector<std::string> propagator_names;
+    for (const auto& propagator_name : opentelemetry_config.propagators()) {
+      propagator_names.push_back(propagator_name);
+    }
+    propagator = PropagatorFactory::createPropagators(propagator_names);
+  } else {
+    // Default to W3C Trace Context for backward compatibility
+    propagator = PropagatorFactory::createDefaultPropagators();
+  }
+
   // Create the tracer in Thread Local Storage.
   tls_slot_ptr_->set([opentelemetry_config, &factory_context, this, resource_ptr,
-                      sampler](Event::Dispatcher& dispatcher) {
+                      sampler, propagator = std::move(propagator)](Event::Dispatcher& dispatcher) mutable {
     OpenTelemetryTraceExporterPtr exporter;
     if (opentelemetry_config.has_grpc_service()) {
       auto factory_or_error =
@@ -113,7 +127,8 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
     TracerPtr tracer =
         std::make_unique<Tracer>(std::move(exporter), factory_context.timeSource(),
                                  factory_context.api().randomGenerator(), factory_context.runtime(),
-                                 dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size);
+                                 dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size,
+                                 std::move(propagator));
     return std::make_shared<TlsTracer>(std::move(tracer));
   });
 }
@@ -125,7 +140,21 @@ Tracing::SpanPtr Driver::startSpan(const Tracing::Config& config,
                                    Tracing::Decision tracing_decision) {
   // Get tracer from TLS and start span.
   auto& tracer = tls_slot_ptr_->getTyped<Driver::TlsTracer>().tracer();
-  SpanContextExtractor extractor(trace_context);
+  
+  // Create a copy of the propagator for the span context extractor
+  // Note: We need to create a new propagator instance since SpanContextExtractor expects ownership
+  std::vector<std::string> propagator_names;
+  if (opentelemetry_config_.propagators_size() > 0) {
+    for (const auto& propagator_name : opentelemetry_config_.propagators()) {
+      propagator_names.push_back(propagator_name);
+    }
+  } else {
+    propagator_names.push_back("tracecontext");
+  }
+  
+  auto extractor_propagator = PropagatorFactory::createPropagators(propagator_names);
+  SpanContextExtractor extractor(trace_context, std::move(extractor_propagator));
+  
   const auto span_kind = getSpanKind(config);
   if (!extractor.propagationHeaderPresent()) {
     // No propagation header, so we can create a fresh span with the given decision.
