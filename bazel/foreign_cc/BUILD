@@ -62,7 +62,7 @@ configure_make(
         "//bazel:apple": ["AR=/usr/bin/ar"],
         "//conditions:default": [],
     }),
-    lib_source = "@com_github_gperftools_gperftools//:tcmalloc",
+    lib_source = "@com_github_gperftools_gperftools//:all",
     linkopts = ["-lpthread"],
     out_static_libs = select({
         "//bazel:debug_tcmalloc": ["libtcmalloc_debug.a"],

@@ -10,6 +10,13 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
+# Provide all source files for configure_make rule
+filegroup(
+    name = "all",
+    srcs = glob(["**"], exclude=["bazel-*"]),
+    visibility = ["//visibility:public"],
+)
+
 # NOTE: as of this writing Bazel support is highly experimental. It is
 # also not entirely complete. It lacks most tests, for example.
 
