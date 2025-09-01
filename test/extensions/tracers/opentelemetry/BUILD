@@ -139,3 +139,16 @@ envoy_extension_cc_test(
         "@envoy_api//envoy/extensions/filters/network/http_connection_manager/v3:pkg_cc_proto",
     ],
 )
+
+envoy_extension_cc_test(
+    name = "propagator_factory_test",
+    srcs = ["propagator_factory_test.cc"],
+    extension_names = ["envoy.tracers.opentelemetry"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//test/mocks/api:api_mocks",
+        "//test/test_common:environment_lib",
+        "//test/test_common:utility_lib",
+    ],
+)

@@ -12,6 +12,7 @@
 #include "test/mocks/stats/mocks.h"
 #include "test/mocks/stream_info/mocks.h"
 #include "test/mocks/tracing/mocks.h"
+#include "test/test_common/environment.h"
 #include "test/test_common/utility.h"
 
 #include "gmock/gmock.h"
@@ -1110,6 +1111,55 @@ TEST_F(OpenTelemetryDriverTest, B3PropagatorExtractionTest) {
   
   // Verify span was created successfully
   EXPECT_NE(nullptr, span.get());
+}
+
+TEST_F(OpenTelemetryDriverTest, OtelPropagatorsEnvironmentVariableTest) {
+  // Setup driver without explicit propagators configuration but with OTEL_PROPAGATORS env var
+  const std::string yaml_string = R"EOF(
+    grpc_service:
+      envoy_grpc:
+        cluster_name: fake-cluster
+      timeout: 0.250s
+    )EOF";
+  envoy::config::trace::v3::OpenTelemetryConfig opentelemetry_config;
+  TestUtility::loadFromYaml(yaml_string, opentelemetry_config);
+
+  // Simulate environment variable being set
+  TestEnvironment::setEnvVar("OTEL_PROPAGATORS", "baggage,b3,tracecontext", 1);
+
+  setup(opentelemetry_config);
+
+  EXPECT_NE(driver_, nullptr);
+  EXPECT_EQ(0, opentelemetry_config.propagators_size()); // No explicit propagators configured
+
+  // Clean up
+  TestEnvironment::unsetEnvVar("OTEL_PROPAGATORS");
+}
+
+TEST_F(OpenTelemetryDriverTest, ConfigPriorityOverEnvironmentVariableTest) {
+  // Test that explicit config takes priority over OTEL_PROPAGATORS env var
+  const std::string yaml_string = R"EOF(
+    grpc_service:
+      envoy_grpc:
+        cluster_name: fake-cluster
+      timeout: 0.250s
+    propagators:
+      - tracecontext
+    )EOF";
+  envoy::config::trace::v3::OpenTelemetryConfig opentelemetry_config;
+  TestUtility::loadFromYaml(yaml_string, opentelemetry_config);
+
+  // Set environment variable that should be ignored due to explicit config
+  TestEnvironment::setEnvVar("OTEL_PROPAGATORS", "b3,baggage", 1);
+
+  setup(opentelemetry_config);
+
+  EXPECT_NE(driver_, nullptr);
+  EXPECT_EQ(1, opentelemetry_config.propagators_size());
+  EXPECT_EQ("tracecontext", opentelemetry_config.propagators(0));
+
+  // Clean up
+  TestEnvironment::unsetEnvVar("OTEL_PROPAGATORS");
 }
 
 } // namespace OpenTelemetry

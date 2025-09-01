@@ -7,6 +7,7 @@
 
 #include "source/common/common/empty_string.h"
 #include "source/common/common/logger.h"
+#include "source/common/config/datasource.h"
 #include "source/common/config/utility.h"
 #include "source/common/tracing/http_tracer_impl.h"
 #include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
@@ -48,6 +49,43 @@ tryCreateSamper(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemet
   return sampler;
 }
 
+std::vector<std::string> resolvePropagatorNames(
+    const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetry_config,
+    Api::Api& api) {
+  std::vector<std::string> config_propagator_names;
+  for (const auto& propagator_name : opentelemetry_config.propagators()) {
+    config_propagator_names.push_back(propagator_name);
+  }
+  
+  // Use temporary propagator to get resolved names, then extract them
+  auto temp_propagator = PropagatorFactory::createPropagators(config_propagator_names, api);
+  
+  // Since we can't easily extract the names from the composite propagator,
+  // we'll manually apply the same resolution logic here
+  if (!config_propagator_names.empty()) {
+    return config_propagator_names;
+  }
+
+  // Try to read from OTEL_PROPAGATORS environment variable
+  envoy::config::core::v3::DataSource ds;
+  ds.set_environment_variable("OTEL_PROPAGATORS");
+  
+  std::string env_value = "";
+  TRY_NEEDS_AUDIT {
+    env_value = THROW_OR_RETURN_VALUE(Config::DataSource::read(ds, true, api), std::string);
+  }
+  END_TRY catch (const EnvoyException&) {
+    // Ignore errors and fall back to default
+  }
+
+  if (!env_value.empty()) {
+    return PropagatorFactory::parseOtelPropagatorsEnv(env_value);
+  }
+
+  // Default
+  return {"tracecontext"};
+}
+
 OTelSpanKind getSpanKind(const Tracing::Config& config) {
   // If this is downstream span that be created by 'startSpan' for downstream request, then
   // set the span type based on the spawnUpstreamSpan flag and traffic direction:
@@ -71,7 +109,9 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
 Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetry_config,
                Server::Configuration::TracerFactoryContext& context,
                const ResourceProvider& resource_provider)
-    : tls_slot_ptr_(context.serverFactoryContext().threadLocal().allocateSlot()),
+    : opentelemetry_config_(opentelemetry_config),
+      resolved_propagator_names_(resolvePropagatorNames(opentelemetry_config, context.serverFactoryContext().api())),
+      tls_slot_ptr_(context.serverFactoryContext().threadLocal().allocateSlot()),
       tracing_stats_{OPENTELEMETRY_TRACER_STATS(
           POOL_COUNTER_PREFIX(context.serverFactoryContext().scope(), "tracing.opentelemetry"))} {
   auto& factory_context = context.serverFactoryContext();
@@ -91,18 +131,15 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
   // Create the sampler if configured
   SamplerSharedPtr sampler = tryCreateSamper(opentelemetry_config, context);
 
-  // Create propagators based on configuration
-  CompositePropagatorPtr propagator;
-  if (opentelemetry_config.propagators_size() > 0) {
-    std::vector<std::string> propagator_names;
-    for (const auto& propagator_name : opentelemetry_config.propagators()) {
-      propagator_names.push_back(propagator_name);
-    }
-    propagator = PropagatorFactory::createPropagators(propagator_names);
-  } else {
-    // Default to W3C Trace Context for backward compatibility
-    propagator = PropagatorFactory::createDefaultPropagators();
+  // Create propagators based on configuration and environment variables
+  std::vector<std::string> config_propagator_names;
+  for (const auto& propagator_name : opentelemetry_config.propagators()) {
+    config_propagator_names.push_back(propagator_name);
   }
+  
+  // Use new factory method that supports OTEL_PROPAGATORS environment variable
+  CompositePropagatorPtr propagator = PropagatorFactory::createPropagators(
+      config_propagator_names, factory_context.api());
 
   // Create the tracer in Thread Local Storage.
   tls_slot_ptr_->set([opentelemetry_config, &factory_context, this, resource_ptr,
@@ -143,16 +180,8 @@ Tracing::SpanPtr Driver::startSpan(const Tracing::Config& config,
   
   // Create a copy of the propagator for the span context extractor
   // Note: We need to create a new propagator instance since SpanContextExtractor expects ownership
-  std::vector<std::string> propagator_names;
-  if (opentelemetry_config_.propagators_size() > 0) {
-    for (const auto& propagator_name : opentelemetry_config_.propagators()) {
-      propagator_names.push_back(propagator_name);
-    }
-  } else {
-    propagator_names.push_back("tracecontext");
-  }
-  
-  auto extractor_propagator = PropagatorFactory::createPropagators(propagator_names);
+  // Use the resolved propagator names which include environment variable resolution
+  auto extractor_propagator = PropagatorFactory::createPropagators(resolved_propagator_names_);
   SpanContextExtractor extractor(trace_context, std::move(extractor_propagator));
   
   const auto span_kind = getSpanKind(config);

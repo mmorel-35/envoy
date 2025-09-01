@@ -301,7 +301,9 @@ new_features:
     to the OpenTelemetry tracer, enabling multi-format trace context propagation. Supports ``tracecontext`` (W3C Trace Context),
     ``baggage`` (W3C Baggage), and ``b3`` (Zipkin B3) propagators. When configured, the tracer tries propagators in order
     for extraction (first successful wins) and injects all configured formats for maximum downstream compatibility.
-    Defaults to ``tracecontext`` when not configured, maintaining backward compatibility.
+    Also added support for the ``OTEL_PROPAGATORS`` environment variable, following OpenTelemetry specification priority:
+    explicit configuration > environment variable > default. Defaults to ``tracecontext`` when not configured, 
+    maintaining backward compatibility.
 - area: composite
   change: |
     Allow composite filter to be configured to insert a filter into filter chain outside of the decode headers lifecycle phase.
