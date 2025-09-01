@@ -1,15 +1,3 @@
-# Export autotools files needed for configure_make with autogen = True
-exports_files(
-    [
-        "autogen.sh",
-        "configure.ac",
-        "configure.in",
-        "Makefile.am",
-        "Makefile.in",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 # Provide source files needed for configure_make rule with autogen = True
 # This is more targeted than using glob(["**"]) and includes only what's needed
 filegroup(
