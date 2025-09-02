@@ -25,7 +25,7 @@ envoy_cc_library(
         "//source/common/http:header_map_lib",
         "//source/common/tracing:trace_context_lib",
         "//source/extensions/tracers/opentelemetry/propagators/b3:b3_propagator_lib",
-        "//source/extensions/tracers/opentelemetry/propagators/w3c:w3c_propagator_lib",
+        "//source/extensions/tracers/opentelemetry/propagators/w3c:w3c_propagators_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@envoy_api//envoy/config/trace/v3:pkg_cc_proto",
         "@io_opentelemetry_cpp//api",
