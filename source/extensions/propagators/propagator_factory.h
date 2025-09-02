@@ -6,6 +6,9 @@
 
 #include "source/common/common/logger.h"
 #include "source/extensions/propagators/propagator.h"
+#include "source/extensions/propagators/generic_propagator.h"
+#include "source/extensions/propagators/generic_propagator_factory.h"
+#include "source/extensions/propagators/propagator_adapter.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -13,6 +16,7 @@ namespace Propagators {
 
 /**
  * Factory for creating propagators from configuration.
+ * Supports both legacy OpenTelemetry-coupled and new generic propagator interfaces.
  */
 class PropagatorFactory : public Logger::Loggable<Logger::Id::tracing> {
 public:
@@ -35,10 +39,33 @@ public:
   static CompositePropagatorPtr createPropagators(const std::vector<std::string>& propagator_names);
 
   /**
+   * Create a generic composite propagator from a list of propagator names.
+   * This creates propagators using the new generic interface that is tracer-agnostic.
+   * @param propagator_names List of propagator names (e.g., "tracecontext", "b3", "baggage").
+   * @return GenericCompositePropagator containing the specified propagators.
+   */
+  static GenericCompositePropagatorPtr createGenericPropagators(const std::vector<std::string>& propagator_names);
+
+  /**
+   * Create a generic composite propagator from configuration and environment variables.
+   * @param propagator_names List of propagator names from config.
+   * @param api API interface for reading environment variables.
+   * @return GenericCompositePropagator containing the specified propagators.
+   */
+  static GenericCompositePropagatorPtr createGenericPropagators(const std::vector<std::string>& propagator_names,
+                                                                Api::Api& api);
+
+  /**
    * Get the default propagator configuration (W3C Trace Context only).
    * @return CompositePropagator with default configuration.
    */
   static CompositePropagatorPtr createDefaultPropagators();
+
+  /**
+   * Get the default generic propagator configuration (W3C Trace Context only).
+   * @return GenericCompositePropagator with default configuration.
+   */
+  static GenericCompositePropagatorPtr createDefaultGenericPropagators();
 
   /**
    * Parse OTEL_PROPAGATORS environment variable format.

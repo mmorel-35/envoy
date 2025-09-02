@@ -75,10 +75,56 @@ PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_
   return std::make_unique<CompositePropagator>(std::move(propagators));
 }
 
+GenericCompositePropagatorPtr
+PropagatorFactory::createGenericPropagators(const std::vector<std::string>& propagator_names) {
+  return GenericPropagatorFactory::createCompositeGenericPropagator(propagator_names);
+}
+
+GenericCompositePropagatorPtr
+PropagatorFactory::createGenericPropagators(const std::vector<std::string>& propagator_names,
+                                            Api::Api& api) {
+  // Priority: explicit config > OTEL_PROPAGATORS env var > default
+  if (!propagator_names.empty()) {
+    return createGenericPropagators(propagator_names);
+  }
+
+  // Try to read from OTEL_PROPAGATORS environment variable
+  envoy::config::core::v3::DataSource ds;
+  ds.set_environment_variable(kOtelPropagatorsEnv);
+
+  std::string env_value = "";
+  TRY_NEEDS_AUDIT {
+    env_value = THROW_OR_RETURN_VALUE(Config::DataSource::read(ds, true, api), std::string);
+  }
+  END_TRY catch (const EnvoyException& e) {
+    ENVOY_LOG(debug, "Failed to read OTEL_PROPAGATORS environment variable: {}. Using defaults.",
+              e.what());
+  }
+
+  if (!env_value.empty()) {
+    std::vector<std::string> env_propagators = parseOtelPropagatorsEnv(env_value);
+    if (!env_propagators.empty()) {
+      ENVOY_LOG(info, "Using generic propagators from OTEL_PROPAGATORS environment variable: [{}]",
+                absl::StrJoin(env_propagators, ", "));
+      return createGenericPropagators(env_propagators);
+    }
+  }
+
+  // Fall back to default
+  ENVOY_LOG(
+      debug,
+      "No propagators specified in config or OTEL_PROPAGATORS, using default generic W3C Trace Context");
+  return createDefaultGenericPropagators();
+}
+
 CompositePropagatorPtr PropagatorFactory::createDefaultPropagators() {
   std::vector<TextMapPropagatorPtr> propagators;
   propagators.push_back(std::make_unique<W3CTraceContextPropagator>());
   return std::make_unique<CompositePropagator>(std::move(propagators));
+}
+
+GenericCompositePropagatorPtr PropagatorFactory::createDefaultGenericPropagators() {
+  return GenericPropagatorFactory::createCompositeGenericPropagator({"tracecontext"});
 }
 
 TextMapPropagatorPtr PropagatorFactory::createPropagator(const std::string& name) {

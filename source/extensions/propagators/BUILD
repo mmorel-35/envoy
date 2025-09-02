@@ -82,6 +82,8 @@ envoy_cc_library(
     deps = [
         ":propagator_interface_lib",
         ":generic_propagator_interface_lib", 
+        ":generic_propagator_factory_lib",
+        ":propagator_adapter_lib",
         ":type_converter_lib",
         "//envoy/api:api_interface",
         "//source/common/common:utility_lib",
@@ -92,5 +94,37 @@ envoy_cc_library(
         "//source/extensions/propagators/w3c:generic_w3c_propagators_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@envoy_api//envoy/config/trace/v3:pkg_cc_proto",
+    ],
+)
+
+envoy_cc_library(
+    name = "generic_propagator_factory_lib",
+    srcs = [
+        "generic_propagator_factory.cc",
+    ],
+    hdrs = [
+        "generic_propagator_factory.h",
+    ],
+    deps = [
+        ":generic_propagator_interface_lib",
+        "//source/extensions/propagators/b3:generic_b3_propagator_lib",
+        "//source/extensions/propagators/w3c:generic_w3c_propagators_lib",
+        "//source/common/common:logger_lib",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+envoy_cc_library(
+    name = "propagator_adapter_lib",
+    srcs = [
+        "propagator_adapter.cc",
+    ],
+    hdrs = [
+        "propagator_adapter.h",
+    ],
+    deps = [
+        ":propagator_interface_lib",
+        ":generic_propagator_interface_lib",
+        ":type_converter_lib",
     ],
 )
