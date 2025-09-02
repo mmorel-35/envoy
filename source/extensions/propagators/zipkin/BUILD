@@ -9,14 +9,52 @@ licenses(["notice"])  # Apache 2
 envoy_package()
 
 envoy_cc_library(
+    name = "propagator_lib",
+    srcs = ["propagator.cc"],
+    hdrs = ["propagator.h"],
+    deps = [
+        "//envoy/tracing:trace_context_interface",
+        "//source/common/common:logger_lib",
+        "//source/common/common:statusor_lib",
+        "//source/extensions/tracers/zipkin:span_context_lib",
+    ],
+)
+
+envoy_cc_library(
+    name = "b3_propagator_lib",
+    srcs = ["b3_propagator.cc"],
+    hdrs = ["b3_propagator.h"],
+    deps = [
+        ":propagator_lib",
+        "//source/common/common:hex_lib",
+        "//source/common/common:utility_lib",
+        "//source/extensions/tracers/zipkin:util_lib",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+envoy_cc_library(
+    name = "w3c_trace_context_propagator_lib",
+    srcs = ["w3c_trace_context_propagator.cc"],
+    hdrs = ["w3c_trace_context_propagator.h"],
+    deps = [
+        ":propagator_lib",
+        "//source/common/common:hex_lib",
+        "//source/common/common:utility_lib",
+        "//source/extensions/tracers/zipkin:util_lib",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+envoy_cc_library(
     name = "propagator_factory_lib",
     srcs = ["propagator_factory.cc"],
     hdrs = ["propagator_factory.h"],
     deps = [
+        ":b3_propagator_lib",
+        ":propagator_lib",
+        ":w3c_trace_context_propagator_lib",
         "//envoy/api:api_interface",
         "//source/common/common:logger_lib",
-        "//source/extensions/propagators/opentelemetry:propagator_lib",
-        "//source/extensions/propagators/opentelemetry/b3:b3_propagator_lib",
-        "//source/extensions/propagators/opentelemetry/w3c:w3c_trace_context_propagator_lib",
     ],
 )

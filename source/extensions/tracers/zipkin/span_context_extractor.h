@@ -4,8 +4,7 @@
 #include "envoy/tracing/tracer.h"
 
 #include "source/common/http/header_map_impl.h"
-#include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
-#include "source/extensions/propagators/opentelemetry/propagator.h"
+#include "source/extensions/propagators/zipkin/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -33,35 +32,24 @@ public:
   SpanContextExtractor(Tracing::TraceContext& trace_context, bool w3c_fallback_enabled = false);
   
   /**
-   * Constructor with configured W3C propagator names for OpenTelemetry specification compliance.
-   * This allows respecting OTEL_PROPAGATORS environment variable and custom propagator configuration.
-   * 
-   * For full OpenTelemetry specification compliance, the caller should:
-   * 1. Read OTEL_PROPAGATORS environment variable using Api::Api interface
-   * 2. Parse the propagator names using PropagatorFactory::parseOtelPropagatorsEnv()
-   * 3. Pass the parsed names to this constructor
+   * Constructor with configured propagator names for specification compliance.
+   * This allows respecting custom propagator configuration.
    * 
    * @param trace_context HTTP headers to extract from
    * @param w3c_fallback_enabled Whether to enable W3C Trace Context fallback
-   * @param w3c_propagator_names List of propagator names to use for W3C fallback (e.g., "tracecontext", "b3")
+   * @param propagator_names List of propagator names to use (e.g., "tracecontext", "b3")
    */
   SpanContextExtractor(Tracing::TraceContext& trace_context, bool w3c_fallback_enabled,
-                       const std::vector<std::string>& w3c_propagator_names);
+                       const std::vector<std::string>& propagator_names);
   ~SpanContextExtractor();
   absl::optional<bool> extractSampled();
   std::pair<SpanContext, bool> extractSpanContext(bool is_sampled);
 
 private:
-  /*
-   * Convert W3C span context to Zipkin span context format
-   */
-  std::pair<SpanContext, bool>
-  convertW3CToZipkin(const Extensions::Tracers::OpenTelemetry::SpanContext& w3c_context,
-                     bool fallback_sampled);
-
   const Tracing::TraceContext& trace_context_;
   bool w3c_fallback_enabled_;
-  std::vector<std::string> w3c_propagator_names_;
+  std::vector<std::string> propagator_names_;
+  Extensions::Propagators::Zipkin::CompositePropagatorPtr composite_propagator_;
 };
 
 } // namespace Zipkin
