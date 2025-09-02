@@ -15,7 +15,7 @@ namespace Utils {
  * These functions provide generic trace/span ID parsing and generation
  * that can be used by different propagation standards (B3, W3C, etc.).
  */
-class TraceId {
+class Trace {
 public:
   /**
    * Parses a trace ID from a hex string into high and low 64-bit parts.
