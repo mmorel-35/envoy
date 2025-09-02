@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/common/trace_id_utils.h"
+#include "source/extensions/tracers/common/utils/trace_id_utils.h"
 
 #include <chrono>
 #include <random>
@@ -9,8 +9,9 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace Common {
+namespace Utils {
 
-bool TraceIdUtils::parseTraceId(const std::string& trace_id_hex, uint64_t& trace_id_high,
+bool TraceId::parseTraceId(const std::string& trace_id_hex, uint64_t& trace_id_high,
                                uint64_t& trace_id_low) {
   if (trace_id_hex.length() == 16) {
     // 64-bit trace ID
@@ -26,14 +27,14 @@ bool TraceIdUtils::parseTraceId(const std::string& trace_id_hex, uint64_t& trace
   return false;
 }
 
-bool TraceIdUtils::parseSpanId(const std::string& span_id_hex, uint64_t& span_id) {
+bool TraceId::parseSpanId(const std::string& span_id_hex, uint64_t& span_id) {
   if (span_id_hex.length() != 16) {
     return false;
   }
   return absl::SimpleHexAtoi(span_id_hex, &span_id);
 }
 
-uint64_t TraceIdUtils::generateRandom64(TimeSource& time_source) {
+uint64_t TraceId::generateRandom64(TimeSource& time_source) {
   uint64_t seed = std::chrono::duration_cast<std::chrono::nanoseconds>(
                       time_source.systemTime().time_since_epoch())
                       .count();
@@ -41,7 +42,7 @@ uint64_t TraceIdUtils::generateRandom64(TimeSource& time_source) {
   return rand_64();
 }
 
-uint64_t TraceIdUtils::generateRandom64() {
+uint64_t TraceId::generateRandom64() {
   uint64_t seed = std::chrono::duration_cast<std::chrono::nanoseconds>(
                       std::chrono::steady_clock::now().time_since_epoch())
                       .count();
@@ -49,6 +50,7 @@ uint64_t TraceIdUtils::generateRandom64() {
   return rand_64();
 }
 
+} // namespace Utils
 } // namespace Common
 } // namespace Tracers
 } // namespace Extensions

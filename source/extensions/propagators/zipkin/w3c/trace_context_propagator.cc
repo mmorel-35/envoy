@@ -2,7 +2,7 @@
 
 #include "source/common/common/hex.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/tracers/common/trace_id_utils.h"
+#include "source/extensions/tracers/common/utils/trace_id_utils.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -54,7 +54,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
 
   std::string trace_id_str(parts[1]);
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Common::TraceIdUtils::parseTraceId(trace_id_str, trace_id_high, trace_id_low)) {
+  if (!Extensions::Tracers::Common::Utils::TraceId::parseTraceId(trace_id_str, trace_id_high, trace_id_low)) {
     return absl::InvalidArgumentError("Invalid W3C trace ID format");
   }
 
@@ -64,7 +64,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
   }
 
   uint64_t parent_id = 0;
-  if (!Extensions::Tracers::Common::TraceIdUtils::parseSpanId(std::string(parts[2]), parent_id)) {
+  if (!Extensions::Tracers::Common::Utils::TraceId::parseSpanId(std::string(parts[2]), parent_id)) {
     return absl::InvalidArgumentError("Invalid W3C parent ID format");
   }
 
@@ -82,7 +82,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
 
   // For Zipkin, we generate a new span ID since the parent ID from W3C is the calling span
   // In Zipkin's model, this would be the parent_id, and we need to generate a new span ID
-  uint64_t span_id = Extensions::Tracers::Common::TraceIdUtils::generateRandom64();
+  uint64_t span_id = Extensions::Tracers::Common::Utils::TraceId::generateRandom64();
 
   return Extensions::Tracers::Zipkin::SpanContext(trace_id_high, trace_id_low, span_id, parent_id,
                                                   sampled);

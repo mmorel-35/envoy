@@ -8,13 +8,14 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace Common {
+namespace Utils {
 
 /**
  * Common trace ID utilities for propagators.
  * These functions provide generic trace/span ID parsing and generation
  * that can be used by different propagation standards (B3, W3C, etc.).
  */
-class TraceIdUtils {
+class TraceId {
 public:
   /**
    * Parses a trace ID from a hex string into high and low 64-bit parts.
@@ -52,6 +53,7 @@ public:
   static uint64_t generateRandom64();
 };
 
+} // namespace Utils
 } // namespace Common
 } // namespace Tracers
 } // namespace Extensions
