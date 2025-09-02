@@ -21,7 +21,6 @@ envoy_cc_library(
     srcs = ["util.cc"],
     hdrs = ["util.h"],
     deps = [
-        "//envoy/common:time_interface",
         "//source/common/common:byte_order_lib",
         "//source/common/common:utility_lib",
         "//source/common/protobuf:utility_lib",
