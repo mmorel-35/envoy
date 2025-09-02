@@ -127,25 +127,50 @@ Alternatively the trace context can be manually propagated by the service:
   X-Ray-specific HTTP headers (
   :ref:`config_http_conn_man_headers_x-amzn-trace-id`).
 
-* When using the OpenTelemetry tracer, Envoy supports configurable trace context propagation 
-  formats through the ``propagators`` configuration field and the ``OTEL_PROPAGATORS`` environment 
-  variable. The tracer can handle multiple propagation formats simultaneously:
+* When using the OpenTelemetry tracer, Envoy provides flexible trace context propagation 
+  that supports multiple formats simultaneously. This is configured through the ``propagators`` 
+  field or the ``OTEL_PROPAGATORS`` environment variable, enabling seamless interoperability 
+  across heterogeneous service meshes.
 
-  - ``tracecontext``: W3C Trace Context (:ref:`traceparent <config_http_conn_man_headers_traceparent>` 
-    and :ref:`tracestate <config_http_conn_man_headers_tracestate>` headers) - default format
-  - ``baggage``: W3C Baggage (:ref:`baggage <config_http_conn_man_headers_baggage>` header)
-  - ``b3``: Zipkin B3 format (auto-detects single-header ``b3`` and multi-header ``X-B3-*`` formats)
+  **Supported Propagation Formats:**
 
-  **Configuration Priority (highest to lowest):**
+  - ``tracecontext``: W3C Trace Context using :ref:`traceparent <config_http_conn_man_headers_traceparent>` 
+    and :ref:`tracestate <config_http_conn_man_headers_tracestate>` headers. This is the default 
+    and recommended format for OpenTelemetry-compliant services.
+  - ``baggage``: W3C Baggage using the :ref:`baggage <config_http_conn_man_headers_baggage>` header. 
+    Enables cross-service metadata propagation throughout the entire request lifecycle.
+  - ``b3``: Zipkin B3 format with automatic detection of both single-header (``b3``) and 
+    multi-header (``X-B3-*``) formats for maximum Zipkin ecosystem compatibility.
+
+  **Configuration Priority and Behavior:**
+
+  The propagator configuration follows this priority order:
   1. Explicit ``propagators`` field in Envoy configuration
-  2. ``OTEL_PROPAGATORS`` environment variable (comma-separated list)
+  2. ``OTEL_PROPAGATORS`` environment variable (comma-separated list)  
   3. Default: ``["tracecontext"]`` for backward compatibility
 
-  For extraction (inbound requests), propagators are tried in the configured order and the first 
-  successful match is used. For injection (outbound requests), all configured propagators are used 
-  to maximize downstream compatibility.
+  **Extraction Behavior (Inbound Requests):**
+  Propagators are tried in the configured order. The first propagator that successfully extracts 
+  valid trace context wins, allowing graceful fallback between formats used by upstream services.
 
-  Example configurations:
+  **Injection Behavior (Outbound Requests):**
+  All configured propagators inject their headers into outgoing requests, maximizing compatibility 
+  with downstream services that may expect specific formats.
+
+  **Configuration Examples:**
+
+  Basic W3C-only setup (default behavior):
+
+  .. code-block:: yaml
+
+    tracing:
+      http:
+        name: envoy.tracers.opentelemetry
+        typed_config:
+          "@type": type.googleapis.com/envoy.config.trace.v3.OpenTelemetryConfig
+          # propagators field omitted - defaults to ["tracecontext"]
+
+  Full multi-format interoperability:
 
   .. code-block:: yaml
 
@@ -155,15 +180,30 @@ Alternatively the trace context can be manually propagated by the service:
         typed_config:
           "@type": type.googleapis.com/envoy.config.trace.v3.OpenTelemetryConfig
           propagators:
-            - tracecontext
-            - baggage
-            - b3
+            - tracecontext  # W3C Trace Context (primary)
+            - baggage       # W3C Baggage support
+            - b3           # Zipkin B3 compatibility
 
-  Or using environment variables:
+  Environment variable configuration:
 
   .. code-block:: bash
 
     export OTEL_PROPAGATORS=tracecontext,baggage,b3
+
+  **Migration and Compatibility:**
+
+  Existing OpenTelemetry configurations without explicit propagator settings continue to work 
+  unchanged, using W3C Trace Context propagation. Services can gradually adopt multi-format 
+  propagation by adding the ``propagators`` field or setting the environment variable.
+
+  **Troubleshooting Propagation Issues:**
+
+  If trace context is not being propagated correctly:
+  
+  1. Verify propagator order matches your service mesh's primary format
+  2. Check that upstream services are injecting expected headers  
+  3. Ensure downstream services can handle multiple header formats
+  4. Use Envoy's admin interface to inspect trace headers in requests
 
 What data each trace contains
 -----------------------------
