@@ -6,7 +6,7 @@
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
-#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
+#include "source/extensions/propagators/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -27,14 +27,14 @@ using OpenTelemetryConstants = ConstSingleton<OpenTelemetryConstantValues>;
  */
 class SpanContextExtractor {
 public:
-  SpanContextExtractor(Tracing::TraceContext& trace_context, CompositePropagatorPtr propagator);
+  SpanContextExtractor(Tracing::TraceContext& trace_context, Propagators::CompositePropagatorPtr propagator);
   ~SpanContextExtractor();
   absl::StatusOr<SpanContext> extractSpanContext();
   bool propagationHeaderPresent();
 
 private:
   const Tracing::TraceContext& trace_context_;
-  CompositePropagatorPtr propagator_;
+  Propagators::CompositePropagatorPtr propagator_;
 };
 
 } // namespace OpenTelemetry
