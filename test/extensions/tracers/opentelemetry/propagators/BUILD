@@ -17,7 +17,7 @@ envoy_extension_cc_test(
     extension_names = ["envoy.tracers.opentelemetry"],
     rbe_pool = "6gig",
     deps = [
-        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//source/extensions/propagators/opentelemetry:propagator_lib",
         "//test/test_common:utility_lib",
     ],
 )
@@ -28,7 +28,7 @@ envoy_extension_cc_test(
     extension_names = ["envoy.tracers.opentelemetry"],
     rbe_pool = "6gig",
     deps = [
-        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//source/extensions/propagators/opentelemetry:propagator_lib",
         "//test/mocks/api:api_mocks",
         "//test/test_common:environment_lib",
         "//test/test_common:utility_lib",

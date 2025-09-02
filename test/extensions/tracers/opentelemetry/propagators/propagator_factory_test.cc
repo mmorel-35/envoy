@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/propagators/propagator_factory.h"
+#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
 
 #include "test/mocks/api/mocks.h"
 #include "test/test_common/environment.h"
