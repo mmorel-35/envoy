@@ -99,7 +99,7 @@ std::vector<std::string> PropagatorFactory::parseOtelPropagatorsEnv(const std::s
 
   // Split by comma and trim whitespace, following OTEL spec
   for (const auto& token : StringUtil::splitToken(env_value, ",")) {
-    std::string trimmed = StringUtil::trim(token);
+    std::string trimmed = std::string(StringUtil::trim(token));
     if (!trimmed.empty()) {
       propagators.push_back(trimmed);
     }
