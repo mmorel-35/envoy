@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 #include "absl/container/flat_hash_map.h"

@@ -4,7 +4,7 @@
 
 #include "source/common/common/assert.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
+#include "source/extensions/propagators/zipkin/propagator_factory.h"
 #include "source/extensions/tracers/zipkin/span_context.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"
 
@@ -102,7 +102,7 @@ SpanContextExtractor::~SpanContextExtractor() = default;
 
 absl::optional<bool> SpanContextExtractor::extractSampled() {
   // Try B3 propagation first using shared propagator
-  auto b3_propagator = Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators({"b3"});
+  auto b3_propagator = Extensions::Propagators::Zipkin::PropagatorFactory::createPropagators({"b3"});
   if (b3_propagator->propagationHeaderPresent(trace_context_)) {
     auto b3_result = b3_propagator->extract(trace_context_);
     if (b3_result.ok()) {
@@ -130,8 +130,8 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
     // - When empty (default): use PropagatorFactory::createDefaultPropagators()
     // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
-        ? Extensions::Propagators::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
-        : Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
+        ? Extensions::Propagators::Zipkin::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Propagators::Zipkin::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
@@ -147,7 +147,7 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
 
 std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sampled) {
   // Try B3 propagation first using shared propagator
-  auto b3_propagator = Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators({"b3"});
+  auto b3_propagator = Extensions::Propagators::Zipkin::PropagatorFactory::createPropagators({"b3"});
   if (b3_propagator->propagationHeaderPresent(trace_context_)) {
     auto b3_result = b3_propagator->extract(trace_context_);
     if (b3_result.ok()) {
@@ -163,8 +163,8 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
     // - When empty (default): use PropagatorFactory::createDefaultPropagators()
     // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
-        ? Extensions::Propagators::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
-        : Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
+        ? Extensions::Propagators::Zipkin::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Propagators::Zipkin::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
