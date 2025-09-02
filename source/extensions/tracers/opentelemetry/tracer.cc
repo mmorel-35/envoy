@@ -26,14 +26,6 @@ using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;
 
 namespace {
 
-const Tracing::TraceContextHandler& traceParentHeader() {
-  CONSTRUCT_ON_FIRST_USE(Tracing::TraceContextHandler, "traceparent");
-}
-
-const Tracing::TraceContextHandler& traceStateHeader() {
-  CONSTRUCT_ON_FIRST_USE(Tracing::TraceContextHandler, "tracestate");
-}
-
 void callSampler(SamplerSharedPtr sampler, const StreamInfo::StreamInfo& stream_info,
                  const absl::optional<SpanContext> span_context, Span& new_span,
                  const std::string& operation_name,
