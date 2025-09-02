@@ -13,6 +13,15 @@ namespace OpenTelemetry {
 /**
  * Abstract interface for trace context propagation.
  * Each propagator handles a specific format (W3C, B3, etc.)
+ * 
+ * This interface complies with the OpenTelemetry Context API Propagators specification:
+ * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md
+ * 
+ * Key compliance features:
+ * - TextMapPropagator interface with extract/inject operations
+ * - Error handling that preserves existing valid values (doesn't throw exceptions)
+ * - Support for field enumeration to facilitate carrier pre-allocation
+ * - Case-insensitive header handling through Envoy's TraceContext abstraction
  */
 class TextMapPropagator {
 public:
@@ -47,6 +56,12 @@ using TextMapPropagatorPtr = std::unique_ptr<TextMapPropagator>;
 
 /**
  * Manages multiple propagators and coordinates extraction/injection.
+ * 
+ * Implements the OpenTelemetry Composite Propagator specification:
+ * - Extract: Tries propagators in order, first successful extraction wins
+ * - Inject: Injects using all configured propagators for maximum interoperability
+ * - Preserves existing context values on extraction failure (spec compliant)
+ * - Supports both trace context and baggage propagation
  */
 class CompositePropagator {
 public:

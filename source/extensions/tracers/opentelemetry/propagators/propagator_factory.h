@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "envoy/api/api.h"
 
 #include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
@@ -48,8 +50,26 @@ public:
    */
   static std::vector<std::string> parseOtelPropagatorsEnv(const std::string& env_value);
 
+  /**
+   * Get the global text map propagator. Provides OpenTelemetry specification compliance
+   * for global propagator access. Returns the default propagator if none is set.
+   * @return The current global TextMapPropagator instance.
+   */
+  static CompositePropagator& getGlobalTextMapPropagator();
+
+  /**
+   * Set the global text map propagator. Provides OpenTelemetry specification compliance
+   * for global propagator configuration.
+   * @param propagator The propagator to set as global. Must not be null.
+   */
+  static void setGlobalTextMapPropagator(CompositePropagatorPtr propagator);
+
 private:
   static TextMapPropagatorPtr createPropagator(const std::string& name);
+
+  // Global propagator instance for OpenTelemetry specification compliance
+  static CompositePropagatorPtr global_propagator_;
+  static std::once_flag global_propagator_once_;
 };
 
 } // namespace OpenTelemetry

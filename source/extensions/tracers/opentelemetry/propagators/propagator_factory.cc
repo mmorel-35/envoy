@@ -105,6 +105,26 @@ std::vector<std::string> PropagatorFactory::parseOtelPropagatorsEnv(const std::s
   return propagators;
 }
 
+// Static members for global propagator support
+CompositePropagatorPtr PropagatorFactory::global_propagator_;
+std::once_flag PropagatorFactory::global_propagator_once_;
+
+CompositePropagator& PropagatorFactory::getGlobalTextMapPropagator() {
+  std::call_once(global_propagator_once_, []() {
+    if (!global_propagator_) {
+      global_propagator_ = createDefaultPropagators();
+    }
+  });
+  return *global_propagator_;
+}
+
+void PropagatorFactory::setGlobalTextMapPropagator(CompositePropagatorPtr propagator) {
+  if (!propagator) {
+    throw std::invalid_argument("Global propagator cannot be null");
+  }
+  global_propagator_ = std::move(propagator);
+}
+
 } // namespace OpenTelemetry
 } // namespace Tracers
 } // namespace Extensions

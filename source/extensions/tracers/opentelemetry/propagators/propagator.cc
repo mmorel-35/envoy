@@ -29,22 +29,15 @@ CompositePropagator::extract(const Tracing::TraceContext& trace_context) {
 void CompositePropagator::inject(const SpanContext& span_context,
                                  Tracing::TraceContext& trace_context) {
   for (const auto& propagator : propagators_) {
-    // Skip baggage propagator for injection since it doesn't inject trace context
-    if (propagator->name() == "baggage") {
-      continue;
-    }
     propagator->inject(span_context, trace_context);
-    ENVOY_LOG(trace, "Injected span context using {} propagator", propagator->name());
+    ENVOY_LOG(trace, "Injected context using {} propagator", propagator->name());
   }
 }
 
 bool CompositePropagator::propagationHeaderPresent(const Tracing::TraceContext& trace_context) {
   for (const auto& propagator : propagators_) {
-    // Skip baggage propagator for header presence check since it doesn't carry trace context
-    if (propagator->name() == "baggage") {
-      continue;
-    }
-
+    // Check for fields that indicate trace context propagation
+    // Both trace context and baggage propagators indicate propagation headers are present
     auto result = propagator->extract(trace_context);
     if (result.ok()) {
       return true;
