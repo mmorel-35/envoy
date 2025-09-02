@@ -47,7 +47,7 @@ public:
 
   /**
    * Generates a random 64-bit integer using default time source.
-   * 
+   *
    * @return A randomly-generated 64-bit integer.
    */
   static uint64_t generateRandom64();

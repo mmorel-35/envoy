@@ -54,7 +54,8 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
 
   std::string trace_id_str(parts[1]);
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Common::Utils::Trace::parseTraceId(trace_id_str, trace_id_high, trace_id_low)) {
+  if (!Extensions::Tracers::Common::Utils::Trace::parseTraceId(trace_id_str, trace_id_high,
+                                                               trace_id_low)) {
     return absl::InvalidArgumentError("Invalid W3C trace ID format");
   }
 
@@ -95,8 +96,7 @@ std::string W3CTraceContextPropagator::formatTraceparent(
 
   // 128-bit trace ID (32 hex chars)
   std::string trace_id =
-      Hex::uint64ToHex(span_context.traceIdHigh()) +
-      Hex::uint64ToHex(span_context.traceId());
+      Hex::uint64ToHex(span_context.traceIdHigh()) + Hex::uint64ToHex(span_context.traceId());
 
   // 64-bit parent ID (16 hex chars) - use current span ID as it becomes the parent for downstream
   std::string parent_id = Hex::uint64ToHex(span_context.id());
