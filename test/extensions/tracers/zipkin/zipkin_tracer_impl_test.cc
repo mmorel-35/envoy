@@ -7,7 +7,7 @@
 
 #include "source/common/http/headers.h"
 #include "source/common/http/message_impl.h"
-#include "source/extensions/tracers/common/utils/trace_id_utils.h"
+#include "source/extensions/tracers/common/utils/trace.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"
 #include "source/extensions/tracers/zipkin/zipkin_tracer_impl.h"
 

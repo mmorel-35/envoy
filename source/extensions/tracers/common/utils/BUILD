@@ -9,9 +9,9 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "trace_id_lib",
-    srcs = ["trace_id_utils.cc"],
-    hdrs = ["trace_id_utils.h"],
+    name = "trace_lib",
+    srcs = ["trace.cc"],
+    hdrs = ["trace.h"],
     deps = [
         "//envoy/common:time_interface",
         "@com_google_absl//absl/strings",

@@ -2,7 +2,7 @@
 
 #include "source/common/common/hex.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/tracers/common/utils/trace_id_utils.h"
+#include "source/extensions/tracers/common/utils/trace.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"

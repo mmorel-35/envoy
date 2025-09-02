@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/common/utils/trace_id_utils.h"
+#include "source/extensions/tracers/common/utils/trace.h"
 
 #include <chrono>
 #include <random>
