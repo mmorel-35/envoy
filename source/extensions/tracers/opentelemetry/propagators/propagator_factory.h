@@ -5,9 +5,6 @@
 #include "envoy/api/api.h"
 
 #include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
-#include "source/extensions/tracers/opentelemetry/propagators/w3c/w3c_trace_context_propagator.h"
-#include "source/extensions/tracers/opentelemetry/propagators/b3/b3_propagator.h"
-#include "source/extensions/tracers/opentelemetry/propagators/w3c/baggage_propagator.h"
 
 namespace Envoy {
 namespace Extensions {
