@@ -143,7 +143,7 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
 
   // Create the tracer in Thread Local Storage.
   tls_slot_ptr_->set([opentelemetry_config, &factory_context, this, resource_ptr,
-                      sampler, propagator = std::move(propagator)](Event::Dispatcher& dispatcher) mutable {
+                      sampler, propagator = std::make_shared<CompositePropagatorPtr>(std::move(propagator))](Event::Dispatcher& dispatcher) mutable {
     OpenTelemetryTraceExporterPtr exporter;
     if (opentelemetry_config.has_grpc_service()) {
       auto factory_or_error =
@@ -165,7 +165,7 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
         std::make_unique<Tracer>(std::move(exporter), factory_context.timeSource(),
                                  factory_context.api().randomGenerator(), factory_context.runtime(),
                                  dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size,
-                                 std::move(propagator));
+                                 std::move(*propagator));
     return std::make_shared<TlsTracer>(std::move(tracer));
   });
 }

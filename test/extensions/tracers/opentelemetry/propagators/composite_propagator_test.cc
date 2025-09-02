@@ -81,7 +81,7 @@ TEST_F(CompositePropagatorTest, ExtractFailsWithNoValidHeaders) {
 }
 
 TEST_F(CompositePropagatorTest, InjectUsesAllPropagatorsExceptBaggage) {
-  SpanContext span_context("00000000000000000000000000000001", "0000000000000002", true,
+  SpanContext span_context("00", "00000000000000000000000000000001", "0000000000000002", true,
                            "vendor=state");
   Tracing::TestTraceContextImpl trace_context{};
 
@@ -99,7 +99,7 @@ TEST_F(CompositePropagatorTest, InjectUsesAllPropagatorsExceptBaggage) {
   EXPECT_EQ(trace_context.get("X-B3-Sampled"), "1");
 
   // Should NOT inject baggage headers (baggage propagator is skipped for injection)
-  EXPECT_TRUE(trace_context.get("baggage").empty());
+  EXPECT_TRUE(!trace_context.get("baggage") || trace_context.get("baggage")->empty());
 }
 
 TEST_F(CompositePropagatorTest, PropagationHeaderPresentWithW3C) {
