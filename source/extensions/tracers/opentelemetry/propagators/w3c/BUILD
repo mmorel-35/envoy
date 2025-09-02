@@ -21,7 +21,7 @@ envoy_cc_library(
     deps = [
         "//source/common/http:header_map_lib",
         "//source/common/tracing:trace_context_lib",
-        "//source/extensions/tracers/opentelemetry/propagators:propagator_lib",
+        "//source/extensions/tracers/opentelemetry/propagators:propagator_interface_lib",
         "@io_opentelemetry_cpp//api",
     ],
 )
