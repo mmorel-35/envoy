@@ -4,6 +4,7 @@
 
 #include "envoy/api/api.h"
 
+#include "source/common/common/logger.h"
 #include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 
 namespace Envoy {
@@ -14,7 +15,7 @@ namespace OpenTelemetry {
 /**
  * Factory for creating propagators from configuration.
  */
-class PropagatorFactory {
+class PropagatorFactory : public Logger::Loggable<Logger::Id::tracing> {
 public:
   /**
    * Create a composite propagator from configuration and environment variables.
