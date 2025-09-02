@@ -7,7 +7,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 using testing::HasSubstr;
@@ -153,6 +153,6 @@ TEST_F(BaggagePropagatorTest, ParseEmptyBaggageEntries) {
 }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy
