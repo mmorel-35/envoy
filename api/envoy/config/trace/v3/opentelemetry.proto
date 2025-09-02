@@ -21,7 +21,7 @@ option (udpa.annotations.file_status).package_version_status = ACTIVE;
 
 // Configuration for the OpenTelemetry tracer.
 //  [#extension: envoy.tracers.opentelemetry]
-// [#next-free-field: 7]
+// [#next-free-field: 8]
 message OpenTelemetryConfig {
   // The upstream gRPC cluster that will receive OTLP traces.
   // Note that the tracer drops traces if the server does not read data fast enough.
@@ -64,4 +64,22 @@ message OpenTelemetryConfig {
   // This field specifies the maximum number of spans that can be cached. If not specified, the
   // default is 1024.
   google.protobuf.UInt32Value max_cache_size = 6;
+
+  // List of trace context propagators to be used by the OpenTelemetry tracer.
+  // The propagators are tried in order for trace context extraction from incoming requests.
+  // All configured propagators are used for trace context injection into outgoing requests.
+  //
+  // Priority (highest to lowest):
+  // 1. Explicit configuration (this field)
+  // 2. OTEL_PROPAGATORS environment variable (comma-separated list)
+  // 3. Default: ["tracecontext"] for W3C Trace Context propagation
+  //
+  // Supported propagators:
+  // - "tracecontext": W3C Trace Context (traceparent/tracestate headers)
+  // - "baggage": W3C Baggage (baggage header)  
+  // - "b3": Zipkin B3 (auto-detects single and multi-header formats)
+  //
+  // Example: ["tracecontext", "baggage", "b3"]
+  // Environment example: OTEL_PROPAGATORS=tracecontext,baggage,b3
+  repeated string propagators = 7;
 }
