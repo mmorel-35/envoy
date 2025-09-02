@@ -1,7 +1,7 @@
-#include "source/extensions/propagators/propagator.h"
-#include "source/extensions/propagators/b3/b3_propagator.h"
-#include "source/extensions/propagators/w3c/baggage_propagator.h"
-#include "source/extensions/propagators/w3c/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/baggage_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/w3c_trace_context_propagator.h"
 
 #include "test/test_common/utility.h"
 
@@ -11,6 +11,7 @@
 namespace Envoy {
 namespace Extensions {
 namespace Propagators {
+namespace OpenTelemetry {
 
 class CompositePropagatorTest : public testing::Test {
 public:
@@ -93,6 +94,7 @@ TEST_F(CompositePropagatorTest, InjectsAllFormats) {
   EXPECT_EQ("1", b3_sampled.value());
 }
 
+} // namespace OpenTelemetry
 } // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

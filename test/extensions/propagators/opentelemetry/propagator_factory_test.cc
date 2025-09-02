@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/propagator_factory.h"
+#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
 
 #include "test/mocks/api/mocks.h"
 #include "test/test_common/environment.h"
@@ -10,6 +10,7 @@
 namespace Envoy {
 namespace Extensions {
 namespace Propagators {
+namespace OpenTelemetry {
 
 using testing::Return;
 using testing::ReturnRef;
@@ -90,6 +91,7 @@ TEST_F(PropagatorFactoryTest, CreatePropagatorsWithEmptyNames) {
   EXPECT_NE(nullptr, propagator);
 }
 
+} // namespace OpenTelemetry
 } // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

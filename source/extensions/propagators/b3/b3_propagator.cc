@@ -3,7 +3,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_split.h"
 #include "source/common/common/logger.h"
-#include "source/extensions/propagators/type_converter.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -70,7 +69,7 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
   if (parts.size() < 2) {
     // Handle sampling-only headers like "0", "1", "d"
     if (parts.size() == 1) {
-      auto sampling = TypeConverter::parseB3SamplingState(parts[0]);
+      auto sampling = parseB3SamplingState(parts[0]);
       if (sampling.has_value()) {
         return absl::InvalidArgumentError("B3 single header contains only sampling state, no trace context");
       }
@@ -79,13 +78,13 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
   }
 
   // Parse trace ID (required)
-  TraceId trace_id = TypeConverter::toTraceId(parts[0]);
+  TraceId trace_id(parts[0]);
   if (!trace_id.isValid()) {
     return absl::InvalidArgumentError("Invalid trace ID in B3 single header");
   }
 
   // Parse span ID (required)
-  SpanId span_id = TypeConverter::toSpanId(parts[1]);
+  SpanId span_id(parts[1]);
   if (!span_id.isValid()) {
     return absl::InvalidArgumentError("Invalid span ID in B3 single header");
   }
@@ -93,7 +92,7 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
   // Parse sampling state (optional, defaults to not sampled)
   TraceFlags trace_flags;
   if (parts.size() > 2 && !parts[2].empty()) {
-    auto sampling = TypeConverter::parseB3SamplingState(parts[2]);
+    auto sampling = parseB3SamplingState(parts[2]);
     if (sampling.has_value()) {
       trace_flags.setSampled(sampling.value());
     }
@@ -102,7 +101,7 @@ absl::StatusOr<SpanContext> B3Propagator::extractSingleHeader(const Tracing::Tra
   // Parse parent span ID (optional)
   absl::optional<SpanId> parent_span_id;
   if (parts.size() > 3 && !parts[3].empty()) {
-    SpanId parent_id = TypeConverter::toSpanId(parts[3]);
+    SpanId parent_id(parts[3]);
     if (parent_id.isValid()) {
       parent_span_id = parent_id;
     }
@@ -128,13 +127,13 @@ absl::StatusOr<SpanContext> B3Propagator::extractMultiHeader(const Tracing::Trac
   }
 
   // Parse trace ID (required)
-  TraceId trace_id = TypeConverter::toTraceId(trace_id_value.value());
+  TraceId trace_id(trace_id_value.value());
   if (!trace_id.isValid()) {
     return absl::InvalidArgumentError("Invalid trace ID in B3 multi-header");
   }
 
   // Parse span ID (required)
-  SpanId span_id = TypeConverter::toSpanId(span_id_value.value());
+  SpanId span_id(span_id_value.value());
   if (!span_id.isValid()) {
     return absl::InvalidArgumentError("Invalid span ID in B3 multi-header");
   }
@@ -146,12 +145,12 @@ absl::StatusOr<SpanContext> B3Propagator::extractMultiHeader(const Tracing::Trac
 
   // Check flags first (debug flag has priority)
   if (flags_value.has_value()) {
-    auto sampling = TypeConverter::parseB3SamplingState(flags_value.value());
+    auto sampling = parseB3SamplingState(flags_value.value());
     if (sampling.has_value()) {
       trace_flags.setSampled(sampling.value());
     }
   } else if (sampled_value.has_value()) {
-    auto sampling = TypeConverter::parseB3SamplingState(sampled_value.value());
+    auto sampling = parseB3SamplingState(sampled_value.value());
     if (sampling.has_value()) {
       trace_flags.setSampled(sampling.value());
     }
@@ -161,7 +160,7 @@ absl::StatusOr<SpanContext> B3Propagator::extractMultiHeader(const Tracing::Trac
   absl::optional<SpanId> parent_span_id;
   auto parent_span_id_value = trace_context.getByKey(x_b3_parent_span_id_header_.key());
   if (parent_span_id_value.has_value()) {
-    SpanId parent_id = TypeConverter::toSpanId(parent_span_id_value.value());
+    SpanId parent_id(parent_span_id_value.value());
     if (parent_id.isValid()) {
       parent_span_id = parent_id;
     }

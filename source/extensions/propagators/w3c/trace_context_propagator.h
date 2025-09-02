@@ -1,7 +1,6 @@
 #pragma once
 
 #include "source/extensions/propagators/generic_propagator.h"
-#include "source/extensions/propagators/type_converter.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 namespace Envoy {

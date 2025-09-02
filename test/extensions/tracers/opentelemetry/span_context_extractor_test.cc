@@ -1,6 +1,6 @@
 #include "source/common/tracing/http_tracer_impl.h"
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
-#include "source/extensions/propagators/propagator_factory.h"
+#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
 
 #include "test/mocks/api/mocks.h"
 #include "test/test_common/status_utility.h"
@@ -30,9 +30,9 @@ public:
 
 protected:
   // Helper to create a default propagator for testing
-  Propagators::CompositePropagatorPtr createDefaultPropagator() {
+  Propagators::OpenTelemetry::CompositePropagatorPtr createDefaultPropagator() {
     std::vector<std::string> propagator_names = {"tracecontext"};
-    return Propagators::PropagatorFactory::createPropagators(propagator_names, api_);
+    return Propagators::OpenTelemetry::PropagatorFactory::createPropagators(propagator_names, api_);
   }
 
   NiceMock<Api::MockApi> api_;

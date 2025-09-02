@@ -206,3 +206,27 @@ private:
 } // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy
+
+// Utility functions for propagator implementations
+namespace Envoy {
+namespace Extensions {
+namespace Propagators {
+
+/**
+ * Parse B3 sampling state to boolean according to B3 specification.
+ * Handles "0" (not sampled), "1" (sampled), "d" (debug/sampled).
+ * @param sampling_state The B3 sampling state value.
+ * @return Optional boolean indicating sampling decision, nullopt if invalid.
+ */
+inline absl::optional<bool> parseB3SamplingState(absl::string_view sampling_state) {
+  if (sampling_state == "0") {
+    return false;
+  } else if (sampling_state == "1" || sampling_state == "d") {
+    return true;
+  }
+  return absl::nullopt;
+}
+
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy

@@ -324,6 +324,14 @@ new_features:
     dependency on OpenTelemetry propagator factory. Fixed broken include paths throughout the propagator system
     to ensure proper architectural separation. This change provides cleaner separation of concerns while maintaining
     identical functionality for all tracers.
+- area: tracing
+  change: |
+    Completed cleanup of propagator architecture by removing root-level compatibility files and moving test files
+    to provider-specific directories. Eliminated duplicated propagator interfaces (``propagator.h``, ``propagator_factory.h``, 
+    ``propagator_adapter.h``, ``type_converter.h``, ``generic_propagator_factory.h``) that were no longer needed after 
+    architectural refactoring. Moved composite propagator and factory tests to ``/test/extensions/propagators/opentelemetry/`` 
+    to align with the provider-specific architecture. This cleanup removes ~500 lines of redundant code while maintaining 
+    full functionality and ensures each tracer implementation uses its own dedicated propagator factory.
 - area: composite
   change: |
     Allow composite filter to be configured to insert a filter into filter chain outside of the decode headers lifecycle phase.

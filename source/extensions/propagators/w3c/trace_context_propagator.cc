@@ -5,7 +5,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/numbers.h"
 #include "source/common/common/logger.h"
-#include "source/extensions/propagators/type_converter.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -68,7 +67,7 @@ absl::StatusOr<SpanContext> TraceContextPropagator::parseTraceparent(const std::
     return absl::InvalidArgumentError("Invalid trace ID length in traceparent");
   }
   
-  TraceId trace_id = TypeConverter::toTraceId(trace_id_str);
+  TraceId trace_id(trace_id_str);
   if (!trace_id.isValid()) {
     return absl::InvalidArgumentError("Invalid trace ID in traceparent");
   }
@@ -79,7 +78,7 @@ absl::StatusOr<SpanContext> TraceContextPropagator::parseTraceparent(const std::
     return absl::InvalidArgumentError("Invalid parent ID length in traceparent");
   }
   
-  SpanId span_id = TypeConverter::toSpanId(span_id_str);
+  SpanId span_id(span_id_str);
   if (!span_id.isValid()) {
     return absl::InvalidArgumentError("Invalid parent ID in traceparent");
   }
