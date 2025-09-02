@@ -123,6 +123,53 @@ TEST_F(B3PropagatorTest, Fields) {
   EXPECT_THAT(fields, testing::Contains("X-B3-ParentSpanId"));
 }
 
+TEST_F(B3PropagatorTest, ExtractSingleHeaderWithDebugFlag) {
+  Tracing::TestTraceContextImpl trace_context{{"b3", "0000000000000001-0000000000000002-d"}};
+
+  auto result = propagator_->extract(trace_context);
+
+  EXPECT_TRUE(result.ok());
+  EXPECT_EQ(result->traceId(), "00000000000000000000000000000001");
+  EXPECT_EQ(result->spanId(), "0000000000000002");
+  EXPECT_TRUE(result->sampled()); // Debug flag implies sampling
+}
+
+TEST_F(B3PropagatorTest, ExtractSingleHeaderWithParentAndDebug) {
+  Tracing::TestTraceContextImpl trace_context{{"b3", "0000000000000001-0000000000000002-d-0000000000000005"}};
+
+  auto result = propagator_->extract(trace_context);
+
+  EXPECT_TRUE(result.ok());
+  EXPECT_EQ(result->traceId(), "00000000000000000000000000000001");
+  EXPECT_EQ(result->spanId(), "0000000000000002");
+  EXPECT_TRUE(result->sampled()); // Debug flag implies sampling
+  // Note: Parent ID is not included in OpenTelemetry SpanContext but should be readable from headers
+}
+
+TEST_F(B3PropagatorTest, ExtractSamplingOnlyHeadersReturnError) {
+  // These should return errors as they don't contain valid trace context
+  {
+    Tracing::TestTraceContextImpl trace_context{{"b3", "0"}};
+    auto result = propagator_->extract(trace_context);
+    EXPECT_FALSE(result.ok());
+    EXPECT_THAT(result.status().message(), HasSubstr("not sampled"));
+  }
+  
+  {
+    Tracing::TestTraceContextImpl trace_context{{"b3", "1"}};
+    auto result = propagator_->extract(trace_context);
+    EXPECT_FALSE(result.ok());
+    EXPECT_THAT(result.status().message(), HasSubstr("debug flag"));
+  }
+  
+  {
+    Tracing::TestTraceContextImpl trace_context{{"b3", "d"}};
+    auto result = propagator_->extract(trace_context);
+    EXPECT_FALSE(result.ok());
+    EXPECT_THAT(result.status().message(), HasSubstr("debug flag"));
+  }
+}
+
 TEST_F(B3PropagatorTest, Name) {
   EXPECT_EQ("b3", propagator_->name());
 }

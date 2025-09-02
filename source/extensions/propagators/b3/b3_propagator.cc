@@ -38,7 +38,7 @@ std::string normalizeB3TraceId(const absl::string_view& trace_id) {
 }
 
 bool parseB3Sampled(const absl::string_view& sampled_str) {
-  if (sampled_str == "1" || sampled_str == "true") {
+  if (sampled_str == "1" || sampled_str == "true" || sampled_str == "d") {
     return true;
   }
   return false;
@@ -76,6 +76,9 @@ B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
     return absl::InvalidArgumentError("B3 not sampled");
   }
   if (header_value == "1") {
+    return absl::InvalidArgumentError("B3 debug flag without trace context");
+  }
+  if (header_value == "d") {
     return absl::InvalidArgumentError("B3 debug flag without trace context");
   }
 

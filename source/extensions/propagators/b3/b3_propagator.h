@@ -8,9 +8,19 @@ namespace Extensions {
 namespace Propagators {
 
 /**
- * Zipkin B3 propagator.
- * Supports both single header (b3) and multi-header (X-B3-*) formats.
- * Auto-detects format on extraction, injects both formats.
+ * B3 propagator supporting both single header (b3) and multi-header (X-B3-*) formats.
+ * Auto-detects format on extraction, injects both formats for maximum compatibility.
+ * 
+ * Handles all B3 specification features:
+ * - Single header format: {TraceId}-{SpanId}-{SamplingState}-{ParentSpanId}
+ * - Multi-header format: X-B3-TraceId, X-B3-SpanId, X-B3-Sampled, X-B3-Flags, X-B3-ParentSpanId
+ * - Debug flag support: "d" implies sampling in both single and multi-header formats
+ * - Sampling-only headers: "0", "1", "d" without trace context return appropriate errors
+ * 
+ * Note: Parent span ID information is extracted from headers but not included in the
+ * returned OpenTelemetry SpanContext (which doesn't support parent IDs). Tracers that
+ * need parent ID information should extract it separately from the headers.
+ * 
  * See: https://github.com/openzipkin/b3-propagation
  */
 class B3Propagator : public TextMapPropagator {
