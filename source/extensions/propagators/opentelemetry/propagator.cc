@@ -2,7 +2,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 CompositePropagator::CompositePropagator(std::vector<TextMapPropagatorPtr> propagators)
@@ -45,6 +45,6 @@ bool CompositePropagator::propagationHeaderPresent(const Tracing::TraceContext& 
 }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

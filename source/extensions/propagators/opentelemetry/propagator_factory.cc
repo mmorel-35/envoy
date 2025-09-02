@@ -1,19 +1,19 @@
-#include "source/extensions/tracers/opentelemetry/propagators/propagator_factory.h"
+#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
 
 #include "envoy/config/core/v3/base.pb.h"
 
 #include "source/common/common/logger.h"
 #include "source/common/config/datasource.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/tracers/opentelemetry/propagators/w3c/w3c_trace_context_propagator.h"
-#include "source/extensions/tracers/opentelemetry/propagators/b3/b3_propagator.h"
-#include "source/extensions/tracers/opentelemetry/propagators/w3c/baggage_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/baggage_propagator.h"
 
 #include "absl/strings/str_split.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 constexpr absl::string_view kOtelPropagatorsEnv = "OTEL_PROPAGATORS";
@@ -129,6 +129,6 @@ void PropagatorFactory::setGlobalTextMapPropagator(CompositePropagatorPtr propag
 }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

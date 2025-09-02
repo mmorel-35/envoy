@@ -12,7 +12,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 namespace {
@@ -228,6 +228,6 @@ bool BaggagePropagator::isValidBaggageValue(absl::string_view value) {
 }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

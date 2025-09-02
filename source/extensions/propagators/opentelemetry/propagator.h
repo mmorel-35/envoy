@@ -8,7 +8,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 /**
@@ -96,6 +96,6 @@ private:
 using CompositePropagatorPtr = std::unique_ptr<CompositePropagator>;
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

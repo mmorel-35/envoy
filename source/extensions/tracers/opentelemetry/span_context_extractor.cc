@@ -9,7 +9,7 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context, Propagators::CompositePropagatorPtr propagator)
+SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context, Propagators::OpenTelemetry::CompositePropagatorPtr propagator)
     : trace_context_(trace_context), propagator_(std::move(propagator)) {}
 
 SpanContextExtractor::~SpanContextExtractor() = default;

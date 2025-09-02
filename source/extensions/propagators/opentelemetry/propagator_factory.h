@@ -5,11 +5,11 @@
 #include "envoy/api/api.h"
 
 #include "source/common/common/logger.h"
-#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 /**
@@ -71,6 +71,6 @@ private:
 };
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

@@ -19,7 +19,7 @@
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
 #include "source/extensions/tracers/opentelemetry/trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/tracer.h"
-#include "source/extensions/propagators/propagator_factory.h"
+#include "source/extensions/propagators/opentelemetry/propagator_factory.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 #include "opentelemetry/proto/trace/v1/trace.pb.h"
@@ -58,7 +58,7 @@ std::vector<std::string> resolvePropagatorNames(
   }
   
   // Use temporary propagator to get resolved names, then extract them
-  auto temp_propagator = Propagators::PropagatorFactory::createPropagators(config_propagator_names, api);
+  auto temp_propagator = Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators(config_propagator_names, api);
   
   // Since we can't easily extract the names from the composite propagator,
   // we'll manually apply the same resolution logic here
@@ -79,7 +79,7 @@ std::vector<std::string> resolvePropagatorNames(
   }
 
   if (!env_value.empty()) {
-    return Propagators::PropagatorFactory::parseOtelPropagatorsEnv(env_value);
+    return Extensions::Propagators::OpenTelemetry::PropagatorFactory::parseOtelPropagatorsEnv(env_value);
   }
 
   // Default
@@ -138,7 +138,7 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
   }
   
   // Use new factory method that supports OTEL_PROPAGATORS environment variable
-  Propagators::CompositePropagatorPtr propagator = Propagators::PropagatorFactory::createPropagators(
+  Propagators::OpenTelemetry::CompositePropagatorPtr propagator = Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators(
       config_propagator_names, factory_context.api());
 
   // Create the tracer in Thread Local Storage.
@@ -181,7 +181,7 @@ Tracing::SpanPtr Driver::startSpan(const Tracing::Config& config,
   // Create a copy of the propagator for the span context extractor
   // Note: We need to create a new propagator instance since SpanContextExtractor expects ownership
   // Use the resolved propagator names which include environment variable resolution
-  auto extractor_propagator = Propagators::PropagatorFactory::createPropagators(resolved_propagator_names_);
+  auto extractor_propagator = Extensions::Propagators::OpenTelemetry::PropagatorFactory::createPropagators(resolved_propagator_names_);
   SpanContextExtractor extractor(trace_context, std::move(extractor_propagator));
   
   const auto span_kind = getSpanKind(config);

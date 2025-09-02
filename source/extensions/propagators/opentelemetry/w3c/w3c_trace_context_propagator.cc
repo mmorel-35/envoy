@@ -10,7 +10,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 namespace {
 
@@ -121,6 +121,6 @@ std::vector<std::string> W3CTraceContextPropagator::fields() const {
 std::string W3CTraceContextPropagator::name() const { return "tracecontext"; }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy
