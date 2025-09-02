@@ -9,6 +9,9 @@ namespace Extensions {
 namespace Propagators {
 namespace OpenTelemetry {
 
+// Use the OpenTelemetry SpanContext type for this interface
+using SpanContext = Extensions::Tracers::OpenTelemetry::SpanContext;
+
 /**
  * OpenTelemetry B3 propagator that reuses the base B3 propagator implementation.
  * Supports both single header (b3) and multi-header (X-B3-*) formats through composition.

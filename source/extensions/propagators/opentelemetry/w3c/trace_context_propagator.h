@@ -9,6 +9,9 @@ namespace Extensions {
 namespace Propagators {
 namespace OpenTelemetry {
 
+// Use the OpenTelemetry SpanContext type for this interface
+using SpanContext = Extensions::Tracers::OpenTelemetry::SpanContext;
+
 /**
  * OpenTelemetry W3C Trace Context propagator that reuses the base W3C propagator implementation.
  * Handles traceparent and tracestate headers through composition.
