@@ -2,7 +2,7 @@
 
 #include "source/common/common/hex.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/tracers/zipkin/util.h"
+#include "source/extensions/propagators/common/trace_id_utils.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -54,7 +54,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
 
   std::string trace_id_str(parts[1]);
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseTraceId(trace_id_str, trace_id_high, trace_id_low)) {
+  if (!Common::TraceIdUtils::parseTraceId(trace_id_str, trace_id_high, trace_id_low)) {
     return absl::InvalidArgumentError("Invalid W3C trace ID format");
   }
 
@@ -64,7 +64,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
   }
 
   uint64_t parent_id = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseSpanId(std::string(parts[2]), parent_id)) {
+  if (!Common::TraceIdUtils::parseSpanId(std::string(parts[2]), parent_id)) {
     return absl::InvalidArgumentError("Invalid W3C parent ID format");
   }
 
@@ -82,7 +82,7 @@ W3CTraceContextPropagator::parseTraceparent(absl::string_view traceparent) {
 
   // For Zipkin, we generate a new span ID since the parent ID from W3C is the calling span
   // In Zipkin's model, this would be the parent_id, and we need to generate a new span ID
-  uint64_t span_id = Extensions::Tracers::Zipkin::Util::generateRandom64();
+  uint64_t span_id = Common::TraceIdUtils::generateRandom64();
 
   return Extensions::Tracers::Zipkin::SpanContext(trace_id_high, trace_id_low, span_id, parent_id,
                                                   sampled);
@@ -95,11 +95,11 @@ std::string W3CTraceContextPropagator::formatTraceparent(
 
   // 128-bit trace ID (32 hex chars)
   std::string trace_id =
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceIdHigh()) +
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceId());
+      Hex::uint64ToHex(span_context.traceIdHigh()) +
+      Hex::uint64ToHex(span_context.traceId());
 
   // 64-bit parent ID (16 hex chars) - use current span ID as it becomes the parent for downstream
-  std::string parent_id = Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.id());
+  std::string parent_id = Hex::uint64ToHex(span_context.id());
 
   // 8-bit trace flags (2 hex chars)
   uint8_t flags = span_context.sampled() ? 0x01 : 0x00;

@@ -23,7 +23,6 @@ envoy_cc_library(
     deps = [
         "//envoy/common:time_interface",
         "//source/common/common:byte_order_lib",
-        "//source/common/common:hex_lib",
         "//source/common/common:utility_lib",
         "//source/common/protobuf:utility_lib",
         "@com_google_absl//absl/strings",

@@ -2,7 +2,7 @@
 
 #include "source/common/common/hex.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/tracers/zipkin/util.h"
+#include "source/extensions/propagators/common/trace_id_utils.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -65,14 +65,14 @@ B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
 
   // Parse trace ID (parts[0])
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseTraceId(std::string(parts[0]), trace_id_high,
-                                                       trace_id_low)) {
+  if (!Common::TraceIdUtils::parseTraceId(std::string(parts[0]), trace_id_high,
+                                         trace_id_low)) {
     return absl::InvalidArgumentError("Invalid trace ID in B3 header");
   }
 
   // Parse span ID (parts[1])
   uint64_t span_id = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseSpanId(std::string(parts[1]), span_id)) {
+  if (!Common::TraceIdUtils::parseSpanId(std::string(parts[1]), span_id)) {
     return absl::InvalidArgumentError("Invalid span ID in B3 header");
   }
 
@@ -89,7 +89,7 @@ B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
   // Parse parent span ID (parts[3] if present)
   uint64_t parent_span_id = 0;
   if (parts.size() > 3) {
-    if (!Extensions::Tracers::Zipkin::Util::parseSpanId(std::string(parts[3]), parent_span_id)) {
+    if (!Common::TraceIdUtils::parseSpanId(std::string(parts[3]), parent_span_id)) {
       return absl::InvalidArgumentError("Invalid parent span ID in B3 header");
     }
   }
@@ -109,14 +109,14 @@ B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
 
   // Parse trace ID
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseTraceId(trace_id_header.value(), trace_id_high,
-                                                       trace_id_low)) {
+  if (!Common::TraceIdUtils::parseTraceId(trace_id_header.value(), trace_id_high,
+                                         trace_id_low)) {
     return absl::InvalidArgumentError("Invalid trace ID in B3 headers");
   }
 
   // Parse span ID
   uint64_t span_id = 0;
-  if (!Extensions::Tracers::Zipkin::Util::parseSpanId(span_id_header.value(), span_id)) {
+  if (!Common::TraceIdUtils::parseSpanId(span_id_header.value(), span_id)) {
     return absl::InvalidArgumentError("Invalid span ID in B3 headers");
   }
 
@@ -124,8 +124,8 @@ B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
   uint64_t parent_span_id = 0;
   auto parent_span_id_header = trace_context.getByKey(B3_PARENT_SPAN_ID_HEADER);
   if (parent_span_id_header.has_value()) {
-    if (!Extensions::Tracers::Zipkin::Util::parseSpanId(parent_span_id_header.value(),
-                                                        parent_span_id)) {
+    if (!Common::TraceIdUtils::parseSpanId(parent_span_id_header.value(),
+                                          parent_span_id)) {
       return absl::InvalidArgumentError("Invalid parent span ID in B3 headers");
     }
   }
@@ -154,9 +154,9 @@ B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
 void B3Propagator::injectSingleHeader(const Extensions::Tracers::Zipkin::SpanContext& span_context,
                                       Tracing::TraceContext& trace_context) {
   std::string b3_value =
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceIdHigh()) +
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceId()) + "-" +
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.id());
+      Hex::uint64ToHex(span_context.traceIdHigh()) +
+      Hex::uint64ToHex(span_context.traceId()) + "-" +
+      Hex::uint64ToHex(span_context.id());
 
   if (span_context.sampled()) {
     b3_value += "-1";
@@ -165,7 +165,7 @@ void B3Propagator::injectSingleHeader(const Extensions::Tracers::Zipkin::SpanCon
   }
 
   if (span_context.parentId() != 0) {
-    b3_value += "-" + Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.parentId());
+    b3_value += "-" + Hex::uint64ToHex(span_context.parentId());
   }
 
   trace_context.setByKey(B3_SINGLE_HEADER, b3_value);
@@ -175,19 +175,19 @@ void B3Propagator::injectMultiHeader(const Extensions::Tracers::Zipkin::SpanCont
                                      Tracing::TraceContext& trace_context) {
   // Inject trace ID (full 128-bit)
   std::string trace_id =
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceIdHigh()) +
-      Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.traceId());
+      Hex::uint64ToHex(span_context.traceIdHigh()) +
+      Hex::uint64ToHex(span_context.traceId());
   trace_context.setByKey(B3_TRACE_ID_HEADER, trace_id);
 
   // Inject span ID
   trace_context.setByKey(B3_SPAN_ID_HEADER,
-                         Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.id()));
+                         Hex::uint64ToHex(span_context.id()));
 
   // Inject parent span ID if present
   if (span_context.parentId() != 0) {
     trace_context.setByKey(
         B3_PARENT_SPAN_ID_HEADER,
-        Extensions::Tracers::Zipkin::Util::uint64ToHexString(span_context.parentId()));
+        Hex::uint64ToHex(span_context.parentId()));
   }
 
   // Inject sampling state

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "source/extensions/propagators/zipkin/propagator.h"
-#include "source/extensions/tracers/zipkin/util.h"
+#include "source/extensions/propagators/common/trace_id_utils.h"
 
 namespace Envoy {
 namespace Extensions {
