@@ -101,8 +101,8 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
     // - When empty (default): use PropagatorFactory::createDefaultPropagators()
     // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
-        ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
-        : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
+        ? Extensions::Propagators::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Propagators::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
@@ -173,8 +173,8 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
     // - When empty (default): use PropagatorFactory::createDefaultPropagators()
     // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
-        ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
-        : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
+        ? Extensions::Propagators::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Propagators::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
