@@ -14,7 +14,7 @@ namespace Tracers {
 namespace Zipkin {
 
 /**
- * Utility class with Zipkin-specific serialization methods
+ * Utility class with a few convenient methods
  */
 class Util {
 public:
