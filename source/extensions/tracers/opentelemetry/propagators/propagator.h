@@ -1,6 +1,6 @@
 #pragma once
 
-#include "envoy/tracing/tracer.h"
+#include "envoy/tracing/trace_context.h"
 
 #include "source/common/common/statusor.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
