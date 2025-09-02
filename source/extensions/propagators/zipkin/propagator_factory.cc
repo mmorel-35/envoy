@@ -3,7 +3,6 @@
 #include "source/common/common/logger.h"
 #include "source/extensions/propagators/zipkin/b3/propagator.h"
 #include "source/extensions/propagators/zipkin/w3c/trace_context_propagator.h"
-#include "source/extensions/propagators/propagator_factory_helper.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -12,18 +11,23 @@ namespace Zipkin {
 
 CompositePropagatorPtr
 PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_names) {
-  return createCompositePropagator<TextMapPropagatorPtr, CompositePropagatorPtr>(
-    propagator_names,
-    [](const std::string& name) { 
-      if (name == "b3") {
-        return std::make_unique<B3Propagator>();
-      } else if (name == "tracecontext") {
-        return std::make_unique<W3CTraceContextPropagator>();
-      }
-      return TextMapPropagatorPtr{};
-    },
-    []() { return createDefaultPropagators(); }
-  );
+  std::vector<TextMapPropagatorPtr> propagators;
+  
+  for (const auto& name : propagator_names) {
+    auto propagator = createPropagator(name);
+    if (propagator) {
+      propagators.push_back(std::move(propagator));
+    } else {
+      ENVOY_LOG(warn, "Unknown propagator name: {}. Ignoring.", name);
+    }
+  }
+
+  if (propagators.empty()) {
+    ENVOY_LOG(info, "No valid propagators specified, using default");
+    return createDefaultPropagators();
+  }
+
+  return std::make_unique<CompositePropagator>(std::move(propagators));
 }
 
 CompositePropagatorPtr PropagatorFactory::createDefaultPropagators() {
@@ -41,11 +45,6 @@ TextMapPropagatorPtr PropagatorFactory::createPropagator(const std::string& name
   }
   return nullptr;
 }
-
-} // namespace Zipkin
-} // namespace Propagators
-} // namespace Extensions
-} // namespace Envoy
 
 } // namespace Zipkin
 } // namespace Propagators
