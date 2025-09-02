@@ -107,6 +107,18 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
     auto b3_result = b3_propagator->extract(trace_context_);
     if (b3_result.ok()) {
       return b3_result.value().sampled();
+    } else {
+      // Handle special B3 cases that shared propagator treats as errors
+      // but still contain sampling information
+      auto b3_header = Tracing::TraceContextHandler("b3").get(trace_context_);
+      if (b3_header.has_value()) {
+        auto header_value = b3_header.value();
+        if (header_value == "0") {
+          return false; // Explicitly not sampled
+        } else if (header_value == "1" || header_value == "d") {
+          return true; // Debug or explicit sampling
+        }
+      }
     }
   }
 

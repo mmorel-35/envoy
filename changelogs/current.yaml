@@ -304,6 +304,12 @@ new_features:
     Also added support for the ``OTEL_PROPAGATORS`` environment variable, following OpenTelemetry specification priority:
     explicit configuration > environment variable > default. Defaults to ``tracecontext`` when not configured, 
     maintaining backward compatibility.
+- area: tracing
+  change: |
+    Refactored Zipkin tracer to use shared propagator implementations from ``/source/extensions/propagators/``
+    instead of custom B3 parsing logic. This change eliminates code duplication while preserving all existing
+    functionality including parent span ID extraction from B3 headers. The refactoring improves maintainability
+    and ensures consistent propagation behavior across different tracer implementations.
 - area: composite
   change: |
     Allow composite filter to be configured to insert a filter into filter chain outside of the decode headers lifecycle phase.
