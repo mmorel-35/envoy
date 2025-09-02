@@ -4,6 +4,7 @@
 
 #include "source/common/common/assert.h"
 #include "source/common/common/utility.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator_factory.h"
 #include "source/extensions/tracers/zipkin/span_context.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"
 
@@ -88,8 +89,9 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
+    auto w3c_propagator = Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators();
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
-        const_cast<Tracing::TraceContext&>(trace_context_));
+        const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
       auto w3c_span_context = w3c_extractor.extractSpanContext();
       if (w3c_span_context.ok()) {
@@ -152,8 +154,9 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
+    auto w3c_propagator = Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators();
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
-        const_cast<Tracing::TraceContext&>(trace_context_));
+        const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
       auto w3c_span_context = w3c_extractor.extractSpanContext();
       if (w3c_span_context.ok()) {
