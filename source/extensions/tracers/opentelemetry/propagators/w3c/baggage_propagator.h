@@ -72,6 +72,7 @@ private:
   bool isValidBaggageValue(absl::string_view value);
 
   const Tracing::TraceContextHandler baggage_header_;
+};
 
 } // namespace OpenTelemetry
 } // namespace Tracers
