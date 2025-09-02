@@ -11,7 +11,7 @@ namespace Zipkin {
 
 absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
 W3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
-  // Use the base W3C propagator to extract generic span context
+  // Use the base W3C propagator to extract generic span context (Gang of Four Adapter pattern)
   auto generic_result = base_propagator_.extract(trace_context);
   if (!generic_result.ok()) {
     return generic_result.status();
@@ -26,7 +26,7 @@ void W3CTraceContextPropagator::inject(const Extensions::Tracers::Zipkin::SpanCo
   // Convert Zipkin span context to generic span context
   auto generic_span_context = convertToGeneric(span_context);
   
-  // Use the base W3C propagator to inject
+  // Use the base W3C propagator to inject (Gang of Four Adapter pattern)
   base_propagator_.inject(generic_span_context, trace_context);
 }
 
@@ -92,6 +92,11 @@ Extensions::Propagators::SpanContext W3CTraceContextPropagator::convertToGeneric
     "" // tracestate not used in Zipkin
   );
 }
+
+} // namespace Zipkin
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
 
 } // namespace Zipkin
 } // namespace Propagators

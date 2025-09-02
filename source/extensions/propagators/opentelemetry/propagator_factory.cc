@@ -8,6 +8,7 @@
 #include "source/extensions/propagators/opentelemetry/w3c/trace_context_propagator.h"
 #include "source/extensions/propagators/opentelemetry/b3/propagator.h"
 #include "source/extensions/propagators/opentelemetry/w3c/baggage_propagator.h"
+#include "source/extensions/propagators/propagator_factory_helper.h"
 
 #include "absl/strings/str_split.h"
 
@@ -17,6 +18,16 @@ namespace Propagators {
 namespace OpenTelemetry {
 
 constexpr absl::string_view kOtelPropagatorsEnv = "OTEL_PROPAGATORS";
+
+// Gang of Four Strategy pattern - define propagator creators as strategies
+static PropagatorFactoryHelper<TextMapPropagatorPtr, CompositePropagatorPtr>::PropagatorCreatorMap
+getOpenTelemetryPropagatorCreators() {
+  return {
+    {"tracecontext", []() { return std::make_unique<W3CTraceContextPropagator>(); }},
+    {"b3", []() { return std::make_unique<B3Propagator>(); }},
+    {"baggage", []() { return std::make_unique<BaggagePropagator>(); }}
+  };
+}
 
 CompositePropagatorPtr
 PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_names,
@@ -57,23 +68,12 @@ PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_
 
 CompositePropagatorPtr
 PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_names) {
-  std::vector<TextMapPropagatorPtr> propagators;
-
-  for (const auto& name : propagator_names) {
-    auto propagator = createPropagator(name);
-    if (propagator) {
-      propagators.push_back(std::move(propagator));
-    } else {
-      ENVOY_LOG(warn, "Unknown propagator name: {}. Ignoring.", name);
-    }
-  }
-
-  if (propagators.empty()) {
-    ENVOY_LOG(info, "No valid propagators specified, using default W3C Trace Context");
-    return createDefaultPropagators();
-  }
-
-  return std::make_unique<CompositePropagator>(std::move(propagators));
+  // Gang of Four Strategy pattern - use helper with OpenTelemetry-specific strategies
+  return PropagatorFactoryHelper<TextMapPropagatorPtr, CompositePropagatorPtr>::createPropagators(
+    propagator_names,
+    getOpenTelemetryPropagatorCreators(),
+    []() { return createDefaultPropagators(); }
+  );
 }
 
 CompositePropagatorPtr PropagatorFactory::createDefaultPropagators() {
@@ -83,15 +83,10 @@ CompositePropagatorPtr PropagatorFactory::createDefaultPropagators() {
 }
 
 TextMapPropagatorPtr PropagatorFactory::createPropagator(const std::string& name) {
-  if (name == "tracecontext") {
-    return std::make_unique<W3CTraceContextPropagator>();
-  } else if (name == "b3") {
-    return std::make_unique<B3Propagator>();
-  } else if (name == "baggage") {
-    return std::make_unique<BaggagePropagator>();
-  }
-
-  return nullptr;
+  // Use the strategy map to create propagators
+  auto creators = getOpenTelemetryPropagatorCreators();
+  auto it = creators.find(name);
+  return it != creators.end() ? it->second() : nullptr;
 }
 
 std::vector<std::string> PropagatorFactory::parseOtelPropagatorsEnv(const std::string& env_value) {
@@ -127,6 +122,11 @@ void PropagatorFactory::setGlobalTextMapPropagator(CompositePropagatorPtr propag
   }
   global_propagator_ = std::move(propagator);
 }
+
+} // namespace OpenTelemetry
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
 
 } // namespace OpenTelemetry
 } // namespace Propagators

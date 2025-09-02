@@ -11,6 +11,7 @@ namespace Zipkin {
 
 /**
  * Zipkin W3C Trace Context propagator that reuses the base W3C propagator implementation.
+ * Applies Gang of Four Adapter pattern to eliminate code duplication.
  * Implements the W3C Trace Context specification while using Zipkin-specific types through composition.
  *
  * Handles W3C traceparent and tracestate headers:
@@ -35,13 +36,18 @@ public:
   std::string name() const override { return "tracecontext"; }
 
 private:
-  // Conversion helpers
+  // Conversion helpers (Gang of Four Adapter pattern)
   static Extensions::Tracers::Zipkin::SpanContext convertFromGeneric(const Extensions::Propagators::SpanContext& generic_span_context);
   static Extensions::Propagators::SpanContext convertToGeneric(const Extensions::Tracers::Zipkin::SpanContext& zipkin_span_context);
 
-  // Base W3C trace context propagator that handles the actual W3C logic
+  // Base W3C trace context propagator that handles the actual W3C logic (Gang of Four Composition pattern)
   Extensions::Propagators::W3C::TraceContextPropagator base_propagator_;
 };
+
+} // namespace Zipkin
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
 
 } // namespace Zipkin
 } // namespace Propagators

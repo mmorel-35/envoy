@@ -14,6 +14,7 @@ namespace OpenTelemetry {
 
 /**
  * Factory for creating propagators from configuration.
+ * Uses Gang of Four Strategy pattern to eliminate code duplication with other propagator factories.
  */
 class PropagatorFactory : public Logger::Loggable<Logger::Id::tracing> {
 public:

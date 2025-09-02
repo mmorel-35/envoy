@@ -41,6 +41,7 @@ envoy_cc_library(
         "//source/common/config:datasource_lib",
         "//source/extensions/propagators/opentelemetry/b3:b3_propagator_lib",
         "//source/extensions/propagators/opentelemetry/w3c:w3c_propagators_lib",
+        "//source/extensions/propagators:propagator_factory_helper_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@envoy_api//envoy/config/trace/v3:pkg_cc_proto",
     ],

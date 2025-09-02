@@ -14,13 +14,14 @@ using SpanContext = Extensions::Tracers::OpenTelemetry::SpanContext;
 
 /**
  * OpenTelemetry W3C Trace Context propagator that reuses the base W3C propagator implementation.
+ * Applies Gang of Four Adapter pattern to eliminate code duplication.
  * Handles traceparent and tracestate headers through composition.
  * Converts between generic SpanContext and OpenTelemetry SpanContext types.
  * See: https://www.w3.org/TR/trace-context/
  */
 class W3CTraceContextPropagator : public TextMapPropagator {
 public:
-  W3CTraceContextPropagator();
+  W3CTraceContextPropagator() = default;
 
   // TextMapPropagator
   absl::StatusOr<SpanContext> extract(const Tracing::TraceContext& trace_context) override;
@@ -29,13 +30,18 @@ public:
   std::string name() const override;
 
 private:
-  // Conversion helpers
+  // Conversion helpers (Gang of Four Adapter pattern)
   static SpanContext convertFromGeneric(const Extensions::Propagators::SpanContext& generic_span_context);
   static Extensions::Propagators::SpanContext convertToGeneric(const SpanContext& otel_span_context);
 
-  // Base W3C trace context propagator that handles the actual W3C logic
+  // Base W3C trace context propagator that handles the actual W3C logic (Gang of Four Composition pattern)
   Extensions::Propagators::W3C::TraceContextPropagator base_propagator_;
 };
+
+} // namespace OpenTelemetry
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
 
 } // namespace OpenTelemetry
 } // namespace Propagators

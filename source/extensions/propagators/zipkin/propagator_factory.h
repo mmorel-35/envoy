@@ -12,6 +12,7 @@ namespace Zipkin {
 
 /**
  * Factory for creating propagators for Zipkin tracer.
+ * Uses Gang of Four Strategy pattern to eliminate code duplication with other propagator factories.
  * This provides Zipkin-specific propagator configuration using only Zipkin types.
  */
 class PropagatorFactory : public Logger::Loggable<Logger::Id::tracing> {
