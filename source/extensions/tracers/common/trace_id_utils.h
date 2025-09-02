@@ -6,7 +6,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
 namespace Common {
 
 /**
@@ -53,6 +53,6 @@ public:
 };
 
 } // namespace Common
-} // namespace Propagators
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

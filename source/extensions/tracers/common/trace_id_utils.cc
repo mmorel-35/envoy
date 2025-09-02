@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/common/trace_id_utils.h"
+#include "source/extensions/tracers/common/trace_id_utils.h"
 
 #include <chrono>
 #include <random>
@@ -7,7 +7,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
 namespace Common {
 
 bool TraceIdUtils::parseTraceId(const std::string& trace_id_hex, uint64_t& trace_id_high,
@@ -50,6 +50,6 @@ uint64_t TraceIdUtils::generateRandom64() {
 }
 
 } // namespace Common
-} // namespace Propagators
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
