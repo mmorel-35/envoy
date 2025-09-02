@@ -310,6 +310,13 @@ new_features:
     instead of custom B3 parsing logic. This change eliminates code duplication while preserving all existing
     functionality including parent span ID extraction from B3 headers. The refactoring improves maintainability
     and ensures consistent propagation behavior across different tracer implementations.
+- area: tracing
+  change: |
+    Completed refactoring of OpenTelemetry and Zipkin tracers to use the new propagator architecture with clean
+    separation between specification-compliant propagators and tracer-specific implementations. Both tracers now
+    use OpenTelemetry-optimized propagators from ``/source/extensions/propagators/opentelemetry/`` while maintaining
+    full backward compatibility. This architectural improvement provides better isolation between propagation standards
+    and tracer implementations, enabling future extensibility for new tracers and propagation formats.
 - area: composite
   change: |
     Allow composite filter to be configured to insert a filter into filter chain outside of the decode headers lifecycle phase.
