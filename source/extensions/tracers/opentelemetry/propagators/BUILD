@@ -17,6 +17,7 @@ envoy_cc_library(
         "propagator.h",
     ],
     deps = [
+        "//source/common/common:logger_lib",
         "//source/common/common:statusor_lib",
         "//source/common/http:header_map_lib",
         "//source/common/tracing:trace_context_lib",
