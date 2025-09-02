@@ -16,7 +16,7 @@ envoy_cc_library(
         "//envoy/tracing:trace_context_interface",
         "//source/common/common:logger_lib",
         "//source/common/common:statusor_lib",
-        "//source/extensions/tracers/zipkin:zipkin_lib",
+        "//source/extensions/tracers/zipkin:span_context_lib",
     ],
 )
 

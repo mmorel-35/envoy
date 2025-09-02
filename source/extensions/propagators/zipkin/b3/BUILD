@@ -20,7 +20,8 @@ envoy_cc_library(
         "//source/common/common:hex_lib",
         "//source/common/common:utility_lib",
         "//source/extensions/propagators/zipkin:propagator_lib",
-        "//source/extensions/tracers/zipkin:zipkin_lib",
+        "//source/extensions/tracers/zipkin:span_context_lib",
+        "//source/extensions/tracers/zipkin:util_lib",
         "@com_google_absl//absl/strings",
     ],
 )

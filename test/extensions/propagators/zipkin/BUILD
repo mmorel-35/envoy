@@ -18,7 +18,7 @@ envoy_extension_cc_test(
     rbe_pool = "6gig",
     deps = [
         "//source/extensions/propagators/zipkin:propagator_factory_lib",
-        "//source/extensions/tracers/zipkin:zipkin_lib",
+        "//source/extensions/tracers/zipkin:span_context_lib",
         "//test/test_common:utility_lib",
     ],
 )
@@ -30,7 +30,7 @@ envoy_extension_cc_test(
     rbe_pool = "6gig",
     deps = [
         "//source/extensions/propagators/zipkin:propagator_factory_lib",
-        "//source/extensions/tracers/zipkin:zipkin_lib",
+        "//source/extensions/tracers/zipkin:span_context_lib",
         "//test/test_common:utility_lib",
     ],
 )

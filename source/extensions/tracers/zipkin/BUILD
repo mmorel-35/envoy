@@ -12,6 +12,11 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
+    name = "span_context_lib",
+    hdrs = ["span_context.h"],
+)
+
+envoy_cc_library(
     name = "util_lib",
     srcs = ["util.cc"],
     hdrs = ["util.h"],
@@ -36,7 +41,6 @@ envoy_cc_library(
     ],
     hdrs = [
         "span_buffer.h",
-        "span_context.h",
         "span_context_extractor.h",
         "tracer.h",
         "tracer_interface.h",
@@ -46,6 +50,7 @@ envoy_cc_library(
         "zipkin_tracer_impl.h",
     ],
     deps = [
+        ":span_context_lib",
         ":util_lib",
         "//envoy/common:time_interface",
         "//envoy/local_info:local_info_interface",
