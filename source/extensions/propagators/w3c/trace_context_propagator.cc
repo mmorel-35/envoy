@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/w3c/generic_w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/w3c/trace_context_propagator.h"
 
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_split.h"
@@ -10,11 +10,12 @@
 namespace Envoy {
 namespace Extensions {
 namespace Propagators {
+namespace W3C {
 
-GenericW3CTraceContextPropagator::GenericW3CTraceContextPropagator()
+TraceContextPropagator::TraceContextPropagator()
     : traceparent_header_("traceparent"), tracestate_header_("tracestate") {}
 
-absl::StatusOr<SpanContext> GenericW3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
+absl::StatusOr<SpanContext> TraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
   auto traceparent_value = trace_context.getByKey(traceparent_header_.key());
   if (!traceparent_value.has_value()) {
     return absl::NotFoundError("traceparent header not present");
@@ -26,7 +27,7 @@ absl::StatusOr<SpanContext> GenericW3CTraceContextPropagator::extract(const Trac
   return parseTraceparent(traceparent_value.value(), tracestate);
 }
 
-void GenericW3CTraceContextPropagator::inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) {
+void TraceContextPropagator::inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) {
   if (!span_context.isValid()) {
     return;
   }
@@ -39,15 +40,15 @@ void GenericW3CTraceContextPropagator::inject(const SpanContext& span_context, T
   }
 }
 
-std::vector<std::string> GenericW3CTraceContextPropagator::fields() const {
+std::vector<std::string> TraceContextPropagator::fields() const {
   return {"traceparent", "tracestate"};
 }
 
-std::string GenericW3CTraceContextPropagator::name() const {
+std::string TraceContextPropagator::name() const {
   return "tracecontext";
 }
 
-absl::StatusOr<SpanContext> GenericW3CTraceContextPropagator::parseTraceparent(const std::string& traceparent_value, 
+absl::StatusOr<SpanContext> TraceContextPropagator::parseTraceparent(const std::string& traceparent_value, 
                                                                                const std::string& tracestate_value) {
   std::vector<std::string> parts = absl::StrSplit(traceparent_value, '-');
   
@@ -100,12 +101,13 @@ absl::StatusOr<SpanContext> GenericW3CTraceContextPropagator::parseTraceparent(c
                      absl::nullopt, tracestate_value);
 }
 
-std::string GenericW3CTraceContextPropagator::formatTraceparent(const SpanContext& span_context) {
+std::string TraceContextPropagator::formatTraceparent(const SpanContext& span_context) {
   return absl::StrCat("00-", span_context.traceId().toHex(), "-", 
                       span_context.spanId().toHex(), "-", 
                       absl::Hex(span_context.traceFlags().value(), absl::kZeroPad2));
 }
 
+} // namespace W3C
 } // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

@@ -7,9 +7,10 @@
 namespace Envoy {
 namespace Extensions {
 namespace Propagators {
+namespace W3C {
 
 /**
- * Generic W3C Trace Context propagator that is tracer-agnostic.
+ * W3C Trace Context propagator that is tracer-agnostic.
  * This implementation is fully compliant with the W3C Trace Context specification.
  * 
  * Handles W3C Trace Context specification features:
@@ -20,9 +21,9 @@ namespace Propagators {
  * 
  * See: https://www.w3.org/TR/trace-context/
  */
-class GenericW3CTraceContextPropagator : public GenericPropagator {
+class TraceContextPropagator : public GenericPropagator {
 public:
-  GenericW3CTraceContextPropagator();
+  TraceContextPropagator();
 
   // GenericPropagator interface
   absl::StatusOr<SpanContext> extract(const Tracing::TraceContext& trace_context) override;
@@ -39,6 +40,7 @@ private:
   std::string formatTraceparent(const SpanContext& span_context);
 };
 
+} // namespace W3C
 } // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy
