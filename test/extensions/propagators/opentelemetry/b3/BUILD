@@ -12,8 +12,8 @@ licenses(["notice"])  # Apache 2
 envoy_package()
 
 envoy_extension_cc_test(
-    name = "b3_propagator_test",
-    srcs = ["b3_propagator_test.cc"],
+    name = "propagator_test",
+    srcs = ["propagator_test.cc"],
     extension_names = ["envoy.tracers.opentelemetry"],
     rbe_pool = "6gig",
     deps = [
