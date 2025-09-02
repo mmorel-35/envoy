@@ -1,6 +1,5 @@
 #include "source/extensions/tracers/opentelemetry/propagators/b3/b3_propagator.h"
 
-#include "source/common/common/hex.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 #include "absl/strings/ascii.h"
