@@ -44,6 +44,12 @@ SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context,
                                            bool w3c_fallback_enabled)
     : trace_context_(trace_context), w3c_fallback_enabled_(w3c_fallback_enabled) {}
 
+SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context,
+                                           bool w3c_fallback_enabled,
+                                           const std::vector<std::string>& w3c_propagator_names)
+    : trace_context_(trace_context), w3c_fallback_enabled_(w3c_fallback_enabled), 
+      w3c_propagator_names_(w3c_propagator_names) {}
+
 SpanContextExtractor::~SpanContextExtractor() = default;
 
 absl::optional<bool> SpanContextExtractor::extractSampled() {
@@ -89,7 +95,11 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
-    auto w3c_propagator = Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators();
+    // Use configured propagator names if provided, otherwise use global propagator pattern
+    // This ensures compliance with OpenTelemetry specification for propagator configuration
+    auto w3c_propagator = w3c_propagator_names_.empty() 
+        ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
@@ -154,7 +164,11 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
-    auto w3c_propagator = Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators();
+    // Use configured propagator names if provided, otherwise use global propagator pattern
+    // This ensures compliance with OpenTelemetry specification for propagator configuration
+    auto w3c_propagator = w3c_propagator_names_.empty() 
+        ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
+        : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
     Extensions::Tracers::OpenTelemetry::SpanContextExtractor w3c_extractor(
         const_cast<Tracing::TraceContext&>(trace_context_), std::move(w3c_propagator));
     if (w3c_extractor.propagationHeaderPresent()) {
