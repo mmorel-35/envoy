@@ -12,7 +12,7 @@ namespace Zipkin {
 CompositePropagatorPtr
 PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_names) {
   std::vector<TextMapPropagatorPtr> propagators;
-
+  
   for (const auto& name : propagator_names) {
     auto propagator = createPropagator(name);
     if (propagator) {
@@ -23,7 +23,7 @@ PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_
   }
 
   if (propagators.empty()) {
-    ENVOY_LOG(info, "No valid propagators specified, using default B3 format for Zipkin");
+    ENVOY_LOG(info, "No valid propagators specified, using default");
     return createDefaultPropagators();
   }
 
@@ -43,7 +43,6 @@ TextMapPropagatorPtr PropagatorFactory::createPropagator(const std::string& name
   } else if (name == "tracecontext") {
     return std::make_unique<W3CTraceContextPropagator>();
   }
-
   return nullptr;
 }
 

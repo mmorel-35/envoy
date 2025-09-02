@@ -44,5 +44,6 @@ envoy_cc_library(
         ":w3c_trace_context_propagator_lib",
         "//envoy/api:api_interface",
         "//source/common/common:logger_lib",
+        "//source/extensions/propagators:propagator_factory_helper_lib",
     ],
 )

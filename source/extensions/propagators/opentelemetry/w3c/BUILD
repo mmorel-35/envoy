@@ -22,6 +22,8 @@ envoy_cc_library(
         "//source/common/common:hex_lib",
         "//source/common/tracing:trace_context_lib",
         "//source/extensions/propagators/opentelemetry:propagator_interface_lib",
+        "//source/extensions/propagators/w3c:w3c_propagators_lib",
+        "//source/extensions/propagators:trace_context_lib",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
     ],

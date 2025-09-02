@@ -19,6 +19,8 @@ envoy_cc_library(
     deps = [
         "//source/common/tracing:trace_context_lib",
         "//source/extensions/propagators/opentelemetry:propagator_interface_lib",
+        "//source/extensions/propagators/b3:b3_propagator_lib",
+        "//source/extensions/propagators:trace_context_lib",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],

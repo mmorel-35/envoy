@@ -1,6 +1,7 @@
 #pragma once
 
 #include "source/extensions/propagators/zipkin/propagator.h"
+#include "source/extensions/propagators/b3/propagator.h"
 #include "source/extensions/tracers/common/utils/trace.h"
 
 namespace Envoy {
@@ -9,8 +10,8 @@ namespace Propagators {
 namespace Zipkin {
 
 /**
- * B3 propagator implementation for Zipkin tracer.
- * Implements the B3 propagation specification while using Zipkin-specific types.
+ * Zipkin B3 propagator that reuses the base B3 propagator implementation.
+ * Implements the B3 propagation specification while using Zipkin-specific types through composition.
  *
  * Supports both single and multi-header B3 formats:
  * - Single: b3: {trace_id}-{span_id}-{sampling_state}-{parent_span_id}
@@ -37,28 +38,12 @@ public:
   std::string name() const override { return "b3"; }
 
 private:
-  // B3 header names
-  static constexpr absl::string_view B3_TRACE_ID_HEADER = "x-b3-traceid";
-  static constexpr absl::string_view B3_SPAN_ID_HEADER = "x-b3-spanid";
-  static constexpr absl::string_view B3_PARENT_SPAN_ID_HEADER = "x-b3-parentspanid";
-  static constexpr absl::string_view B3_SAMPLED_HEADER = "x-b3-sampled";
-  static constexpr absl::string_view B3_FLAGS_HEADER = "x-b3-flags";
-  static constexpr absl::string_view B3_SINGLE_HEADER = "b3";
+  // Conversion helpers
+  static Extensions::Tracers::Zipkin::SpanContext convertFromGeneric(const Extensions::Propagators::SpanContext& generic_span_context);
+  static Extensions::Propagators::SpanContext convertToGeneric(const Extensions::Tracers::Zipkin::SpanContext& zipkin_span_context);
 
-  // Helper methods
-  absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
-  extractSingleHeader(const Tracing::TraceContext& trace_context);
-
-  absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
-  extractMultiHeader(const Tracing::TraceContext& trace_context);
-
-  void injectSingleHeader(const Extensions::Tracers::Zipkin::SpanContext& span_context,
-                          Tracing::TraceContext& trace_context);
-
-  void injectMultiHeader(const Extensions::Tracers::Zipkin::SpanContext& span_context,
-                         Tracing::TraceContext& trace_context);
-
-  absl::optional<bool> parseB3SamplingState(absl::string_view sampling_state);
+  // Base B3 propagator that handles the actual B3 logic
+  Extensions::Propagators::B3::B3Propagator base_propagator_;
 };
 
 } // namespace Zipkin

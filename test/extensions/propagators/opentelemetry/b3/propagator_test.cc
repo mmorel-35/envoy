@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/propagators/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/propagator.h"
 
 #include "test/test_common/utility.h"
 
@@ -7,7 +7,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Propagators {
 namespace OpenTelemetry {
 
 using testing::HasSubstr;
@@ -110,6 +110,6 @@ TEST_F(B3PropagatorTest, FieldsReturnsExpectedHeaders) {
 TEST_F(B3PropagatorTest, NameReturnsB3) { EXPECT_EQ(propagator_->name(), "b3"); }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

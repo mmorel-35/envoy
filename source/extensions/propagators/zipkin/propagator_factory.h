@@ -12,6 +12,7 @@ namespace Zipkin {
 
 /**
  * Factory for creating propagators for Zipkin tracer.
+ * Provides shared utilities to eliminate code duplication with other propagator factories.
  * This provides Zipkin-specific propagator configuration using only Zipkin types.
  */
 class PropagatorFactory : public Logger::Loggable<Logger::Id::tracing> {

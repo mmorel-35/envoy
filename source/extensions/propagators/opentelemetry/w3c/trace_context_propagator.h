@@ -1,6 +1,7 @@
 #pragma once
 
 #include "source/extensions/propagators/opentelemetry/propagator.h"
+#include "source/extensions/propagators/w3c/trace_context_propagator.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 namespace Envoy {
@@ -8,14 +9,19 @@ namespace Extensions {
 namespace Propagators {
 namespace OpenTelemetry {
 
+// Use the OpenTelemetry SpanContext type for this interface
+using SpanContext = Extensions::Tracers::OpenTelemetry::SpanContext;
+
 /**
- * W3C Trace Context propagator.
- * Handles traceparent and tracestate headers.
+ * OpenTelemetry W3C Trace Context propagator that reuses the base W3C propagator implementation.
+ * Eliminates code duplication through composition and type conversion.
+ * Handles traceparent and tracestate headers through composition.
+ * Converts between generic SpanContext and OpenTelemetry SpanContext types.
  * See: https://www.w3.org/TR/trace-context/
  */
 class W3CTraceContextPropagator : public TextMapPropagator {
 public:
-  W3CTraceContextPropagator();
+  W3CTraceContextPropagator() = default;
 
   // TextMapPropagator
   absl::StatusOr<SpanContext> extract(const Tracing::TraceContext& trace_context) override;
@@ -24,8 +30,12 @@ public:
   std::string name() const override;
 
 private:
-  const Tracing::TraceContextHandler trace_parent_header_;
-  const Tracing::TraceContextHandler trace_state_header_;
+  // Conversion helpers for type adaptation
+  static SpanContext convertFromGeneric(const Extensions::Propagators::SpanContext& generic_span_context);
+  static Extensions::Propagators::SpanContext convertToGeneric(const SpanContext& otel_span_context);
+
+  // Base W3C trace context propagator that handles the actual W3C protocol logic
+  Extensions::Propagators::W3C::TraceContextPropagator base_propagator_;
 };
 
 } // namespace OpenTelemetry

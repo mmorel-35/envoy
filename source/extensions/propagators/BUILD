@@ -37,3 +37,13 @@ envoy_cc_library(
         "//source/common/tracing:trace_context_lib",
     ],
 )
+
+envoy_cc_library(
+    name = "propagator_factory_helper_lib",
+    hdrs = [
+        "propagator_factory_helper.h",
+    ],
+    deps = [
+        "//source/common/common:logger_lib",
+    ],
+)
