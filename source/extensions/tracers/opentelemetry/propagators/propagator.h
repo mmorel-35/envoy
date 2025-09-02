@@ -2,6 +2,7 @@
 
 #include "envoy/tracing/trace_context.h"
 
+#include "source/common/common/logger.h"
 #include "source/common/common/statusor.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
 
@@ -63,7 +64,7 @@ using TextMapPropagatorPtr = std::unique_ptr<TextMapPropagator>;
  * - Preserves existing context values on extraction failure (spec compliant)
  * - Supports both trace context and baggage propagation
  */
-class CompositePropagator {
+class CompositePropagator : Logger::Loggable<Logger::Id::tracing> {
 public:
   explicit CompositePropagator(std::vector<TextMapPropagatorPtr> propagators);
 
