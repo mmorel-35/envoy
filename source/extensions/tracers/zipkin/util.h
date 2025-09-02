@@ -59,6 +59,7 @@ public:
    */
   static Protobuf::Value uint64Value(uint64_t value, absl::string_view name,
                                      Replacements& replacements);
+};
 
 } // namespace Zipkin
 } // namespace Tracers
