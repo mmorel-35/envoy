@@ -95,8 +95,11 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
-    // Use configured propagator names if provided, otherwise use global propagator pattern
-    // This ensures compliance with OpenTelemetry specification for propagator configuration
+    // Use configured propagator names if provided, otherwise use default W3C propagator.
+    // This follows OpenTelemetry specification for propagator configuration:
+    // - When propagator names are provided: use PropagatorFactory::createPropagators() 
+    // - When empty (default): use PropagatorFactory::createDefaultPropagators()
+    // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
         ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
         : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);
@@ -164,8 +167,11 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
 
   // Try W3C Trace Context format as fallback only if enabled.
   if (w3c_fallback_enabled_) {
-    // Use configured propagator names if provided, otherwise use global propagator pattern
-    // This ensures compliance with OpenTelemetry specification for propagator configuration
+    // Use configured propagator names if provided, otherwise use default W3C propagator.
+    // This follows OpenTelemetry specification for propagator configuration:
+    // - When propagator names are provided: use PropagatorFactory::createPropagators() 
+    // - When empty (default): use PropagatorFactory::createDefaultPropagators()
+    // This eliminates ad-hoc propagator creation and enables future configuration support.
     auto w3c_propagator = w3c_propagator_names_.empty() 
         ? Extensions::Tracers::OpenTelemetry::PropagatorFactory::createDefaultPropagators()
         : Extensions::Tracers::OpenTelemetry::PropagatorFactory::createPropagators(w3c_propagator_names_);

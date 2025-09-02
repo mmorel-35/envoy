@@ -35,6 +35,12 @@ public:
   /**
    * Constructor with configured W3C propagator names for OpenTelemetry specification compliance.
    * This allows respecting OTEL_PROPAGATORS environment variable and custom propagator configuration.
+   * 
+   * For full OpenTelemetry specification compliance, the caller should:
+   * 1. Read OTEL_PROPAGATORS environment variable using Api::Api interface
+   * 2. Parse the propagator names using PropagatorFactory::parseOtelPropagatorsEnv()
+   * 3. Pass the parsed names to this constructor
+   * 
    * @param trace_context HTTP headers to extract from
    * @param w3c_fallback_enabled Whether to enable W3C Trace Context fallback
    * @param w3c_propagator_names List of propagator names to use for W3C fallback (e.g., "tracecontext", "b3")
