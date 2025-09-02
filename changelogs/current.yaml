@@ -317,6 +317,13 @@ new_features:
     use OpenTelemetry-optimized propagators from ``/source/extensions/propagators/opentelemetry/`` while maintaining
     full backward compatibility. This architectural improvement provides better isolation between propagation standards
     and tracer implementations, enabling future extensibility for new tracers and propagation formats.
+- area: tracing
+  change: |
+    Improved propagator architecture to eliminate unwanted cross-dependencies between tracer implementations.
+    Created Zipkin-specific propagator factory in ``/source/extensions/propagators/zipkin/`` to remove Zipkin's
+    dependency on OpenTelemetry propagator factory. Fixed broken include paths throughout the propagator system
+    to ensure proper architectural separation. This change provides cleaner separation of concerns while maintaining
+    identical functionality for all tracers.
 - area: composite
   change: |
     Allow composite filter to be configured to insert a filter into filter chain outside of the decode headers lifecycle phase.
