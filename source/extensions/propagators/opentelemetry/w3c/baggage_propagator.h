@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/extensions/propagators/propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/propagator.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 #include "absl/container/flat_hash_map.h"
@@ -8,7 +8,8 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
+namespace OpenTelemetry {
 
 /**
  * W3C Baggage propagator.
@@ -22,8 +23,8 @@ public:
   BaggagePropagator();
 
   // TextMapPropagator
-  absl::StatusOr<Tracers::OpenTelemetry::SpanContext> extract(const Tracing::TraceContext& trace_context) override;
-  void inject(const Tracers::OpenTelemetry::SpanContext& span_context, Tracing::TraceContext& trace_context) override;
+  absl::StatusOr<SpanContext> extract(const Tracing::TraceContext& trace_context) override;
+  void inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) override;
   std::vector<std::string> fields() const override;
   std::string name() const override;
 
@@ -73,6 +74,7 @@ private:
   const Tracing::TraceContextHandler baggage_header_;
 };
 
-} // namespace Propagators
+} // namespace OpenTelemetry
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

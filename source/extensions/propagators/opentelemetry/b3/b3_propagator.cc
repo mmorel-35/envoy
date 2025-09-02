@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/b3/b3_propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/b3/b3_propagator.h"
 
 #include "source/common/tracing/trace_context_impl.h"
 
@@ -8,7 +8,8 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
+namespace OpenTelemetry {
 namespace {
 
 constexpr absl::string_view kDefaultVersion = "00";
@@ -38,7 +39,7 @@ std::string normalizeB3TraceId(const absl::string_view& trace_id) {
 }
 
 bool parseB3Sampled(const absl::string_view& sampled_str) {
-  if (sampled_str == "1" || sampled_str == "true" || sampled_str == "d") {
+  if (sampled_str == "1" || sampled_str == "true") {
     return true;
   }
   return false;
@@ -51,7 +52,7 @@ B3Propagator::B3Propagator()
       x_b3_sampled_header_("X-B3-Sampled"), x_b3_flags_header_("X-B3-Flags"),
       x_b3_parent_span_id_header_("X-B3-ParentSpanId") {}
 
-absl::StatusOr<Tracers::OpenTelemetry::SpanContext> B3Propagator::extract(const Tracing::TraceContext& trace_context) {
+absl::StatusOr<SpanContext> B3Propagator::extract(const Tracing::TraceContext& trace_context) {
   // Try single header format first
   auto single_result = extractSingleHeader(trace_context);
   if (single_result.ok()) {
@@ -62,7 +63,7 @@ absl::StatusOr<Tracers::OpenTelemetry::SpanContext> B3Propagator::extract(const 
   return extractMultiHeader(trace_context);
 }
 
-absl::StatusOr<Tracers::OpenTelemetry::SpanContext>
+absl::StatusOr<SpanContext>
 B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
   auto b3_header = b3_header_.get(trace_context);
   if (!b3_header.has_value()) {
@@ -76,9 +77,6 @@ B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
     return absl::InvalidArgumentError("B3 not sampled");
   }
   if (header_value == "1") {
-    return absl::InvalidArgumentError("B3 debug flag without trace context");
-  }
-  if (header_value == "d") {
     return absl::InvalidArgumentError("B3 debug flag without trace context");
   }
 
@@ -102,11 +100,11 @@ B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
   }
 
   std::string normalized_trace_id = normalizeB3TraceId(trace_id);
-  Tracers::OpenTelemetry::SpanContext span_context(kDefaultVersion, normalized_trace_id, span_id, sampled, "");
+  SpanContext span_context(kDefaultVersion, normalized_trace_id, span_id, sampled, "");
   return span_context;
 }
 
-absl::StatusOr<Tracers::OpenTelemetry::SpanContext>
+absl::StatusOr<SpanContext>
 B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
   auto trace_id_header = x_b3_trace_id_header_.get(trace_context);
   auto span_id_header = x_b3_span_id_header_.get(trace_context);
@@ -135,11 +133,11 @@ B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
   }
 
   std::string normalized_trace_id = normalizeB3TraceId(trace_id);
-  Tracers::OpenTelemetry::SpanContext span_context(kDefaultVersion, normalized_trace_id, span_id, sampled, "");
+  SpanContext span_context(kDefaultVersion, normalized_trace_id, span_id, sampled, "");
   return span_context;
 }
 
-void B3Propagator::inject(const Tracers::OpenTelemetry::SpanContext& span_context, Tracing::TraceContext& trace_context) {
+void B3Propagator::inject(const SpanContext& span_context, Tracing::TraceContext& trace_context) {
   const std::string& trace_id = span_context.traceId();
   const std::string& span_id = span_context.spanId();
   bool sampled = span_context.sampled();
@@ -161,6 +159,7 @@ std::vector<std::string> B3Propagator::fields() const {
 
 std::string B3Propagator::name() const { return "b3"; }
 
-} // namespace Propagators
+} // namespace OpenTelemetry
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

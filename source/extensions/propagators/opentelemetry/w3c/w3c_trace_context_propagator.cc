@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/w3c/w3c_trace_context_propagator.h"
+#include "source/extensions/tracers/opentelemetry/propagators/w3c/w3c_trace_context_propagator.h"
 
 #include "source/common/common/hex.h"
 #include "source/common/tracing/trace_context_impl.h"
@@ -10,7 +10,8 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
+namespace OpenTelemetry {
 namespace {
 
 constexpr absl::string_view kDefaultVersion = "00";
@@ -36,7 +37,7 @@ bool isAllZeros(const absl::string_view& input) {
 W3CTraceContextPropagator::W3CTraceContextPropagator()
     : trace_parent_header_("traceparent"), trace_state_header_("tracestate") {}
 
-absl::StatusOr<Tracers::OpenTelemetry::SpanContext>
+absl::StatusOr<SpanContext>
 W3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
   auto propagation_header = trace_parent_header_.get(trace_context);
   if (!propagation_header.has_value()) {
@@ -48,62 +49,68 @@ W3CTraceContextPropagator::extract(const Tracing::TraceContext& trace_context) {
     return absl::InvalidArgumentError("Invalid traceparent header length");
   }
 
-  // Parse: version-trace_id-parent_id-trace_flags
-  std::vector<absl::string_view> parts = absl::StrSplit(header_value_string, '-');
-  if (parts.size() != 4) {
-    return absl::InvalidArgumentError("Invalid traceparent header format");
+  // Try to split it into its component parts:
+  std::vector<absl::string_view> propagation_header_components =
+      absl::StrSplit(header_value_string, '-', absl::SkipEmpty());
+  if (propagation_header_components.size() != 4) {
+    return absl::InvalidArgumentError("Invalid traceparent hyphenation");
   }
 
-  absl::string_view version = parts[0];
-  absl::string_view trace_id = parts[1];
-  absl::string_view parent_id = parts[2];
-  absl::string_view trace_flags = parts[3];
+  absl::string_view version = propagation_header_components[0];
+  absl::string_view trace_id = propagation_header_components[1];
+  absl::string_view span_id = propagation_header_components[2];
+  absl::string_view trace_flags = propagation_header_components[3];
 
-  // Validate format
-  if (version.size() != kVersionHexSize || !isValidHex(version) ||
-      trace_id.size() != kTraceIdHexSize || !isValidHex(trace_id) || isAllZeros(trace_id) ||
-      parent_id.size() != kParentIdHexSize || !isValidHex(parent_id) || isAllZeros(parent_id) ||
-      trace_flags.size() != kTraceFlagsHexSize || !isValidHex(trace_flags)) {
-    return absl::InvalidArgumentError("Invalid traceparent header values");
+  if (version.size() != kVersionHexSize || trace_id.size() != kTraceIdHexSize ||
+      span_id.size() != kParentIdHexSize || trace_flags.size() != kTraceFlagsHexSize) {
+    return absl::InvalidArgumentError("Invalid traceparent field sizes");
   }
 
-  // Parse trace flags for sampling decision
-  uint8_t flags;
-  if (!absl::SimpleHexAtoi(trace_flags, &flags)) {
-    return absl::InvalidArgumentError("Invalid trace flags");
-  }
-  bool sampled = (flags & 0x01) != 0;
-
-  // Get trace state
-  std::string trace_state = "";
-  auto trace_state_header = trace_state_header_.get(trace_context);
-  if (trace_state_header.has_value()) {
-    trace_state = std::string(trace_state_header.value());
+  if (!isValidHex(version) || !isValidHex(trace_id) || !isValidHex(span_id) ||
+      !isValidHex(trace_flags)) {
+    return absl::InvalidArgumentError("Invalid header hex");
   }
 
-  Tracers::OpenTelemetry::SpanContext span_context(version, trace_id, parent_id, sampled, trace_state);
-  return span_context;
+  // As per the traceparent header definition, if the trace-id or parent-id are all zeros, they are
+  // invalid and must be ignored.
+  if (isAllZeros(trace_id)) {
+    return absl::InvalidArgumentError("Invalid trace id");
+  }
+  if (isAllZeros(span_id)) {
+    return absl::InvalidArgumentError("Invalid parent id");
+  }
+
+  // Set whether or not the span is sampled from the trace flags.
+  // See https://w3c.github.io/trace-context/#trace-flags.
+  char decoded_trace_flags = absl::HexStringToBytes(trace_flags).front();
+  bool sampled = (decoded_trace_flags & 1);
+
+  // If a tracestate header is received without an accompanying traceparent header,
+  // it is invalid and MUST be discarded. Because we're already checking for the
+  // traceparent header above, we don't need to check here.
+  // See https://www.w3.org/TR/trace-context/#processing-model-for-working-with-trace-context
+  const auto tracestate_values = trace_state_header_.getAll(trace_context);
+
+  SpanContext parent_context(version, trace_id, span_id, sampled,
+                             absl::StrJoin(tracestate_values, ","));
+  return parent_context;
 }
 
-void W3CTraceContextPropagator::inject(const Tracers::OpenTelemetry::SpanContext& span_context,
+void W3CTraceContextPropagator::inject(const SpanContext& span_context,
                                        Tracing::TraceContext& trace_context) {
-  const std::string& version = span_context.version();
-  const std::string& trace_id = span_context.traceId();
-  const std::string& span_id = span_context.spanId();
-  bool sampled = span_context.sampled();
+  std::string trace_id_hex = span_context.traceId();
+  std::string span_id_hex = span_context.spanId();
+  std::vector<uint8_t> trace_flags_vec{span_context.sampled()};
+  std::string trace_flags_hex = Hex::encode(trace_flags_vec);
+  std::string traceparent_header_value =
+      absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
 
-  // Format trace flags
-  uint8_t flags = sampled ? 0x01 : 0x00;
-  std::string trace_flags = absl::StrCat(absl::Hex(flags, absl::kZeroPad2));
+  // Set the traceparent in the trace_context.
+  trace_parent_header_.setRefKey(trace_context, traceparent_header_value);
 
-  // Format traceparent header
-  std::string traceparent = absl::StrCat(version, "-", trace_id, "-", span_id, "-", trace_flags);
-  trace_parent_header_.setRefKey(trace_context, traceparent);
-
-  // Inject trace state if present
-  const std::string& trace_state = span_context.traceState();
-  if (!trace_state.empty()) {
-    trace_state_header_.setRefKey(trace_context, trace_state);
+  // Also set the tracestate if present.
+  if (!span_context.tracestate().empty()) {
+    trace_state_header_.setRefKey(trace_context, span_context.tracestate());
   }
 }
 
@@ -113,6 +120,7 @@ std::vector<std::string> W3CTraceContextPropagator::fields() const {
 
 std::string W3CTraceContextPropagator::name() const { return "tracecontext"; }
 
-} // namespace Propagators
+} // namespace OpenTelemetry
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

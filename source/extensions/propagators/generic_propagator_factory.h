@@ -1,9 +1,9 @@
 #pragma once
 
 #include "source/extensions/propagators/generic_propagator.h"
-#include "source/extensions/propagators/b3/generic_b3_propagator.h"
-#include "source/extensions/propagators/w3c/generic_w3c_trace_context_propagator.h"
-#include "source/extensions/propagators/w3c/generic_w3c_baggage_propagator.h"
+#include "source/extensions/propagators/b3/b3_propagator.h"
+#include "source/extensions/propagators/w3c/trace_context_propagator.h"
+#include "source/extensions/propagators/w3c/baggage_propagator.h"
 
 namespace Envoy {
 namespace Extensions {

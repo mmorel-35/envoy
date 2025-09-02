@@ -12,11 +12,11 @@ GenericPropagatorPtr GenericPropagatorFactory::createGenericPropagator(const std
   std::string normalized_name = absl::AsciiStrToLower(name);
   
   if (normalized_name == "b3") {
-    return std::make_unique<GenericB3Propagator>();
+    return std::make_unique<B3::B3Propagator>();
   } else if (normalized_name == "tracecontext") {
-    return std::make_unique<GenericW3CTraceContextPropagator>();
+    return std::make_unique<W3C::TraceContextPropagator>();
   } else if (normalized_name == "baggage") {
-    return std::make_unique<GenericW3CBaggagePropagator>();
+    return std::make_unique<W3C::BaggagePropagator>();
   }
   
   return nullptr;
