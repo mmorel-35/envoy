@@ -10,21 +10,18 @@ namespace Extensions {
 namespace Propagators {
 namespace Zipkin {
 
-// Gang of Four Strategy pattern - define propagator creators as strategies
-static PropagatorFactoryHelper<TextMapPropagatorPtr, CompositePropagatorPtr>::PropagatorCreatorMap
-getZipkinPropagatorCreators() {
-  return {
-    {"b3", []() { return std::make_unique<B3Propagator>(); }},
-    {"tracecontext", []() { return std::make_unique<W3CTraceContextPropagator>(); }}
-  };
-}
-
 CompositePropagatorPtr
 PropagatorFactory::createPropagators(const std::vector<std::string>& propagator_names) {
-  // Gang of Four Strategy pattern - use helper with Zipkin-specific strategies
-  return PropagatorFactoryHelper<TextMapPropagatorPtr, CompositePropagatorPtr>::createPropagators(
+  return createCompositePropagator<TextMapPropagatorPtr, CompositePropagatorPtr>(
     propagator_names,
-    getZipkinPropagatorCreators(),
+    [](const std::string& name) { 
+      if (name == "b3") {
+        return std::make_unique<B3Propagator>();
+      } else if (name == "tracecontext") {
+        return std::make_unique<W3CTraceContextPropagator>();
+      }
+      return TextMapPropagatorPtr{};
+    },
     []() { return createDefaultPropagators(); }
   );
 }
@@ -37,10 +34,12 @@ CompositePropagatorPtr PropagatorFactory::createDefaultPropagators() {
 }
 
 TextMapPropagatorPtr PropagatorFactory::createPropagator(const std::string& name) {
-  // Use the strategy map to create propagators
-  auto creators = getZipkinPropagatorCreators();
-  auto it = creators.find(name);
-  return it != creators.end() ? it->second() : nullptr;
+  if (name == "b3") {
+    return std::make_unique<B3Propagator>();
+  } else if (name == "tracecontext") {
+    return std::make_unique<W3CTraceContextPropagator>();
+  }
+  return nullptr;
 }
 
 } // namespace Zipkin
