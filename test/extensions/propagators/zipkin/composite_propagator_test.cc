@@ -1,6 +1,6 @@
 #include "source/extensions/propagators/zipkin/propagator.h"
-#include "source/extensions/propagators/zipkin/b3_propagator.h"
-#include "source/extensions/propagators/zipkin/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/zipkin/b3/propagator.h"
+#include "source/extensions/propagators/zipkin/w3c/trace_context_propagator.h"
 
 #include "source/extensions/tracers/zipkin/span_context.h"
 

@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/b3/b3_propagator.h"
+#include "source/extensions/propagators/b3/propagator.h"
 
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_split.h"

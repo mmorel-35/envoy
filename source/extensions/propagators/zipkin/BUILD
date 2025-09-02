@@ -22,27 +22,15 @@ envoy_cc_library(
 
 envoy_cc_library(
     name = "b3_propagator_lib",
-    srcs = ["b3_propagator.cc"],
-    hdrs = ["b3_propagator.h"],
     deps = [
-        ":propagator_lib",
-        "//source/common/common:hex_lib",
-        "//source/common/common:utility_lib",
-        "//source/extensions/tracers/zipkin:util_lib",
-        "@com_google_absl//absl/strings",
+        "//source/extensions/propagators/zipkin/b3:propagator_lib",
     ],
 )
 
 envoy_cc_library(
     name = "w3c_trace_context_propagator_lib",
-    srcs = ["w3c_trace_context_propagator.cc"],
-    hdrs = ["w3c_trace_context_propagator.h"],
     deps = [
-        ":propagator_lib",
-        "//source/common/common:hex_lib",
-        "//source/common/common:utility_lib",
-        "//source/extensions/tracers/zipkin:util_lib",
-        "@com_google_absl//absl/strings",
+        "//source/extensions/propagators/zipkin/w3c:trace_context_propagator_lib",
     ],
 )
 

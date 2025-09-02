@@ -5,8 +5,8 @@
 #include "source/common/common/logger.h"
 #include "source/common/config/datasource.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/propagators/opentelemetry/w3c/w3c_trace_context_propagator.h"
-#include "source/extensions/propagators/opentelemetry/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/trace_context_propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/propagator.h"
 #include "source/extensions/propagators/opentelemetry/w3c/baggage_propagator.h"
 
 #include "absl/strings/str_split.h"

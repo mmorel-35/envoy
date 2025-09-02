@@ -9,7 +9,7 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "b3_propagator_lib",
+    name = "propagator_lib",
     srcs = [
         "propagator.cc",
     ],
@@ -17,10 +17,10 @@ envoy_cc_library(
         "propagator.h",
     ],
     deps = [
-        "//source/extensions/propagators:generic_propagator_interface_lib",
-        "//source/extensions/propagators:type_converter_lib",
-        "//source/common/common:logger_lib",
-        "//source/common/tracing:trace_context_lib",
+        "//source/extensions/propagators/zipkin:propagator_lib",
+        "//source/common/common:hex_lib",
+        "//source/common/common:utility_lib",
+        "//source/extensions/tracers/zipkin:util_lib",
         "@com_google_absl//absl/strings",
     ],
 )

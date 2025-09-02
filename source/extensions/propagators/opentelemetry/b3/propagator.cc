@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/opentelemetry/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/propagator.h"
 
 #include "source/common/tracing/trace_context_impl.h"
 

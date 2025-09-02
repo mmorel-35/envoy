@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/zipkin/b3_propagator.h"
+#include "source/extensions/propagators/zipkin/b3/propagator.h"
 
 #include "source/common/common/hex.h"
 #include "source/common/common/utility.h"

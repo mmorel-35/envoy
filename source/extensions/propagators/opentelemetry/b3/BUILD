@@ -11,10 +11,10 @@ envoy_extension_package()
 envoy_cc_library(
     name = "b3_propagator_lib",
     srcs = [
-        "b3_propagator.cc",
+        "propagator.cc",
     ],
     hdrs = [
-        "b3_propagator.h",
+        "propagator.h",
     ],
     deps = [
         "//source/common/tracing:trace_context_lib",

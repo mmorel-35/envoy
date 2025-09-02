@@ -1,7 +1,7 @@
 #include "source/extensions/propagators/opentelemetry/propagator.h"
-#include "source/extensions/propagators/opentelemetry/b3/b3_propagator.h"
+#include "source/extensions/propagators/opentelemetry/b3/propagator.h"
 #include "source/extensions/propagators/opentelemetry/w3c/baggage_propagator.h"
-#include "source/extensions/propagators/opentelemetry/w3c/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/trace_context_propagator.h"
 
 #include "test/test_common/utility.h"
 

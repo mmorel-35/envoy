@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/opentelemetry/w3c/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/opentelemetry/w3c/trace_context_propagator.h"
 
 #include "source/common/common/hex.h"
 #include "source/common/tracing/trace_context_impl.h"

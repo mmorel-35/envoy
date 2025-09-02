@@ -1,8 +1,8 @@
 #include "source/extensions/propagators/zipkin/propagator_factory.h"
 
 #include "source/common/common/logger.h"
-#include "source/extensions/propagators/zipkin/b3_propagator.h"
-#include "source/extensions/propagators/zipkin/w3c_trace_context_propagator.h"
+#include "source/extensions/propagators/zipkin/b3/propagator.h"
+#include "source/extensions/propagators/zipkin/w3c/trace_context_propagator.h"
 
 namespace Envoy {
 namespace Extensions {

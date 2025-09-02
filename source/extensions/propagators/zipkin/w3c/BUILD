@@ -9,20 +9,18 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "w3c_propagators_lib",
+    name = "trace_context_propagator_lib",
     srcs = [
-        "baggage_propagator.cc",
         "trace_context_propagator.cc",
     ],
     hdrs = [
-        "baggage_propagator.h",
         "trace_context_propagator.h",
     ],
     deps = [
+        "//source/extensions/propagators/zipkin:propagator_lib",
         "//source/common/common:hex_lib",
-        "//source/common/tracing:trace_context_lib",
-        "//source/extensions/propagators/opentelemetry:propagator_interface_lib",
-        "@com_google_absl//absl/container:flat_hash_map",
+        "//source/common/common:utility_lib",
+        "//source/extensions/tracers/zipkin:util_lib",
         "@com_google_absl//absl/strings",
     ],
 )
