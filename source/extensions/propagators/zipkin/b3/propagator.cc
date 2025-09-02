@@ -1,11 +1,8 @@
 #include "source/extensions/propagators/zipkin/b3/propagator.h"
 
 #include "source/common/common/hex.h"
-#include "source/common/common/utility.h"
+#include "source/extensions/propagators/trace_context.h"
 #include "source/extensions/tracers/common/utils/trace.h"
-
-#include "absl/strings/str_split.h"
-#include "absl/strings/string_view.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -14,190 +11,91 @@ namespace Zipkin {
 
 absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
 B3Propagator::extract(const Tracing::TraceContext& trace_context) {
-  // Try single header format first
-  auto single_result = extractSingleHeader(trace_context);
-  if (single_result.ok()) {
-    return single_result;
+  // Use the base B3 propagator to extract generic span context
+  auto generic_result = base_propagator_.extract(trace_context);
+  if (!generic_result.ok()) {
+    return generic_result.status();
   }
 
-  // Fall back to multi-header format
-  return extractMultiHeader(trace_context);
+  // Convert generic span context to Zipkin span context
+  return convertFromGeneric(generic_result.value());
 }
 
 void B3Propagator::inject(const Extensions::Tracers::Zipkin::SpanContext& span_context,
                           Tracing::TraceContext& trace_context) {
-  // Inject both single and multi-header formats for maximum compatibility
-  injectSingleHeader(span_context, trace_context);
-  injectMultiHeader(span_context, trace_context);
+  // Convert Zipkin span context to generic span context
+  auto generic_span_context = convertToGeneric(span_context);
+  
+  // Use the base B3 propagator to inject
+  base_propagator_.inject(generic_span_context, trace_context);
 }
 
 std::vector<std::string> B3Propagator::fields() const {
-  return {std::string(B3_SINGLE_HEADER),  std::string(B3_TRACE_ID_HEADER),
-          std::string(B3_SPAN_ID_HEADER), std::string(B3_PARENT_SPAN_ID_HEADER),
-          std::string(B3_SAMPLED_HEADER), std::string(B3_FLAGS_HEADER)};
+  return base_propagator_.fields();
 }
 
-absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
-B3Propagator::extractSingleHeader(const Tracing::TraceContext& trace_context) {
-  auto b3_value = trace_context.getByKey(B3_SINGLE_HEADER);
-  if (!b3_value.has_value()) {
-    return absl::NotFoundError("B3 single header not found");
-  }
-
-  std::vector<absl::string_view> parts = absl::StrSplit(b3_value.value(), '-');
-  if (parts.empty()) {
-    return absl::InvalidArgumentError("Invalid B3 single header format");
-  }
-
-  // Handle sampling-only format ("0", "1", "d")
-  if (parts.size() == 1) {
-    auto sampling = parseB3SamplingState(parts[0]);
-    if (sampling.has_value()) {
-      // Return context with sampling info but no trace data
-      return Extensions::Tracers::Zipkin::SpanContext(0, 0, 0, 0, sampling.value());
-    }
-    return absl::InvalidArgumentError("Invalid B3 sampling-only header");
-  }
-
-  if (parts.size() < 2 || parts.size() > 4) {
-    return absl::InvalidArgumentError("Invalid B3 single header format");
-  }
-
-  // Parse trace ID (parts[0])
+Extensions::Tracers::Zipkin::SpanContext B3Propagator::convertFromGeneric(const Extensions::Propagators::SpanContext& generic_span_context) {
+  // Convert from generic SpanContext to Zipkin SpanContext
+  const std::string& trace_id_hex = generic_span_context.traceId().toHex();
+  const std::string& span_id_hex = generic_span_context.spanId().toHex();
+  
   uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Common::Utils::Trace::parseTraceId(std::string(parts[0]), trace_id_high,
-                                                               trace_id_low)) {
-    return absl::InvalidArgumentError("Invalid trace ID in B3 header");
-  }
-
-  // Parse span ID (parts[1])
+  Extensions::Tracers::Common::Utils::Trace::parseTraceId(trace_id_hex, trace_id_high, trace_id_low);
+  
   uint64_t span_id = 0;
-  if (!Extensions::Tracers::Common::Utils::Trace::parseSpanId(std::string(parts[1]), span_id)) {
-    return absl::InvalidArgumentError("Invalid span ID in B3 header");
-  }
-
-  // Parse sampling state (parts[2] if present)
-  bool sampled = false;
-  if (parts.size() > 2) {
-    auto sampling = parseB3SamplingState(parts[2]);
-    if (!sampling.has_value()) {
-      return absl::InvalidArgumentError("Invalid sampling state in B3 header");
-    }
-    sampled = sampling.value();
-  }
-
-  // Parse parent span ID (parts[3] if present)
+  Extensions::Tracers::Common::Utils::Trace::parseSpanId(span_id_hex, span_id);
+  
   uint64_t parent_span_id = 0;
-  if (parts.size() > 3) {
-    if (!Extensions::Tracers::Common::Utils::Trace::parseSpanId(std::string(parts[3]),
-                                                                parent_span_id)) {
-      return absl::InvalidArgumentError("Invalid parent span ID in B3 header");
-    }
+  if (generic_span_context.parentSpanId().has_value()) {
+    const std::string& parent_span_id_hex = generic_span_context.parentSpanId().value().toHex();
+    Extensions::Tracers::Common::Utils::Trace::parseSpanId(parent_span_id_hex, parent_span_id);
   }
-
-  return Extensions::Tracers::Zipkin::SpanContext(trace_id_high, trace_id_low, span_id,
-                                                  parent_span_id, sampled);
+  
+  return Extensions::Tracers::Zipkin::SpanContext(
+    trace_id_high, 
+    trace_id_low, 
+    span_id, 
+    parent_span_id, 
+    generic_span_context.sampled()
+  );
 }
 
-absl::StatusOr<Extensions::Tracers::Zipkin::SpanContext>
-B3Propagator::extractMultiHeader(const Tracing::TraceContext& trace_context) {
-  auto trace_id_header = trace_context.getByKey(B3_TRACE_ID_HEADER);
-  auto span_id_header = trace_context.getByKey(B3_SPAN_ID_HEADER);
-
-  if (!trace_id_header.has_value() || !span_id_header.has_value()) {
-    return absl::NotFoundError("Required B3 headers not found");
-  }
-
-  // Parse trace ID
-  uint64_t trace_id_high = 0, trace_id_low = 0;
-  if (!Extensions::Tracers::Common::Utils::Trace::parseTraceId(trace_id_header.value(),
-                                                               trace_id_high, trace_id_low)) {
-    return absl::InvalidArgumentError("Invalid trace ID in B3 headers");
-  }
-
-  // Parse span ID
-  uint64_t span_id = 0;
-  if (!Extensions::Tracers::Common::Utils::Trace::parseSpanId(span_id_header.value(), span_id)) {
-    return absl::InvalidArgumentError("Invalid span ID in B3 headers");
-  }
-
-  // Parse parent span ID (optional)
-  uint64_t parent_span_id = 0;
-  auto parent_span_id_header = trace_context.getByKey(B3_PARENT_SPAN_ID_HEADER);
-  if (parent_span_id_header.has_value()) {
-    if (!Extensions::Tracers::Common::Utils::Trace::parseSpanId(parent_span_id_header.value(),
-                                                                parent_span_id)) {
-      return absl::InvalidArgumentError("Invalid parent span ID in B3 headers");
-    }
-  }
-
-  // Parse sampling state
-  bool sampled = false;
-  auto sampled_header = trace_context.getByKey(B3_SAMPLED_HEADER);
-  if (sampled_header.has_value()) {
-    auto sampling = parseB3SamplingState(sampled_header.value());
-    if (!sampling.has_value()) {
-      return absl::InvalidArgumentError("Invalid sampling state in B3 headers");
-    }
-    sampled = sampling.value();
-  }
-
-  // Check for debug flag
-  auto flags_header = trace_context.getByKey(B3_FLAGS_HEADER);
-  if (flags_header.has_value() && flags_header.value() == "1") {
-    sampled = true; // Debug flag implies sampling
-  }
-
-  return Extensions::Tracers::Zipkin::SpanContext(trace_id_high, trace_id_low, span_id,
-                                                  parent_span_id, sampled);
-}
-
-void B3Propagator::injectSingleHeader(const Extensions::Tracers::Zipkin::SpanContext& span_context,
-                                      Tracing::TraceContext& trace_context) {
-  std::string b3_value = Hex::uint64ToHex(span_context.traceIdHigh()) +
-                         Hex::uint64ToHex(span_context.traceId()) + "-" +
-                         Hex::uint64ToHex(span_context.id());
-
-  if (span_context.sampled()) {
-    b3_value += "-1";
+Extensions::Propagators::SpanContext B3Propagator::convertToGeneric(const Extensions::Tracers::Zipkin::SpanContext& zipkin_span_context) {
+  // Convert from Zipkin SpanContext to generic SpanContext
+  std::string trace_id_hex;
+  if (zipkin_span_context.is128BitTraceId()) {
+    trace_id_hex = Hex::uint64ToHex(zipkin_span_context.traceIdHigh()) + 
+                   Hex::uint64ToHex(zipkin_span_context.traceId());
   } else {
-    b3_value += "-0";
+    trace_id_hex = Hex::uint64ToHex(zipkin_span_context.traceId());
   }
-
-  if (span_context.parentId() != 0) {
-    b3_value += "-" + Hex::uint64ToHex(span_context.parentId());
+  
+  std::string span_id_hex = Hex::uint64ToHex(zipkin_span_context.id());
+  
+  Extensions::Propagators::TraceId trace_id(trace_id_hex);
+  Extensions::Propagators::SpanId span_id(span_id_hex);
+  Extensions::Propagators::TraceFlags trace_flags;
+  trace_flags.setSampled(zipkin_span_context.sampled());
+  
+  absl::optional<Extensions::Propagators::SpanId> parent_span_id;
+  if (zipkin_span_context.parentId() != 0) {
+    std::string parent_span_id_hex = Hex::uint64ToHex(zipkin_span_context.parentId());
+    parent_span_id = Extensions::Propagators::SpanId(parent_span_id_hex);
   }
-
-  trace_context.setByKey(B3_SINGLE_HEADER, b3_value);
+  
+  return Extensions::Propagators::SpanContext(
+    trace_id, 
+    span_id, 
+    trace_flags, 
+    parent_span_id, 
+    "" // tracestate not used in Zipkin
+  );
 }
 
-void B3Propagator::injectMultiHeader(const Extensions::Tracers::Zipkin::SpanContext& span_context,
-                                     Tracing::TraceContext& trace_context) {
-  // Inject trace ID (full 128-bit)
-  std::string trace_id =
-      Hex::uint64ToHex(span_context.traceIdHigh()) + Hex::uint64ToHex(span_context.traceId());
-  trace_context.setByKey(B3_TRACE_ID_HEADER, trace_id);
-
-  // Inject span ID
-  trace_context.setByKey(B3_SPAN_ID_HEADER, Hex::uint64ToHex(span_context.id()));
-
-  // Inject parent span ID if present
-  if (span_context.parentId() != 0) {
-    trace_context.setByKey(B3_PARENT_SPAN_ID_HEADER, Hex::uint64ToHex(span_context.parentId()));
-  }
-
-  // Inject sampling state
-  trace_context.setByKey(B3_SAMPLED_HEADER, span_context.sampled() ? "1" : "0");
-}
-
-absl::optional<bool> B3Propagator::parseB3SamplingState(absl::string_view sampling_state) {
-  if (sampling_state == "0") {
-    return false;
-  } else if (sampling_state == "1" || sampling_state == "d") {
-    return true;
-  }
-  return absl::nullopt;
-}
+} // namespace Zipkin
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
 
 } // namespace Zipkin
 } // namespace Propagators
