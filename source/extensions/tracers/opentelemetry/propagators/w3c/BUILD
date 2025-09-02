@@ -19,9 +19,9 @@ envoy_cc_library(
         "w3c_trace_context_propagator.h",
     ],
     deps = [
-        "//source/common/http:header_map_lib",
+        "//source/common/common:hex_lib",
         "//source/common/tracing:trace_context_lib",
         "//source/extensions/tracers/opentelemetry/propagators:propagator_interface_lib",
-        "@io_opentelemetry_cpp//api",
+        "@com_google_absl//absl/strings",
     ],
 )
