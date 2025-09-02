@@ -12,12 +12,25 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
+    name = "util_lib",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
+    deps = [
+        "//envoy/common:time_interface",
+        "//source/common/common:byte_order_lib",
+        "//source/common/common:hex_lib",
+        "//source/common/common:utility_lib",
+        "//source/common/protobuf:utility_lib",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+envoy_cc_library(
     name = "zipkin_lib",
     srcs = [
         "span_buffer.cc",
         "span_context_extractor.cc",
         "tracer.cc",
-        "util.cc",
         "zipkin_core_types.cc",
         "zipkin_tracer_impl.cc",
     ],
@@ -27,13 +40,13 @@ envoy_cc_library(
         "span_context_extractor.h",
         "tracer.h",
         "tracer_interface.h",
-        "util.h",
         "zipkin_core_constants.h",
         "zipkin_core_types.h",
         "zipkin_json_field_names.h",
         "zipkin_tracer_impl.h",
     ],
     deps = [
+        ":util_lib",
         "//envoy/common:time_interface",
         "//envoy/local_info:local_info_interface",
         "//envoy/network:address_interface",
