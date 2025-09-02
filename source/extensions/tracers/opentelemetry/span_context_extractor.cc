@@ -1,7 +1,5 @@
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
 
-#include "envoy/tracing/tracer.h"
-
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
