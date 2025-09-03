@@ -92,12 +92,26 @@ void Span::finishSpan() {
 void Span::setOperation(absl::string_view operation) { span_.set_name(operation); };
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
-  // Create a SpanContext from current span state
-  SpanContext span_context(std::string(kDefaultVersion), getTraceId(), spanId(), sampled(),
-                           std::string(tracestate()));
+  // Create a CompositeTraceContext from current span state
+  auto composite_result = Extensions::Propagators::OpenTelemetry::TracingHelper::createFromTracerData(
+    getTraceId(),
+    spanId(),
+    "",  // no parent span id available from current span
+    sampled(),
+    std::string(tracestate()),
+    Extensions::Propagators::OpenTelemetry::TraceFormat::W3C
+  );
   
-  // Use the propagator configuration to inject the context
-  parent_tracer_.propagator_config_.injectSpanContext(span_context, trace_context);
+  if (composite_result.ok()) {
+    // Use the composite propagator to inject the context
+    auto inject_result = Extensions::Propagators::OpenTelemetry::TracingHelper::injectWithConfig(
+        composite_result.value(), trace_context, parent_tracer_.propagator_config_);
+    if (!inject_result.ok()) {
+      ENVOY_LOG(warn, "Failed to inject span context: {}", inject_result.message());
+    }
+  } else {
+    ENVOY_LOG(warn, "Failed to create composite context for injection: {}", composite_result.status().message());
+  }
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {
@@ -183,7 +197,7 @@ Tracer::Tracer(OpenTelemetryTraceExporterPtr exporter, Envoy::TimeSource& time_s
                Random::RandomGenerator& random, Runtime::Loader& runtime,
                Event::Dispatcher& dispatcher, OpenTelemetryTracerStats tracing_stats,
                const ResourceConstSharedPtr resource, SamplerSharedPtr sampler,
-               uint64_t max_cache_size, const PropagatorConfig& propagator_config)
+               uint64_t max_cache_size, const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config)
     : exporter_(std::move(exporter)), time_source_(time_source), random_(random), runtime_(runtime),
       tracing_stats_(tracing_stats), resource_(resource), sampler_(sampler),
       max_cache_size_(max_cache_size), propagator_config_(propagator_config) {

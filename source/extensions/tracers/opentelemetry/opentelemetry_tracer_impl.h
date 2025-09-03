@@ -9,7 +9,7 @@
 #include "source/common/singleton/const_singleton.h"
 #include "source/extensions/tracers/common/factory_base.h"
 #include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
-#include "source/extensions/tracers/opentelemetry/propagator_config.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_provider.h"
 #include "source/extensions/tracers/opentelemetry/tracer.h"
 
@@ -50,7 +50,7 @@ private:
   const envoy::config::trace::v3::OpenTelemetryConfig opentelemetry_config_;
   ThreadLocal::SlotPtr tls_slot_ptr_;
   OpenTelemetryTracerStats tracing_stats_;
-  std::unique_ptr<PropagatorConfig> propagator_config_;
+  Extensions::Propagators::OpenTelemetry::Propagator::Config propagator_config_;
 };
 
 } // namespace OpenTelemetry

@@ -12,7 +12,7 @@
 #include "source/common/common/logger.h"
 #include "source/extensions/tracers/common/factory_base.h"
 #include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
-#include "source/extensions/tracers/opentelemetry/propagator_config.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 #include "source/extensions/tracers/opentelemetry/samplers/sampler.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
@@ -42,7 +42,7 @@ public:
          Random::RandomGenerator& random, Runtime::Loader& runtime, Event::Dispatcher& dispatcher,
          OpenTelemetryTracerStats tracing_stats, const ResourceConstSharedPtr resource,
          SamplerSharedPtr sampler, uint64_t max_cache_size, 
-         const PropagatorConfig& propagator_config);
+         const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config);
 
   void sendSpan(::opentelemetry::proto::trace::v1::Span& span);
 
@@ -78,7 +78,7 @@ private:
   const ResourceConstSharedPtr resource_;
   SamplerSharedPtr sampler_;
   uint64_t max_cache_size_;
-  const PropagatorConfig& propagator_config_;
+  const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config_;
 };
 
 /**

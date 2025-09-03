@@ -26,13 +26,11 @@ envoy_cc_library(
     name = "opentelemetry_tracer_lib",
     srcs = [
         "opentelemetry_tracer_impl.cc",
-        "propagator_config.cc",
         "span_context_extractor.cc",
         "tracer.cc",
     ],
     hdrs = [
         "opentelemetry_tracer_impl.h",
-        "propagator_config.h",
         "span_context.h",
         "span_context_extractor.h",
         "tracer.h",
