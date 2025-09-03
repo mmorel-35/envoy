@@ -30,54 +30,66 @@ absl::StatusOr<CompositeTraceContext> Propagator::extract(const Tracing::TraceCo
 
 absl::StatusOr<CompositeTraceContext> Propagator::extract(const Tracing::TraceContext& trace_context,
                                                          const Config& config) {
-  // If no propagators configured, use default behavior
   if (config.propagators.empty()) {
-    // Try W3C format first (preferred standard)
-    auto w3c_result = tryExtractW3C(trace_context);
-    if (w3c_result.has_value()) {
-      return w3c_result.value();
+    return extractWithDefaults(trace_context, config.strict_validation);
+  }
+  
+  return extractWithPropagators(trace_context, config.propagators, config.strict_validation);
+}
+
+absl::StatusOr<CompositeTraceContext> Propagator::extractWithDefaults(
+    const Tracing::TraceContext& trace_context, bool strict_validation) {
+  // Try W3C format first (preferred standard)
+  auto w3c_result = tryExtractW3C(trace_context);
+  if (w3c_result.has_value()) {
+    return w3c_result.value();
+  }
+  
+  // Try B3 format as fallback
+  auto b3_result = tryExtractB3(trace_context);
+  if (b3_result.has_value()) {
+    return b3_result.value();
+  }
+  
+  return strict_validation 
+    ? absl::InvalidArgumentError("No valid trace headers found in any supported format")
+    : absl::NotFoundError("No trace headers found");
+}
+
+absl::StatusOr<CompositeTraceContext> Propagator::extractWithPropagators(
+    const Tracing::TraceContext& trace_context,
+    const std::vector<PropagatorType>& propagators,
+    bool strict_validation) {
+  
+  for (const auto& propagator_type : propagators) {
+    if (!isTraceContextPropagator(propagator_type)) {
+      continue; // Skip non-trace propagators like Baggage
     }
     
-    // Try B3 format as fallback
-    auto b3_result = tryExtractB3(trace_context);
-    if (b3_result.has_value()) {
-      return b3_result.value();
-    }
-  } else {
-    // Try each configured propagator in priority order
-    for (const auto& propagator_type : config.propagators) {
-      switch (propagator_type) {
-        case PropagatorType::TraceContext: {
-          auto w3c_result = tryExtractW3C(trace_context);
-          if (w3c_result.has_value()) {
-            return w3c_result.value();
-          }
-          break;
+    switch (propagator_type) {
+      case PropagatorType::TraceContext: {
+        auto w3c_result = tryExtractW3C(trace_context);
+        if (w3c_result.has_value()) {
+          return w3c_result.value();
         }
-        case PropagatorType::B3:
-        case PropagatorType::B3Multi: {
-          auto b3_result = tryExtractB3(trace_context);
-          if (b3_result.has_value()) {
-            return b3_result.value();
-          }
-          break;
-        }
-        case PropagatorType::Baggage:
-          // Baggage doesn't contain trace context, skip for span context extraction
-          break;
-        case PropagatorType::None:
-          // No propagation
-          break;
+        break;
       }
+      case PropagatorType::B3:
+      case PropagatorType::B3Multi: {
+        auto b3_result = tryExtractB3(trace_context);
+        if (b3_result.has_value()) {
+          return b3_result.value();
+        }
+        break;
+      }
+      default:
+        break;
     }
   }
   
-  // No valid trace context found
-  if (config.strict_validation) {
-    return absl::InvalidArgumentError("No valid trace headers found in any supported format");
-  } else {
-    return absl::NotFoundError("No trace headers found");
-  }
+  return strict_validation 
+    ? absl::InvalidArgumentError("No valid trace headers found in any supported format")
+    : absl::NotFoundError("No trace headers found");
 }
 
 absl::Status Propagator::inject(const CompositeTraceContext& composite_context,
@@ -94,43 +106,66 @@ absl::Status Propagator::inject(const CompositeTraceContext& composite_context,
   }
   
   switch (config.injection_format) {
-    case InjectionFormat::W3C_ONLY: {
+    case InjectionFormat::W3C_ONLY:
       return injectW3C(composite_context, trace_context);
-    }
-    case InjectionFormat::B3_ONLY: {
-      return injectB3(composite_context, trace_context);
-    }
-    case InjectionFormat::W3C_PRIMARY: {
-      auto w3c_status = injectW3C(composite_context, trace_context);
-      if (!w3c_status.ok() && composite_context.format() != TraceFormat::W3C) {
-        // Fallback to B3 if W3C injection fails and we're not already in W3C format
-        return injectB3(composite_context, trace_context);
-      }
-      return w3c_status;
-    }
-    case InjectionFormat::B3_PRIMARY: {
-      auto b3_status = injectB3(composite_context, trace_context);
-      if (!b3_status.ok() && composite_context.format() != TraceFormat::B3) {
-        // Fallback to W3C if B3 injection fails and we're not already in B3 format
-        return injectW3C(composite_context, trace_context);
-      }
-      return b3_status;
-    }
-    case InjectionFormat::BOTH: {
-      auto w3c_status = injectW3C(composite_context, trace_context);
-      auto b3_status = injectB3(composite_context, trace_context);
       
-      // Return error only if both injections fail
-      if (!w3c_status.ok() && !b3_status.ok()) {
-        return absl::InvalidArgumentError(absl::StrFormat(
-            "Both W3C and B3 injection failed: W3C=%s, B3=%s",
-            w3c_status.ToString(), b3_status.ToString()));
-      }
-      return absl::OkStatus();
-    }
+    case InjectionFormat::B3_ONLY:
+      return injectB3(composite_context, trace_context);
+      
+    case InjectionFormat::W3C_PRIMARY:
+      return injectWithFormatAndFallback(composite_context, trace_context,
+                                       InjectionFormat::W3C_ONLY, InjectionFormat::B3_ONLY);
+      
+    case InjectionFormat::B3_PRIMARY:
+      return injectWithFormatAndFallback(composite_context, trace_context,
+                                       InjectionFormat::B3_ONLY, InjectionFormat::W3C_ONLY);
+      
+    case InjectionFormat::BOTH:
+      return injectBothFormats(composite_context, trace_context);
+      
     default:
       return absl::InvalidArgumentError("Unknown injection format");
   }
+}
+
+absl::Status Propagator::injectWithFormatAndFallback(
+    const CompositeTraceContext& composite_context,
+    Tracing::TraceContext& trace_context,
+    InjectionFormat primary_format,
+    InjectionFormat fallback_format) {
+  
+  absl::Status primary_status;
+  
+  if (primary_format == InjectionFormat::W3C_ONLY) {
+    primary_status = injectW3C(composite_context, trace_context);
+    if (!primary_status.ok() && composite_context.format() != TraceFormat::W3C) {
+      return injectB3(composite_context, trace_context);
+    }
+  } else if (primary_format == InjectionFormat::B3_ONLY) {
+    primary_status = injectB3(composite_context, trace_context);
+    if (!primary_status.ok() && composite_context.format() != TraceFormat::B3) {
+      return injectW3C(composite_context, trace_context);
+    }
+  }
+  
+  return primary_status;
+}
+
+absl::Status Propagator::injectBothFormats(
+    const CompositeTraceContext& composite_context,
+    Tracing::TraceContext& trace_context) {
+  
+  auto w3c_status = injectW3C(composite_context, trace_context);
+  auto b3_status = injectB3(composite_context, trace_context);
+  
+  // Return error only if both injections fail
+  if (!w3c_status.ok() && !b3_status.ok()) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Both W3C and B3 injection failed: W3C=%s, B3=%s",
+        w3c_status.ToString(), b3_status.ToString()));
+  }
+  
+  return absl::OkStatus();
 }
 
 absl::StatusOr<CompositeBaggage> Propagator::extractBaggage(const Tracing::TraceContext& trace_context) {
@@ -363,61 +398,78 @@ absl::StatusOr<CompositeTraceContext> TracingHelper::createFromTracerData(
     TraceFormat format) {
   
   switch (format) {
-    case TraceFormat::W3C: {
-      auto w3c_result = W3C::Propagator::createRoot(trace_id, span_id, sampled);
-      if (!w3c_result.ok()) {
-        return w3c_result.status();
-      }
-      
-      auto w3c_ctx = w3c_result.value();
-      
-      // Set parent span ID if provided
-      if (!parent_span_id.empty()) {
-        w3c_ctx.mutableTraceparent().setParentId(parent_span_id);
-      }
-      
-      // Set trace state if provided
-      if (!trace_state.empty()) {
-        auto tracestate_result = W3C::TraceState::fromString(trace_state);
-        if (tracestate_result.ok()) {
-          w3c_ctx.setTracestate(tracestate_result.value());
-        }
-      }
-      
-      return CompositeTraceContext(w3c_ctx);
-    }
-    case TraceFormat::B3: {
-      // Parse IDs for B3
-      auto trace_id_result = B3::TraceId::fromString(trace_id);
-      if (!trace_id_result.ok()) {
-        return trace_id_result.status();
-      }
-      
-      auto span_id_result = B3::SpanId::fromString(span_id);
-      if (!span_id_result.ok()) {
-        return span_id_result.status();
-      }
-      
-      absl::optional<B3::SpanId> parent_span_id_opt;
-      if (!parent_span_id.empty()) {
-        auto parent_result = B3::SpanId::fromString(parent_span_id);
-        if (!parent_result.ok()) {
-          return parent_result.status();
-        }
-        parent_span_id_opt = parent_result.value();
-      }
-      
-      B3::SamplingState sampling_state = sampled ? B3::SamplingState::SAMPLED : B3::SamplingState::NOT_SAMPLED;
-      
-      B3::TraceContext b3_ctx(trace_id_result.value(), span_id_result.value(), 
-                             parent_span_id_opt, sampling_state);
-      
-      return CompositeTraceContext(b3_ctx);
-    }
+    case TraceFormat::W3C:
+      return createW3CFromTracerData(trace_id, span_id, parent_span_id, sampled, trace_state);
+    case TraceFormat::B3:
+      return createB3FromTracerData(trace_id, span_id, parent_span_id, sampled);
     case TraceFormat::NONE:
     default:
       return absl::InvalidArgumentError("Invalid format for creating trace context");
   }
+}
+
+absl::StatusOr<CompositeTraceContext> TracingHelper::createW3CFromTracerData(
+    absl::string_view trace_id,
+    absl::string_view span_id,
+    absl::string_view parent_span_id,
+    bool sampled,
+    absl::string_view trace_state) {
+  
+  auto w3c_result = W3C::Propagator::createRoot(trace_id, span_id, sampled);
+  if (!w3c_result.ok()) {
+    return w3c_result.status();
+  }
+  
+  auto w3c_ctx = w3c_result.value();
+  
+  // Set parent span ID if provided
+  if (!parent_span_id.empty()) {
+    w3c_ctx.mutableTraceparent().setParentId(parent_span_id);
+  }
+  
+  // Set trace state if provided
+  if (!trace_state.empty()) {
+    auto tracestate_result = W3C::TraceState::fromString(trace_state);
+    if (tracestate_result.ok()) {
+      w3c_ctx.setTracestate(tracestate_result.value());
+    }
+  }
+  
+  return CompositeTraceContext(w3c_ctx);
+}
+
+absl::StatusOr<CompositeTraceContext> TracingHelper::createB3FromTracerData(
+    absl::string_view trace_id,
+    absl::string_view span_id,
+    absl::string_view parent_span_id,
+    bool sampled) {
+  
+  // Parse IDs for B3
+  auto trace_id_result = B3::TraceId::fromString(trace_id);
+  if (!trace_id_result.ok()) {
+    return trace_id_result.status();
+  }
+  
+  auto span_id_result = B3::SpanId::fromString(span_id);
+  if (!span_id_result.ok()) {
+    return span_id_result.status();
+  }
+  
+  absl::optional<B3::SpanId> parent_span_id_opt;
+  if (!parent_span_id.empty()) {
+    auto parent_result = B3::SpanId::fromString(parent_span_id);
+    if (!parent_result.ok()) {
+      return parent_result.status();
+    }
+    parent_span_id_opt = parent_result.value();
+  }
+  
+  B3::SamplingState sampling_state = sampled ? B3::SamplingState::SAMPLED : B3::SamplingState::NOT_SAMPLED;
+  
+  B3::TraceContext b3_ctx(trace_id_result.value(), span_id_result.value(), 
+                         parent_span_id_opt, sampling_state);
+  
+  return CompositeTraceContext(b3_ctx);
 }
 
 absl::StatusOr<CompositeTraceContext> TracingHelper::extractWithConfig(
@@ -428,31 +480,28 @@ absl::StatusOr<CompositeTraceContext> TracingHelper::extractWithConfig(
 
 bool TracingHelper::propagationHeaderPresent(const Tracing::TraceContext& trace_context,
                                            const Config& config) {
-  // Check for each enabled propagator type
   for (const auto& propagator_type : config.propagators) {
-    switch (propagator_type) {
-      case PropagatorType::TraceContext:
-        if (W3C::Propagator::isPresent(trace_context)) {
-          return true;
-        }
-        break;
-      case PropagatorType::B3:
-      case PropagatorType::B3Multi:
-        if (B3::Propagator::isPresent(trace_context)) {
-          return true;
-        }
-        break;
-      case PropagatorType::Baggage:
-        if (W3C::Propagator::isBaggagePresent(trace_context)) {
-          return true;
-        }
-        break;
-      case PropagatorType::None:
-        // No propagation
-        break;
+    if (isPropagatorHeaderPresent(trace_context, propagator_type)) {
+      return true;
     }
   }
   return false;
+}
+
+bool TracingHelper::isPropagatorHeaderPresent(const Tracing::TraceContext& trace_context,
+                                            PropagatorType propagator_type) {
+  switch (propagator_type) {
+    case PropagatorType::TraceContext:
+      return W3C::Propagator::isPresent(trace_context);
+    case PropagatorType::B3:
+    case PropagatorType::B3Multi:
+      return B3::Propagator::isPresent(trace_context);
+    case PropagatorType::Baggage:
+      return W3C::Propagator::isBaggagePresent(trace_context);
+    case PropagatorType::None:
+    default:
+      return false;
+  }
 }
 
 absl::Status TracingHelper::injectWithConfig(const CompositeTraceContext& composite_context,
@@ -507,28 +556,11 @@ bool BaggageHelper::hasBaggage(const Tracing::TraceContext& trace_context) {
 
 // Configuration implementation
 
-constexpr absl::string_view kOtelPropagatorsEnv = "OTEL_PROPAGATORS";
-constexpr absl::string_view kDefaultPropagator = "tracecontext";
-
 Propagator::Config Propagator::createConfig(const envoy::config::trace::v3::OpenTelemetryConfig& otel_config, 
                                            Api::Api& api) {
   Config config;
   config.propagators = parsePropagatorConfig(otel_config, api);
-  // Set injection format based on propagators priority
-  if (!config.propagators.empty()) {
-    switch (config.propagators[0]) {
-      case PropagatorType::TraceContext:
-        config.injection_format = InjectionFormat::W3C_PRIMARY;
-        break;
-      case PropagatorType::B3:
-      case PropagatorType::B3Multi:
-        config.injection_format = InjectionFormat::B3_PRIMARY;
-        break;
-      default:
-        config.injection_format = InjectionFormat::W3C_PRIMARY;
-        break;
-    }
-  }
+  config.injection_format = determineInjectionFormat(config.propagators);
   
   // Enable baggage if configured
   config.enable_baggage = std::find(config.propagators.begin(), config.propagators.end(), 
@@ -548,6 +580,35 @@ Propagator::Config Propagator::createConfig(const std::vector<PropagatorType>& p
 }
 
 std::vector<PropagatorType> Propagator::parsePropagatorConfig(
+    const envoy::config::trace::v3::OpenTelemetryConfig& config, Api::Api& api) {
+  
+  auto propagator_strings = extractPropagatorStrings(config, api);
+  
+  // Convert strings to propagator types
+  std::vector<PropagatorType> propagators;
+  for (const auto& propagator_str : propagator_strings) {
+    auto propagator_type = stringToPropagatorType(propagator_str);
+    if (propagator_type.ok()) {
+      propagators.push_back(propagator_type.value());
+      
+      // Handle "none" special case
+      if (propagator_type.value() == PropagatorType::None) {
+        propagators.clear();
+        break;
+      }
+    } else {
+      ENVOY_LOG(warn, "Unknown propagator type '{}', ignoring", propagator_str);
+    }
+  }
+
+  // Remove duplicates while preserving order
+  auto last = std::unique(propagators.begin(), propagators.end());
+  propagators.erase(last, propagators.end());
+  
+  return propagators;
+}
+
+std::vector<std::string> Propagator::extractPropagatorStrings(
     const envoy::config::trace::v3::OpenTelemetryConfig& config, Api::Api& api) {
   std::vector<std::string> propagator_strings;
 
@@ -577,30 +638,37 @@ std::vector<PropagatorType> Propagator::parsePropagatorConfig(
     // Default to tracecontext for backward compatibility
     propagator_strings.push_back(std::string(kDefaultPropagator));
   }
-
-  // Convert strings to propagator types
-  std::vector<PropagatorType> propagators;
-  for (const auto& propagator_str : propagator_strings) {
-    auto propagator_type = stringToPropagatorType(propagator_str);
-    if (propagator_type.ok()) {
-      propagators.push_back(propagator_type.value());
-      
-      // Handle "none" special case
-      if (propagator_type.value() == PropagatorType::None) {
-        // Clear all propagators for "none"
-        propagators.clear();
-        break;
-      }
-    } else {
-      ENVOY_LOG(warn, "Unknown propagator type '{}', ignoring", propagator_str);
-    }
-  }
-
-  // Remove duplicates while preserving order
-  auto last = std::unique(propagators.begin(), propagators.end());
-  propagators.erase(last, propagators.end());
   
-  return propagators;
+  return propagator_strings;
+}
+
+Propagator::InjectionFormat Propagator::determineInjectionFormat(const std::vector<PropagatorType>& propagators) {
+  if (propagators.empty()) {
+    return InjectionFormat::W3C_PRIMARY;
+  }
+  
+  switch (propagators[0]) {
+    case PropagatorType::TraceContext:
+      return InjectionFormat::W3C_PRIMARY;
+    case PropagatorType::B3:
+    case PropagatorType::B3Multi:
+      return InjectionFormat::B3_PRIMARY;
+    default:
+      return InjectionFormat::W3C_PRIMARY;
+  }
+}
+
+bool Propagator::isTraceContextPropagator(PropagatorType type) {
+  switch (type) {
+    case PropagatorType::TraceContext:
+    case PropagatorType::B3:
+    case PropagatorType::B3Multi:
+      return true;
+    case PropagatorType::Baggage:
+    case PropagatorType::None:
+    default:
+      return false;
+  }
 }
 
 absl::StatusOr<PropagatorType> Propagator::stringToPropagatorType(const std::string& propagator_str) {

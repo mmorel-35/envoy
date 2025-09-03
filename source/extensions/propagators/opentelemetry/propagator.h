@@ -20,6 +20,10 @@ namespace Extensions {
 namespace Propagators {
 namespace OpenTelemetry {
 
+// Constants for configuration
+constexpr absl::string_view kOtelPropagatorsEnv = "OTEL_PROPAGATORS";
+constexpr absl::string_view kDefaultPropagator = "tracecontext";
+
 /**
  * Supported propagator types for OpenTelemetry configuration
  */
@@ -177,10 +181,35 @@ public:
 
 private:
   /**
-   * Tries to extract W3C trace context.
-   * @param trace_context The trace context containing headers
-   * @return CompositeTraceContext or nullopt if not found/invalid
+   * Extract trace context using configured propagators.
    */
+  static absl::StatusOr<CompositeTraceContext> extractWithPropagators(
+      const Tracing::TraceContext& trace_context,
+      const std::vector<PropagatorType>& propagators,
+      bool strict_validation);
+
+  /**
+   * Extract trace context using default behavior (W3C then B3).
+   */
+  static absl::StatusOr<CompositeTraceContext> extractWithDefaults(
+      const Tracing::TraceContext& trace_context,
+      bool strict_validation);
+
+  /**
+   * Handle injection for specific format with fallback.
+   */
+  static absl::Status injectWithFormatAndFallback(
+      const CompositeTraceContext& composite_context,
+      Tracing::TraceContext& trace_context,
+      InjectionFormat primary_format,
+      InjectionFormat fallback_format);
+
+  /**
+   * Handle injection for both formats.
+   */
+  static absl::Status injectBothFormats(
+      const CompositeTraceContext& composite_context,
+      Tracing::TraceContext& trace_context);
   static absl::optional<CompositeTraceContext> tryExtractW3C(const Tracing::TraceContext& trace_context);
 
   /**
@@ -210,19 +239,30 @@ private:
 
   /**
    * Parse propagator configuration from proto and environment.
-   * @param config The OpenTelemetry configuration
-   * @param api API interface for reading environment variables
-   * @return Vector of configured propagator types
    */
   static std::vector<PropagatorType> parsePropagatorConfig(
       const envoy::config::trace::v3::OpenTelemetryConfig& config, Api::Api& api);
 
   /**
+   * Extract propagator strings from environment variable and config.
+   */
+  static std::vector<std::string> extractPropagatorStrings(
+      const envoy::config::trace::v3::OpenTelemetryConfig& config, Api::Api& api);
+
+  /**
    * Convert string to propagator type.
-   * @param propagator_str String representation of propagator
-   * @return PropagatorType or error if unknown
    */
   static absl::StatusOr<PropagatorType> stringToPropagatorType(const std::string& propagator_str);
+
+  /**
+   * Determine injection format from propagator priority.
+   */
+  static InjectionFormat determineInjectionFormat(const std::vector<PropagatorType>& propagators);
+
+  /**
+   * Check if propagator type is valid for trace context extraction.
+   */
+  static bool isTraceContextPropagator(PropagatorType type);
 };
 
 /**
@@ -308,6 +348,25 @@ public:
       TraceFormat format = TraceFormat::W3C);
 
   /**
+   * Create W3C trace context from tracer data.
+   */
+  static absl::StatusOr<CompositeTraceContext> createW3CFromTracerData(
+      absl::string_view trace_id,
+      absl::string_view span_id,
+      absl::string_view parent_span_id,
+      bool sampled,
+      absl::string_view trace_state);
+
+  /**
+   * Create B3 trace context from tracer data.
+   */
+  static absl::StatusOr<CompositeTraceContext> createB3FromTracerData(
+      absl::string_view trace_id,
+      absl::string_view span_id,
+      absl::string_view parent_span_id,
+      bool sampled);
+
+  /**
    * Extracts trace context using configurable propagators specifically for OpenTelemetry tracer.
    * This replaces the functionality previously in PropagatorConfig.
    * @param trace_context The trace context containing headers
@@ -326,6 +385,12 @@ public:
    */
   static bool propagationHeaderPresent(const Tracing::TraceContext& trace_context,
                                       const Config& config);
+
+  /**
+   * Check if specific propagator type has headers present.
+   */
+  static bool isPropagatorHeaderPresent(const Tracing::TraceContext& trace_context,
+                                      PropagatorType propagator_type);
 
   /**
    * Injects composite trace context using configurable propagators.
