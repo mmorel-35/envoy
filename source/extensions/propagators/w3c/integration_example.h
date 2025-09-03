@@ -62,8 +62,27 @@ public:
       }
     }
 
-    W3C::TraceContext w3c_context(std::move(traceparent.value()), std::move(tracestate));
+    // Include baggage if present
+    W3C::Baggage baggage;
+    if (!span_context.baggage.empty()) {
+      auto parsed_baggage = W3C::Baggage::parse(span_context.baggage);
+      if (parsed_baggage.ok()) {
+        baggage = std::move(parsed_baggage.value());
+      }
+    }
+
+    W3C::TraceContext w3c_context(std::move(traceparent.value()), std::move(tracestate), std::move(baggage));
     W3C::Propagator::inject(w3c_context, trace_context);
+  }
+
+  // Example: Implement standard Span baggage interface using W3C propagator
+  std::string getBaggage(const Tracing::TraceContext& trace_context, absl::string_view key) {
+    return W3C::BaggageHelper::getBaggageValue(trace_context, key);
+  }
+
+  bool setBaggage(Tracing::TraceContext& trace_context, 
+                  absl::string_view key, absl::string_view value) {
+    return W3C::BaggageHelper::setBaggageValue(trace_context, key, value);
   }
 
 private:
@@ -75,6 +94,7 @@ private:
     std::string trace_flags;
     bool sampled;
     std::string tracestate;
+    std::string baggage; // Added baggage support
   };
 };
 
@@ -120,7 +140,30 @@ private:
  * - Ensures W3C specification compliance
  * - Centralized validation and parsing logic
  * - Easier to maintain and extend
- * - Prepares for W3C Baggage support
+ * - Full W3C Baggage support for span baggage interface
+ * 
+ * W3C BAGGAGE INTEGRATION:
+ * ```cpp
+ * // Traditional span baggage interface using W3C propagator
+ * class MySpan : public Tracing::Span {
+ * public:
+ *   std::string getBaggage(absl::string_view key) override {
+ *     return W3C::BaggageHelper::getBaggageValue(trace_context_, key);
+ *   }
+ * 
+ *   void setBaggage(absl::string_view key, absl::string_view value) override {
+ *     W3C::BaggageHelper::setBaggageValue(trace_context_, key, value);
+ *   }
+ * };
+ * 
+ * // Advanced baggage manipulation
+ * auto baggage = W3C::Propagator::extractBaggage(trace_context);
+ * if (baggage.ok()) {
+ *   baggage.value().set("userId", "alice");
+ *   baggage.value().set("sessionId", "xyz123");
+ *   W3C::Propagator::injectBaggage(baggage.value(), trace_context);
+ * }
+ * ```
  */
 
 } // namespace Tracers

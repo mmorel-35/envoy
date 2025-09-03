@@ -20,6 +20,7 @@ class W3CConstantValues {
 public:
   const Tracing::TraceContextHandler TRACE_PARENT{std::string(Constants::kTraceparentHeader)};
   const Tracing::TraceContextHandler TRACE_STATE{std::string(Constants::kTracestateHeader)};
+  const Tracing::TraceContextHandler BAGGAGE{std::string(Constants::kBaggageHeader)};
 };
 
 using W3CConstants = ConstSingleton<W3CConstantValues>;
@@ -77,6 +78,27 @@ public:
                                                  absl::string_view span_id,
                                                  bool sampled);
 
+  /**
+   * Check if W3C baggage header is present.
+   * @param trace_context the trace context to check
+   * @return true if baggage header is present
+   */
+  static bool isBaggagePresent(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Extract W3C baggage from headers.
+   * @param trace_context the trace context containing headers
+   * @return W3C Baggage or error status if extraction fails
+   */
+  static absl::StatusOr<Baggage> extractBaggage(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Inject W3C baggage into headers.
+   * @param baggage the W3C baggage to inject
+   * @param trace_context the trace context to inject headers into
+   */
+  static void injectBaggage(const Baggage& baggage, Tracing::TraceContext& trace_context);
+
 private:
   // Helper to validate hex string of specific length
   static bool isValidHexString(absl::string_view input, size_t expected_length);
@@ -108,6 +130,45 @@ public:
    * Check if traceparent header is present (for backward compatibility).
    */
   static bool traceparentPresent(const Tracing::TraceContext& trace_context);
+};
+
+/**
+ * Utility class for working with W3C baggage in existing Envoy tracers.
+ * Provides integration with the standard Span baggage interface.
+ */
+class BaggageHelper {
+public:
+  /**
+   * Extract baggage value by key for tracer getBaggage() implementation.
+   * @param trace_context the trace context containing headers
+   * @param key the baggage key to look up
+   * @return the baggage value if found, empty string otherwise
+   */
+  static std::string getBaggageValue(const Tracing::TraceContext& trace_context, absl::string_view key);
+
+  /**
+   * Set baggage value for tracer setBaggage() implementation.
+   * @param trace_context the trace context to modify
+   * @param key the baggage key
+   * @param value the baggage value
+   * @return true if successfully set, false if size limits exceeded
+   */
+  static bool setBaggageValue(Tracing::TraceContext& trace_context, 
+                              absl::string_view key, absl::string_view value);
+
+  /**
+   * Get all baggage as a map for tracer integration.
+   * @param trace_context the trace context containing headers
+   * @return map of all baggage key-value pairs
+   */
+  static std::map<std::string, std::string> getAllBaggage(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Check if any baggage is present.
+   * @param trace_context the trace context to check
+   * @return true if baggage header is present and valid
+   */
+  static bool hasBaggage(const Tracing::TraceContext& trace_context);
 };
 
 } // namespace W3C

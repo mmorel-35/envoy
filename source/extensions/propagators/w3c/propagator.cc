@@ -1,5 +1,7 @@
 #include "source/extensions/propagators/w3c/propagator.h"
 
+#include <map>
+
 #include "absl/strings/str_join.h"
 
 namespace Envoy {
@@ -38,7 +40,15 @@ absl::StatusOr<TraceContext> Propagator::extract(const Tracing::TraceContext& tr
     // Note: We don't fail on tracestate parsing errors as it's optional
   }
 
-  return TraceContext(std::move(traceparent_result.value()), std::move(tracestate));
+  // Extract baggage header - optional
+  Baggage baggage;
+  auto baggage_result = extractBaggage(trace_context);
+  if (baggage_result.ok()) {
+    baggage = std::move(baggage_result.value());
+  }
+  // Note: We don't fail on baggage parsing errors as it's optional
+
+  return TraceContext(std::move(traceparent_result.value()), std::move(tracestate), std::move(baggage));
 }
 
 void Propagator::inject(const TraceContext& w3c_context, Tracing::TraceContext& trace_context) {
@@ -52,6 +62,11 @@ void Propagator::inject(const TraceContext& w3c_context, Tracing::TraceContext& 
     if (!tracestate_value.empty()) {
       W3CConstants::get().TRACE_STATE.set(trace_context, tracestate_value);
     }
+  }
+
+  // Inject baggage header if present
+  if (w3c_context.hasBaggage()) {
+    injectBaggage(w3c_context.baggage(), trace_context);
   }
 }
 
@@ -108,6 +123,28 @@ bool Propagator::isValidHexString(absl::string_view input, size_t expected_lengt
                      [](char c) { return std::isxdigit(c); });
 }
 
+// Baggage-related methods
+
+bool Propagator::isBaggagePresent(const Tracing::TraceContext& trace_context) {
+  auto baggage_header = W3CConstants::get().BAGGAGE.get(trace_context);
+  return baggage_header.has_value() && !baggage_header.value().empty();
+}
+
+absl::StatusOr<Baggage> Propagator::extractBaggage(const Tracing::TraceContext& trace_context) {
+  auto baggage_header = W3CConstants::get().BAGGAGE.get(trace_context);
+  if (!baggage_header.has_value()) {
+    return Baggage(); // Return empty baggage if header not present
+  }
+
+  return Baggage::parse(baggage_header.value());
+}
+
+void Propagator::injectBaggage(const Baggage& baggage, Tracing::TraceContext& trace_context) {
+  if (!baggage.empty()) {
+    W3CConstants::get().BAGGAGE.set(trace_context, baggage.toString());
+  }
+}
+
 // TracingHelper implementation
 
 absl::optional<TracingHelper::ExtractedContext> 
@@ -133,6 +170,54 @@ TracingHelper::extractForTracer(const Tracing::TraceContext& trace_context) {
 
 bool TracingHelper::traceparentPresent(const Tracing::TraceContext& trace_context) {
   return Propagator::isPresent(trace_context);
+}
+
+// BaggageHelper implementation
+
+std::string BaggageHelper::getBaggageValue(const Tracing::TraceContext& trace_context, absl::string_view key) {
+  auto baggage_result = Propagator::extractBaggage(trace_context);
+  if (!baggage_result.ok()) {
+    return "";
+  }
+
+  auto value = baggage_result.value().get(key);
+  return value.has_value() ? std::string(value.value()) : "";
+}
+
+bool BaggageHelper::setBaggageValue(Tracing::TraceContext& trace_context, 
+                                   absl::string_view key, absl::string_view value) {
+  // Extract existing baggage
+  auto baggage_result = Propagator::extractBaggage(trace_context);
+  Baggage baggage = baggage_result.ok() ? std::move(baggage_result.value()) : Baggage();
+
+  // Set the new value
+  if (!baggage.set(key, value)) {
+    return false; // Size limits exceeded
+  }
+
+  // Inject updated baggage back
+  Propagator::injectBaggage(baggage, trace_context);
+  return true;
+}
+
+std::map<std::string, std::string> BaggageHelper::getAllBaggage(const Tracing::TraceContext& trace_context) {
+  std::map<std::string, std::string> result;
+  
+  auto baggage_result = Propagator::extractBaggage(trace_context);
+  if (!baggage_result.ok()) {
+    return result;
+  }
+
+  const auto& members = baggage_result.value().getMembers();
+  for (const auto& member : members) {
+    result[member.key()] = member.value();
+  }
+
+  return result;
+}
+
+bool BaggageHelper::hasBaggage(const Tracing::TraceContext& trace_context) {
+  return Propagator::isBaggagePresent(trace_context);
 }
 
 } // namespace W3C

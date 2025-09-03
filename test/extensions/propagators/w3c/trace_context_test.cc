@@ -249,6 +249,213 @@ TEST_F(TraceContextTest, MutableAccess) {
   EXPECT_EQ(value.value(), "value");
 }
 
+// BaggageMember Tests
+class BaggageMemberTest : public ::testing::Test {
+protected:
+  const std::string valid_member = "key1=value1";
+  const std::string member_with_properties = "key1=value1;prop1=propvalue1;prop2=propvalue2";
+  const std::string url_encoded_member = "my%20key=my%20value";
+};
+
+TEST_F(BaggageMemberTest, ParseValidMember) {
+  auto result = BaggageMember::parse(valid_member);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& member = result.value();
+  EXPECT_EQ(member.key(), "key1");
+  EXPECT_EQ(member.value(), "value1");
+  EXPECT_TRUE(member.properties().empty());
+}
+
+TEST_F(BaggageMemberTest, ParseMemberWithProperties) {
+  auto result = BaggageMember::parse(member_with_properties);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& member = result.value();
+  EXPECT_EQ(member.key(), "key1");
+  EXPECT_EQ(member.value(), "value1");
+  EXPECT_EQ(member.properties().size(), 2);
+  
+  auto prop1 = member.getProperty("prop1");
+  ASSERT_TRUE(prop1.has_value());
+  EXPECT_EQ(prop1.value(), "propvalue1");
+  
+  auto prop2 = member.getProperty("prop2");
+  ASSERT_TRUE(prop2.has_value());
+  EXPECT_EQ(prop2.value(), "propvalue2");
+}
+
+TEST_F(BaggageMemberTest, ParseUrlEncodedMember) {
+  auto result = BaggageMember::parse(url_encoded_member);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& member = result.value();
+  EXPECT_EQ(member.key(), "my key");
+  EXPECT_EQ(member.value(), "my value");
+}
+
+TEST_F(BaggageMemberTest, RoundTripSerialization) {
+  auto original = BaggageMember::parse(member_with_properties);
+  ASSERT_TRUE(original.ok());
+  
+  std::string serialized = original.value().toString();
+  auto reparsed = BaggageMember::parse(serialized);
+  ASSERT_TRUE(reparsed.ok());
+  
+  EXPECT_EQ(original.value().key(), reparsed.value().key());
+  EXPECT_EQ(original.value().value(), reparsed.value().value());
+  EXPECT_EQ(original.value().properties().size(), reparsed.value().properties().size());
+}
+
+TEST_F(BaggageMemberTest, InvalidMembers) {
+  EXPECT_FALSE(BaggageMember::parse("").ok());
+  EXPECT_FALSE(BaggageMember::parse("no_equals").ok());
+  EXPECT_FALSE(BaggageMember::parse("=no_key").ok());
+  EXPECT_FALSE(BaggageMember::parse("key=").ok()); // Empty value is allowed but let's keep it simple
+}
+
+// Baggage Tests
+class BaggageTest : public ::testing::Test {
+protected:
+  const std::string simple_baggage = "key1=value1,key2=value2";
+  const std::string complex_baggage = "key1=value1;prop1=val1,key2=value2;prop2=val2;prop3=val3";
+  const std::string url_encoded_baggage = "my%20key=my%20value,other%20key=other%20value";
+};
+
+TEST_F(BaggageTest, ParseSimpleBaggage) {
+  auto result = Baggage::parse(simple_baggage);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& baggage = result.value();
+  EXPECT_EQ(baggage.getMembers().size(), 2);
+  
+  auto value1 = baggage.get("key1");
+  ASSERT_TRUE(value1.has_value());
+  EXPECT_EQ(value1.value(), "value1");
+  
+  auto value2 = baggage.get("key2");
+  ASSERT_TRUE(value2.has_value());
+  EXPECT_EQ(value2.value(), "value2");
+}
+
+TEST_F(BaggageTest, ParseComplexBaggage) {
+  auto result = Baggage::parse(complex_baggage);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& baggage = result.value();
+  EXPECT_EQ(baggage.getMembers().size(), 2);
+  
+  const auto& members = baggage.getMembers();
+  EXPECT_EQ(members[0].properties().size(), 1);
+  EXPECT_EQ(members[1].properties().size(), 2);
+}
+
+TEST_F(BaggageTest, SetAndGetBaggage) {
+  Baggage baggage;
+  EXPECT_TRUE(baggage.empty());
+  
+  EXPECT_TRUE(baggage.set("key1", "value1"));
+  EXPECT_FALSE(baggage.empty());
+  
+  auto value = baggage.get("key1");
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(value.value(), "value1");
+}
+
+TEST_F(BaggageTest, UpdateExistingKey) {
+  Baggage baggage;
+  EXPECT_TRUE(baggage.set("key1", "value1"));
+  EXPECT_TRUE(baggage.set("key1", "updated_value"));
+  
+  auto value = baggage.get("key1");
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(value.value(), "updated_value");
+  EXPECT_EQ(baggage.getMembers().size(), 1);
+}
+
+TEST_F(BaggageTest, RemoveBaggage) {
+  auto baggage_result = Baggage::parse(simple_baggage);
+  ASSERT_TRUE(baggage_result.ok());
+  
+  auto baggage = std::move(baggage_result.value());
+  EXPECT_EQ(baggage.getMembers().size(), 2);
+  
+  baggage.remove("key1");
+  EXPECT_EQ(baggage.getMembers().size(), 1);
+  EXPECT_FALSE(baggage.get("key1").has_value());
+  EXPECT_TRUE(baggage.get("key2").has_value());
+}
+
+TEST_F(BaggageTest, RoundTripSerialization) {
+  auto original = Baggage::parse(complex_baggage);
+  ASSERT_TRUE(original.ok());
+  
+  std::string serialized = original.value().toString();
+  auto reparsed = Baggage::parse(serialized);
+  ASSERT_TRUE(reparsed.ok());
+  
+  EXPECT_EQ(original.value().getMembers().size(), reparsed.value().getMembers().size());
+  
+  for (const auto& member : original.value().getMembers()) {
+    auto value = reparsed.value().get(member.key());
+    ASSERT_TRUE(value.has_value());
+    EXPECT_EQ(value.value(), member.value());
+  }
+}
+
+TEST_F(BaggageTest, EmptyBaggage) {
+  auto result = Baggage::parse("");
+  ASSERT_TRUE(result.ok());
+  EXPECT_TRUE(result.value().empty());
+  
+  result = Baggage::parse("   ");
+  ASSERT_TRUE(result.ok());
+  EXPECT_TRUE(result.value().empty());
+}
+
+// TraceContext with Baggage Tests
+class TraceContextBaggageTest : public ::testing::Test {
+protected:
+  TraceParent createValidTraceParent() {
+    return TraceParent("00", "4bf92f3577b34da6a3ce929d0e0e4736", "00f067aa0ba902b7", "01");
+  }
+  
+  Baggage createValidBaggage() {
+    auto result = Baggage::parse("key1=value1,key2=value2");
+    return std::move(result.value());
+  }
+};
+
+TEST_F(TraceContextBaggageTest, TraceContextWithBaggage) {
+  TraceParent traceparent = createValidTraceParent();
+  TraceState tracestate;
+  Baggage baggage = createValidBaggage();
+  
+  TraceContext context(std::move(traceparent), std::move(tracestate), std::move(baggage));
+  
+  EXPECT_TRUE(context.hasBaggage());
+  EXPECT_EQ(context.baggage().getMembers().size(), 2);
+  
+  auto value = context.baggage().get("key1");
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(value.value(), "value1");
+}
+
+TEST_F(TraceContextBaggageTest, ModifyBaggage) {
+  TraceParent traceparent = createValidTraceParent();
+  TraceContext context(std::move(traceparent));
+  
+  EXPECT_FALSE(context.hasBaggage());
+  
+  context.baggage().set("new_key", "new_value");
+  EXPECT_TRUE(context.hasBaggage());
+  
+  auto value = context.baggage().get("new_key");
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(value.value(), "new_value");
+}
+}
+
 } // namespace
 } // namespace W3C
 } // namespace Propagators
