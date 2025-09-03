@@ -1,0 +1,300 @@
+#pragma once
+
+#include "source/extensions/propagators/opentelemetry/trace_context.h"
+#include "source/extensions/propagators/w3c/propagator.h"
+#include "source/extensions/propagators/b3/propagator.h"
+
+#include "envoy/tracing/trace_context.h"
+#include "source/common/tracing/trace_context_impl.h"
+
+#include "absl/status/statusor.h"
+#include "absl/types/optional.h"
+
+namespace Envoy {
+namespace Extensions {
+namespace Propagators {
+namespace OpenTelemetry {
+
+/**
+ * OpenTelemetry Composite Propagator implements the OpenTelemetry specification
+ * for propagator composition, allowing multiple trace formats to be handled
+ * through a single, unified interface.
+ * 
+ * This propagator follows the OpenTelemetry API specification:
+ * https://opentelemetry.io/docs/specs/otel/context/api-propagators
+ * 
+ * Features:
+ * - Supports both W3C Trace Context and B3 Propagation formats
+ * - Priority-based extraction (W3C first, B3 fallback)
+ * - Configurable injection format preferences
+ * - Complete baggage support through W3C
+ * - Backward compatibility with existing OpenTelemetry tracer
+ * - Thread-safe operations
+ */
+class Propagator {
+public:
+  /**
+   * Propagation format preferences for injection.
+   */
+  enum class InjectionFormat {
+    W3C_ONLY,           // Inject only W3C headers
+    B3_ONLY,            // Inject only B3 headers
+    W3C_PRIMARY,        // Inject W3C headers with B3 fallback
+    B3_PRIMARY,         // Inject B3 headers with W3C fallback
+    BOTH                // Inject both W3C and B3 headers
+  };
+
+  /**
+   * Configuration for the composite propagator.
+   */
+  struct Config {
+    InjectionFormat injection_format = InjectionFormat::W3C_PRIMARY;
+    bool enable_baggage = true;
+    bool strict_validation = false; // If true, fail on any validation errors
+  };
+
+  /**
+   * Checks if any supported trace headers are present.
+   * @param trace_context The trace context to check
+   * @return true if W3C or B3 headers are found
+   */
+  static bool isPresent(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Extracts composite trace context from HTTP headers.
+   * Tries W3C format first, then B3 as fallback.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or error status if no valid headers found
+   */
+  static absl::StatusOr<CompositeTraceContext> extract(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Extracts composite trace context with configuration.
+   * @param trace_context The trace context containing headers
+   * @param config Propagator configuration
+   * @return CompositeTraceContext or error status
+   */
+  static absl::StatusOr<CompositeTraceContext> extract(const Tracing::TraceContext& trace_context,
+                                                       const Config& config);
+
+  /**
+   * Injects composite trace context into HTTP headers.
+   * Uses default configuration (W3C primary format).
+   * @param composite_context The composite trace context to inject
+   * @param trace_context The target trace context for header injection
+   * @return Success status or error if injection fails
+   */
+  static absl::Status inject(const CompositeTraceContext& composite_context,
+                           Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects composite trace context with configuration.
+   * @param composite_context The composite trace context to inject
+   * @param trace_context The target trace context for header injection
+   * @param config Propagator configuration
+   * @return Success status or error if injection fails
+   */
+  static absl::Status inject(const CompositeTraceContext& composite_context,
+                           Tracing::TraceContext& trace_context,
+                           const Config& config);
+
+  /**
+   * Extracts baggage from supported formats.
+   * Currently only W3C format supports baggage.
+   * @param trace_context The trace context containing headers
+   * @return CompositeBaggage or error status
+   */
+  static absl::StatusOr<CompositeBaggage> extractBaggage(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects baggage into supported formats.
+   * @param baggage The baggage to inject
+   * @param trace_context The target trace context
+   * @return Success status or error if injection fails
+   */
+  static absl::Status injectBaggage(const CompositeBaggage& baggage,
+                                  Tracing::TraceContext& trace_context);
+
+  /**
+   * Creates a new root trace context in the specified format.
+   * @param trace_id The trace ID (hex string)
+   * @param span_id The span ID (hex string)
+   * @param sampled Whether the trace is sampled
+   * @param format The desired trace format
+   * @return CompositeTraceContext in the specified format
+   */
+  static absl::StatusOr<CompositeTraceContext> createRoot(absl::string_view trace_id,
+                                                         absl::string_view span_id,
+                                                         bool sampled,
+                                                         TraceFormat format = TraceFormat::W3C);
+
+  /**
+   * Creates a child trace context from parent.
+   * @param parent_context The parent composite trace context
+   * @param new_span_id The new span ID (hex string)
+   * @return Child CompositeTraceContext
+   */
+  static absl::StatusOr<CompositeTraceContext> createChild(const CompositeTraceContext& parent_context,
+                                                          absl::string_view new_span_id);
+
+private:
+  /**
+   * Tries to extract W3C trace context.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not found/invalid
+   */
+  static absl::optional<CompositeTraceContext> tryExtractW3C(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Tries to extract B3 trace context.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not found/invalid
+   */
+  static absl::optional<CompositeTraceContext> tryExtractB3(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects trace context in W3C format.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status or error
+   */
+  static absl::Status injectW3C(const CompositeTraceContext& composite_context,
+                               Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects trace context in B3 format.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status or error
+   */
+  static absl::Status injectB3(const CompositeTraceContext& composite_context,
+                              Tracing::TraceContext& trace_context);
+};
+
+/**
+ * TracingHelper provides backward compatibility interface for existing 
+ * OpenTelemetry tracer to seamlessly integrate with the composite propagator.
+ * 
+ * This class eliminates the need to modify existing OpenTelemetry tracer code
+ * while providing access to improved multi-format trace propagation.
+ */
+class TracingHelper {
+public:
+  /**
+   * Configuration options for tracer integration.
+   */
+  struct TracerConfig {
+    TraceFormat preferred_format = TraceFormat::W3C;
+    bool enable_format_fallback = true;
+    bool enable_baggage = true;
+  };
+
+  /**
+   * Extracts trace context specifically optimized for OpenTelemetry tracer use.
+   * Provides the same interface as the existing SpanContextExtractor.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not present
+   */
+  static absl::optional<CompositeTraceContext> extractForTracer(
+      const Tracing::TraceContext& trace_context);
+
+  /**
+   * Extracts trace context with tracer-specific configuration.
+   * @param trace_context The trace context containing headers
+   * @param config Tracer configuration
+   * @return CompositeTraceContext or nullopt if not present
+   */
+  static absl::optional<CompositeTraceContext> extractForTracer(
+      const Tracing::TraceContext& trace_context,
+      const TracerConfig& config);
+
+  /**
+   * Injects trace context from tracer-generated data.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status
+   */
+  static absl::Status injectFromTracer(const CompositeTraceContext& composite_context,
+                                     Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects with tracer configuration.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @param config Tracer configuration
+   * @return Success status
+   */
+  static absl::Status injectFromTracer(const CompositeTraceContext& composite_context,
+                                     Tracing::TraceContext& trace_context,
+                                     const TracerConfig& config);
+
+  /**
+   * Checks if propagation headers are present (backward compatibility).
+   * @param trace_context The trace context to check
+   * @return true if any supported headers are found
+   */
+  static bool propagationHeaderPresent(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Creates composite context from individual tracer values.
+   * @param trace_id The trace ID (hex string)
+   * @param span_id The span ID (hex string)
+   * @param parent_span_id The parent span ID (hex string, empty if none)
+   * @param sampled Whether the trace is sampled
+   * @param trace_state Optional trace state (W3C only)
+   * @param format Preferred format
+   * @return CompositeTraceContext
+   */
+  static absl::StatusOr<CompositeTraceContext> createFromTracerData(
+      absl::string_view trace_id,
+      absl::string_view span_id,
+      absl::string_view parent_span_id,
+      bool sampled,
+      absl::string_view trace_state = "",
+      TraceFormat format = TraceFormat::W3C);
+};
+
+/**
+ * BaggageHelper provides integration with standard Span baggage interface
+ * for composite propagator baggage support.
+ */
+class BaggageHelper {
+public:
+  /**
+   * Extract baggage value by key for tracer getBaggage() implementation.
+   * @param trace_context The trace context containing headers
+   * @param key The baggage key to look up
+   * @return The baggage value if found, empty string otherwise
+   */
+  static std::string getBaggageValue(const Tracing::TraceContext& trace_context, 
+                                   absl::string_view key);
+
+  /**
+   * Set baggage value for tracer setBaggage() implementation.
+   * @param trace_context The trace context to modify
+   * @param key The baggage key
+   * @param value The baggage value
+   * @return true if successfully set, false if size limits exceeded
+   */
+  static bool setBaggageValue(Tracing::TraceContext& trace_context,
+                            absl::string_view key, absl::string_view value);
+
+  /**
+   * Get all baggage as a map.
+   * @param trace_context The trace context containing headers
+   * @return Map of all baggage key-value pairs
+   */
+  static std::map<std::string, std::string> getAllBaggage(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Check if any baggage is present.
+   * @param trace_context The trace context to check
+   * @return true if baggage header is present and valid
+   */
+  static bool hasBaggage(const Tracing::TraceContext& trace_context);
+};
+
+} // namespace OpenTelemetry
+} // namespace Propagators
+} // namespace Extensions
+} // namespace Envoy
