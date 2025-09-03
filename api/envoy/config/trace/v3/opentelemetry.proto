@@ -84,8 +84,20 @@ message OpenTelemetryConfig {
   //
   // Environment variable precedence: OTEL_PROPAGATORS takes precedence over this
   // configuration field. Format: comma-separated list (e.g., "tracecontext,b3,baggage").
+  // Propagator names are case-insensitive and duplicate names are automatically deduplicated.
+  // Unknown propagator names are ignored gracefully.
+  //
+  // Examples:
+  // - ["tracecontext"] - W3C Trace Context only (default)
+  // - ["tracecontext", "baggage"] - W3C with baggage support
+  // - ["b3", "tracecontext"] - B3 preferred, W3C fallback
+  // - ["b3multi", "baggage"] - B3 multiple headers with baggage
+  // - ["none"] - Disable all propagation
   //
   // See: `OpenTelemetry propagators specification <https://opentelemetry.io/docs/specs/otel/context/api-propagators/>`_
   // See: `OpenTelemetry SDK configuration <https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators>`_
+  // See: `W3C Trace Context specification <https://www.w3.org/TR/trace-context/>`_
+  // See: `W3C Baggage specification <https://www.w3.org/TR/baggage/>`_
+  // See: `B3 Propagation specification <https://github.com/openzipkin/b3-propagation>`_
   repeated string propagators = 7;
 }
