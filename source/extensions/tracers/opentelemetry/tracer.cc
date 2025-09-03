@@ -93,25 +93,27 @@ void Span::setOperation(absl::string_view operation) { span_.set_name(operation)
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
   // Create a CompositeTraceContext from current span state
-  auto composite_result = Extensions::Propagators::OpenTelemetry::TracingHelper::createFromTracerData(
+  auto composite_result = parent_tracer_.propagator_service_->createFromTracerData(
     getTraceId(),
     spanId(),
     "",  // no parent span id available from current span
     sampled(),
-    std::string(tracestate()),
-    Extensions::Propagators::OpenTelemetry::TraceFormat::W3C
+    std::string(tracestate())
   );
   
   if (composite_result.ok()) {
-    // Use the composite propagator to inject the context
-    auto inject_result = Extensions::Propagators::OpenTelemetry::TracingHelper::injectWithConfig(
-        composite_result.value(), trace_context, parent_tracer_.propagator_config_);
+    // Use the propagator service to inject the context
+    auto inject_result = parent_tracer_.propagator_service_->inject(
+        composite_result.value(), trace_context);
     if (!inject_result.ok()) {
       ENVOY_LOG(warn, "Failed to inject span context: {}", inject_result.message());
     }
   } else {
     ENVOY_LOG(warn, "Failed to create composite context for injection: {}", composite_result.status().message());
   }
+  
+  // Store trace context for baggage operations
+  trace_context_ = &trace_context;
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {
@@ -193,14 +195,27 @@ void Span::setTag(absl::string_view name, absl::string_view value) {
   setAttribute(name, value);
 }
 
+std::string Span::getBaggage(absl::string_view key) {
+  if (trace_context_ != nullptr) {
+    return parent_tracer_.propagator_service_->getBaggageValue(*trace_context_, key);
+  }
+  return "";
+}
+
+void Span::setBaggage(absl::string_view key, absl::string_view value) {
+  if (trace_context_ != nullptr) {
+    parent_tracer_.propagator_service_->setBaggageValue(*trace_context_, key, value);
+  }
+}
+
 Tracer::Tracer(OpenTelemetryTraceExporterPtr exporter, Envoy::TimeSource& time_source,
                Random::RandomGenerator& random, Runtime::Loader& runtime,
                Event::Dispatcher& dispatcher, OpenTelemetryTracerStats tracing_stats,
                const ResourceConstSharedPtr resource, SamplerSharedPtr sampler,
-               uint64_t max_cache_size, const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config)
+               uint64_t max_cache_size, Extensions::Propagators::OpenTelemetry::PropagatorServicePtr propagator_service)
     : exporter_(std::move(exporter)), time_source_(time_source), random_(random), runtime_(runtime),
       tracing_stats_(tracing_stats), resource_(resource), sampler_(sampler),
-      max_cache_size_(max_cache_size), propagator_config_(propagator_config) {
+      max_cache_size_(max_cache_size), propagator_service_(std::move(propagator_service)) {
   flush_timer_ = dispatcher.createTimer([this]() -> void {
     tracing_stats_.timer_flushed_.inc();
     flushSpans();
@@ -299,6 +314,12 @@ Tracing::SpanPtr Tracer::startSpan(const std::string& operation_name,
   } else {
     new_span->setSampled(tracing_decision.traced);
   }
+  
+  // Set trace context for baggage operations if available
+  if (trace_context.has_value()) {
+    new_span->setTraceContext(const_cast<Tracing::TraceContext*>(&trace_context.value()));
+  }
+  
   return new_span;
 }
 
@@ -330,6 +351,12 @@ Tracing::SpanPtr Tracer::startSpan(const std::string& operation_name,
       new_span->setTracestate(parent_context.tracestate());
     }
   }
+  
+  // Set trace context for baggage operations if available
+  if (trace_context.has_value()) {
+    new_span->setTraceContext(const_cast<Tracing::TraceContext*>(&trace_context.value()));
+  }
+  
   return new_span;
 }
 

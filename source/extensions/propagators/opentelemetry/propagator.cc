@@ -621,6 +621,69 @@ absl::StatusOr<PropagatorType> Propagator::stringToPropagatorType(const std::str
   return absl::InvalidArgumentError(absl::StrCat("Unknown propagator type: ", propagator_str));
 }
 
+// PropagatorService implementation
+
+PropagatorService::PropagatorService(const Config& config) : config_(config) {}
+
+bool PropagatorService::isPresent(const Tracing::TraceContext& trace_context) const {
+  return TracingHelper::propagationHeaderPresent(trace_context, config_);
+}
+
+absl::StatusOr<CompositeTraceContext> PropagatorService::extract(const Tracing::TraceContext& trace_context) const {
+  return Propagator::extract(trace_context, config_);
+}
+
+absl::Status PropagatorService::inject(const CompositeTraceContext& composite_context,
+                                     Tracing::TraceContext& trace_context) const {
+  return Propagator::inject(composite_context, trace_context, config_);
+}
+
+absl::StatusOr<CompositeBaggage> PropagatorService::extractBaggage(const Tracing::TraceContext& trace_context) const {
+  return Propagator::extractBaggage(trace_context);
+}
+
+absl::Status PropagatorService::injectBaggage(const CompositeBaggage& baggage,
+                                           Tracing::TraceContext& trace_context) const {
+  return Propagator::injectBaggage(baggage, trace_context);
+}
+
+std::string PropagatorService::getBaggageValue(const Tracing::TraceContext& trace_context, 
+                                              absl::string_view key) const {
+  return BaggageHelper::getBaggageValue(trace_context, key);
+}
+
+bool PropagatorService::setBaggageValue(Tracing::TraceContext& trace_context,
+                                       absl::string_view key, absl::string_view value) const {
+  return BaggageHelper::setBaggageValue(trace_context, key, value);
+}
+
+absl::StatusOr<CompositeTraceContext> PropagatorService::createFromTracerData(
+    absl::string_view trace_id,
+    absl::string_view span_id,
+    absl::string_view parent_span_id,
+    bool sampled,
+    absl::string_view trace_state) const {
+  
+  // Determine format based on configuration priority
+  TraceFormat format = TraceFormat::W3C; // default
+  if (!config_.propagators.empty()) {
+    switch (config_.propagators[0]) {
+      case PropagatorType::TraceContext:
+        format = TraceFormat::W3C;
+        break;
+      case PropagatorType::B3:
+      case PropagatorType::B3Multi:
+        format = TraceFormat::B3;
+        break;
+      default:
+        format = TraceFormat::W3C;
+        break;
+    }
+  }
+  
+  return TracingHelper::createFromTracerData(trace_id, span_id, parent_span_id, sampled, trace_state, format);
+}
+
 } // namespace OpenTelemetry
 } // namespace Propagators
 } // namespace Extensions

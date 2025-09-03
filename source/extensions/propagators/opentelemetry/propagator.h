@@ -340,6 +340,104 @@ public:
 };
 
 /**
+ * PropagatorService encapsulates all propagation logic with configured propagators.
+ * This service implements the IoC pattern, handling propagation internally without
+ * exposing configuration details to clients.
+ */
+class PropagatorService {
+public:
+  /**
+   * Creates a propagator service with the specified configuration.
+   * @param config Propagator configuration containing enabled propagators
+   */
+  explicit PropagatorService(const Config& config);
+
+  /**
+   * Copy constructor for creating instances in TLS.
+   */
+  PropagatorService(const PropagatorService& other) = default;
+
+  /**
+   * Checks if any configured propagation headers are present.
+   * @param trace_context The trace context to check
+   * @return true if any configured propagators find headers
+   */
+  bool isPresent(const Tracing::TraceContext& trace_context) const;
+
+  /**
+   * Extracts trace context using configured propagators.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or error if no valid headers found
+   */
+  absl::StatusOr<CompositeTraceContext> extract(const Tracing::TraceContext& trace_context) const;
+
+  /**
+   * Injects trace context using configured propagators.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status or error if injection fails
+   */
+  absl::Status inject(const CompositeTraceContext& composite_context,
+                     Tracing::TraceContext& trace_context) const;
+
+  /**
+   * Extracts baggage using configured propagators.
+   * @param trace_context The trace context containing headers
+   * @return CompositeBaggage or error status
+   */
+  absl::StatusOr<CompositeBaggage> extractBaggage(const Tracing::TraceContext& trace_context) const;
+
+  /**
+   * Injects baggage using configured propagators.
+   * @param baggage The baggage to inject
+   * @param trace_context The target trace context
+   * @return Success status or error if injection fails
+   */
+  absl::Status injectBaggage(const CompositeBaggage& baggage,
+                           Tracing::TraceContext& trace_context) const;
+
+  /**
+   * Extract baggage value by key for tracer getBaggage() implementation.
+   * @param trace_context The trace context containing headers
+   * @param key The baggage key to look up
+   * @return The baggage value if found, empty string otherwise
+   */
+  std::string getBaggageValue(const Tracing::TraceContext& trace_context, 
+                            absl::string_view key) const;
+
+  /**
+   * Set baggage value for tracer setBaggage() implementation.
+   * @param trace_context The trace context to modify
+   * @param key The baggage key
+   * @param value The baggage value
+   * @return true if successfully set, false if size limits exceeded
+   */
+  bool setBaggageValue(Tracing::TraceContext& trace_context,
+                     absl::string_view key, absl::string_view value) const;
+
+  /**
+   * Creates from tracer data for injection.
+   * @param trace_id The trace ID (hex string)
+   * @param span_id The span ID (hex string)
+   * @param parent_span_id The parent span ID (hex string, empty if none)
+   * @param sampled Whether the trace is sampled
+   * @param trace_state Optional trace state (W3C only)
+   * @return CompositeTraceContext
+   */
+  absl::StatusOr<CompositeTraceContext> createFromTracerData(
+      absl::string_view trace_id,
+      absl::string_view span_id,
+      absl::string_view parent_span_id,
+      bool sampled,
+      absl::string_view trace_state = "") const;
+
+private:
+  const Config config_;
+};
+
+using PropagatorServicePtr = std::unique_ptr<PropagatorService>;
+
+/**
  * BaggageHelper provides integration with standard Span baggage interface
  * for composite propagator baggage support.
  */

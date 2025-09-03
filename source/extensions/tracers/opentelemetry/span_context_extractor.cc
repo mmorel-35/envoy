@@ -13,17 +13,17 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context,
-                                          const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config)
-    : trace_context_(trace_context), propagator_config_(propagator_config) {}
+                                          const Extensions::Propagators::OpenTelemetry::PropagatorService& propagator_service)
+    : trace_context_(trace_context), propagator_service_(propagator_service) {}
 
 SpanContextExtractor::~SpanContextExtractor() = default;
 
 bool SpanContextExtractor::propagationHeaderPresent() {
-  return Extensions::Propagators::OpenTelemetry::TracingHelper::propagationHeaderPresent(trace_context_, propagator_config_);
+  return propagator_service_.isPresent(trace_context_);
 }
 
 absl::StatusOr<SpanContext> SpanContextExtractor::extractSpanContext() {
-  auto composite_result = Extensions::Propagators::OpenTelemetry::TracingHelper::extractWithConfig(trace_context_, propagator_config_);
+  auto composite_result = propagator_service_.extract(trace_context_);
   if (!composite_result.ok()) {
     return composite_result.status();
   }

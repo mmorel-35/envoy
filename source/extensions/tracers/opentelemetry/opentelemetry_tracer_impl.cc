@@ -74,7 +74,8 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
       tls_slot_ptr_(context.serverFactoryContext().threadLocal().allocateSlot()),
       tracing_stats_{OPENTELEMETRY_TRACER_STATS(
           POOL_COUNTER_PREFIX(context.serverFactoryContext().scope(), "tracing.opentelemetry"))},
-      propagator_config_(Extensions::Propagators::OpenTelemetry::Propagator::createConfig(opentelemetry_config, context.serverFactoryContext().api())) {
+      propagator_service_(std::make_unique<Extensions::Propagators::OpenTelemetry::PropagatorService>(
+          Extensions::Propagators::OpenTelemetry::Propagator::createConfig(opentelemetry_config, context.serverFactoryContext().api()))) {
   auto& factory_context = context.serverFactoryContext();
 
   Resource resource = resource_provider.getResource(
@@ -94,7 +95,7 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
 
   // Create the tracer in Thread Local Storage.
   tls_slot_ptr_->set([opentelemetry_config, &factory_context, this, resource_ptr,
-                      sampler](Event::Dispatcher& dispatcher) {
+                      sampler, propagator_service = propagator_service_.get()](Event::Dispatcher& dispatcher) {
     OpenTelemetryTraceExporterPtr exporter;
     if (opentelemetry_config.has_grpc_service()) {
       auto factory_or_error =
@@ -116,7 +117,7 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
         std::make_unique<Tracer>(std::move(exporter), factory_context.timeSource(),
                                  factory_context.api().randomGenerator(), factory_context.runtime(),
                                  dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size,
-                                 propagator_config_);
+                                 std::make_unique<Extensions::Propagators::OpenTelemetry::PropagatorService>(*propagator_service));
     return std::make_shared<TlsTracer>(std::move(tracer));
   });
 }
@@ -128,7 +129,7 @@ Tracing::SpanPtr Driver::startSpan(const Tracing::Config& config,
                                    Tracing::Decision tracing_decision) {
   // Get tracer from TLS and start span.
   auto& tracer = tls_slot_ptr_->getTyped<Driver::TlsTracer>().tracer();
-  SpanContextExtractor extractor(trace_context, propagator_config_);
+  SpanContextExtractor extractor(trace_context, tracer.getPropagatorService());
   const auto span_kind = getSpanKind(config);
   if (!extractor.propagationHeaderPresent()) {
     // No propagation header, so we can create a fresh span with the given decision.

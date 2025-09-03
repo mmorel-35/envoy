@@ -16,12 +16,12 @@ namespace OpenTelemetry {
 
 /**
  * This class is used to extract SpanContext from HTTP headers.
- * Updated to directly use the OpenTelemetry composite propagator.
+ * Updated to directly use the OpenTelemetry propagator service.
  */
 class SpanContextExtractor {
 public:
   SpanContextExtractor(Tracing::TraceContext& trace_context, 
-                       const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config);
+                       const Extensions::Propagators::OpenTelemetry::PropagatorService& propagator_service);
   ~SpanContextExtractor();
   absl::StatusOr<SpanContext> extractSpanContext();
   bool propagationHeaderPresent();
@@ -34,7 +34,7 @@ private:
       const Extensions::Propagators::OpenTelemetry::CompositeTraceContext& composite_context);
 
   const Tracing::TraceContext& trace_context_;
-  const Extensions::Propagators::OpenTelemetry::Propagator::Config& propagator_config_;
+  const Extensions::Propagators::OpenTelemetry::PropagatorService& propagator_service_;
 };
 
 } // namespace OpenTelemetry

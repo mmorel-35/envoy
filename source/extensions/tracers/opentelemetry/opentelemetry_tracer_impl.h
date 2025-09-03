@@ -50,7 +50,7 @@ private:
   const envoy::config::trace::v3::OpenTelemetryConfig opentelemetry_config_;
   ThreadLocal::SlotPtr tls_slot_ptr_;
   OpenTelemetryTracerStats tracing_stats_;
-  Extensions::Propagators::OpenTelemetry::Propagator::Config propagator_config_;
+  Extensions::Propagators::OpenTelemetry::PropagatorServicePtr propagator_service_;
 };
 
 } // namespace OpenTelemetry
