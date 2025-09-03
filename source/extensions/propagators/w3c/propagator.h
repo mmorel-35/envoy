@@ -34,7 +34,7 @@ using W3CConstants = ConstSingleton<W3CConstantValues>;
  * - W3C Baggage: https://www.w3.org/TR/baggage/
  * 
  * SPECIFICATION COMPLIANCE:
- * ✅ W3C Trace Context:
+ * W3C Trace Context:
  *    - Traceparent format validation (version-traceId-parentId-traceFlags)
  *    - Header case-insensitivity per HTTP specification
  *    - Future version compatibility (versions > 00)
@@ -42,7 +42,7 @@ using W3CConstants = ConstSingleton<W3CConstantValues>;
  *    - Tracestate concatenation with comma separator
  *    - Proper hex string validation and length enforcement
  * 
- * ✅ W3C Baggage:
+ * W3C Baggage:
  *    - URL encoding/decoding for keys, values, and properties
  *    - 8KB size limit enforcement with graceful handling
  *    - Baggage member properties support (semicolon-separated)

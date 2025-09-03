@@ -45,27 +45,27 @@ enum class PropagatorType {
  * - https://opentelemetry.io/docs/specs/otel/context/api-propagators/
  * - https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
  * 
- * ✅ Configuration Compliance:
+ * Configuration Compliance:
  *    - OTEL_PROPAGATORS environment variable support with precedence
  *    - Default behavior: "tracecontext" only (per specification)
  *    - Supported propagators: "tracecontext", "baggage", "b3", "b3multi", "none"
  *    - Case-insensitive propagator names
  *    - Graceful handling of unknown/duplicate propagator names
  * 
- * ✅ Extraction Behavior Compliance:
+ * Extraction Behavior Compliance:
  *    - Priority-based extraction: tries propagators in exact configuration order
  *    - First-match-wins: returns context from first successful propagator
  *    - Format-specific behavior: "b3" uses single header, "b3multi" uses multiple headers
  *    - No format mixing: does not merge contexts from different propagators
  *    - Graceful error handling with fallback through propagator list
  * 
- * ✅ Injection Behavior Compliance:
+ * Injection Behavior Compliance:
  *    - Multi-propagator injection: injects headers for ALL configured propagators
  *    - Format distinction: proper single vs multiple B3 header injection
  *    - Independent header management: each propagator manages its own headers
  *    - "none" propagator: completely disables propagation and clears headers
  * 
- * ✅ Composite Features:
+ * Composite Features:
  *    - Complete W3C Trace Context and Baggage support
  *    - Full B3 single and multiple header format support
  *    - Automatic format detection and conversion

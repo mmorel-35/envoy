@@ -20,18 +20,18 @@ namespace B3 {
  * Reference: https://github.com/openzipkin/b3-propagation
  * Reference: https://zipkin.io/pages/instrumenting.html
  * 
- * ✅ Multiple Headers Format:
+ * Multiple Headers Format:
  *    - x-b3-traceid: 64-bit or 128-bit trace ID (hex encoded)
  *    - x-b3-spanid: 64-bit span ID (hex encoded)
  *    - x-b3-parentspanid: 64-bit parent span ID (optional, hex encoded)
  *    - x-b3-sampled: Sampling decision ("0", "1", "true", "false" - case insensitive)
  *    - x-b3-flags: Debug sampling flag ("1" for debug)
  * 
- * ✅ Single Header Format:
+ * Single Header Format:
  *    - b3: {traceId}-{spanId}-{sampled}-{parentSpanId} format
  *    - Supports all combinations per B3 specification
  * 
- * ✅ Specification Requirements:
+ * Specification Requirements:
  *    - Header case-insensitivity per HTTP specification
  *    - Zero trace ID and span ID rejection
  *    - 64-bit and 128-bit trace ID support with proper validation
