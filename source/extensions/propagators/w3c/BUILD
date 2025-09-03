@@ -13,9 +13,6 @@ envoy_cc_library(
     srcs = ["trace_context.cc"],
     hdrs = ["trace_context.h"],
     deps = [
-        "//envoy/tracing:trace_context_interface",
-        "//source/common/common:assert_lib",
-        "//source/common/common:statusor_lib",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
@@ -30,7 +27,7 @@ envoy_cc_library(
     deps = [
         ":trace_context_lib",
         "//envoy/tracing:trace_context_interface",
-        "//source/common/tracing:trace_context_impl",
+        "//source/common/tracing:trace_context_lib",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],

@@ -13,7 +13,7 @@ envoy_cc_test(
     srcs = ["trace_context_test.cc"],
     deps = [
         "//source/extensions/propagators/w3c:trace_context_lib",
-        "//test/test_common:utility_lib",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -22,7 +22,8 @@ envoy_cc_test(
     srcs = ["propagator_test.cc"],
     deps = [
         "//source/extensions/propagators/w3c:propagator_lib",
-        "//source/common/tracing:trace_context_impl",
-        "//test/test_common:utility_lib",
+        "//source/common/tracing:trace_context_lib",
+        "//source/common/http:header_map_lib",
+        "@com_google_googletest//:gtest_main",
     ],
 )
