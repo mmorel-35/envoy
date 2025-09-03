@@ -1,15 +1,11 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "envoy/api/api.h"
 #include "envoy/config/trace/v3/opentelemetry.pb.h"
+#include "envoy/tracing/trace_context.h"
 
 #include "source/common/common/statusor.h"
-#include "source/extensions/propagators/b3/propagator.h"
 #include "source/extensions/propagators/opentelemetry/propagator.h"
-#include "source/extensions/propagators/w3c/propagator.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
 
 namespace Envoy {
@@ -18,20 +14,11 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 /**
- * Supported propagator types for OpenTelemetry tracer configuration
- */
-enum class PropagatorType {
-  TraceContext,  // W3C Trace Context
-  Baggage,       // W3C Baggage  
-  B3,            // B3 single header
-  B3Multi,       // B3 multiple headers
-  None           // No propagation
-};
-
-/**
- * Configuration manager for OpenTelemetry propagators.
- * Handles configuration from proto and environment variables,
- * with fallback to default behavior for backward compatibility.
+ * PropagatorConfig provides a bridge between the OpenTelemetry tracer and the 
+ * configurable propagators in source/extensions/propagators/opentelemetry.
+ * 
+ * This class maintains the same interface as the original PropagatorConfig
+ * for backward compatibility, while delegating to the new composite propagator.
  */
 class PropagatorConfig {
 public:
@@ -63,42 +50,18 @@ public:
 
 private:
   /**
-   * Parse propagator configuration from proto and environment
+   * Convert CompositeTraceContext to OpenTelemetry SpanContext
    */
-  void parsePropagatorConfig(const envoy::config::trace::v3::OpenTelemetryConfig& config, Api::Api& api);
+  absl::StatusOr<SpanContext> convertFromComposite(
+      const Extensions::Propagators::OpenTelemetry::CompositeTraceContext& composite_context);
 
   /**
-   * Convert string to propagator type
+   * Convert OpenTelemetry SpanContext to CompositeTraceContext
    */
-  absl::StatusOr<PropagatorType> stringToPropagatorType(const std::string& propagator_str);
+  Extensions::Propagators::OpenTelemetry::CompositeTraceContext convertToComposite(
+      const SpanContext& span_context);
 
-  /**
-   * Convert SpanContext from W3C format
-   */
-  absl::StatusOr<SpanContext> convertFromW3C(
-      const Extensions::Propagators::W3C::TraceContext& w3c_context);
-
-  /**
-   * Convert SpanContext from B3 format  
-   */
-  absl::StatusOr<SpanContext> convertFromB3(
-      const Extensions::Propagators::B3::TraceContext& b3_context);
-
-  /**
-   * Convert SpanContext to W3C format for injection
-   */
-  Extensions::Propagators::W3C::TraceContext convertToW3C(const SpanContext& span_context);
-
-  /**
-   * Convert SpanContext to B3 format for injection
-   */
-  Extensions::Propagators::B3::TraceContext convertToB3(const SpanContext& span_context);
-
-  std::vector<PropagatorType> propagators_;
-  bool trace_context_enabled_;
-  bool baggage_enabled_;
-  bool b3_enabled_;
-  bool b3_multi_enabled_;
+  Extensions::Propagators::OpenTelemetry::Propagator::Config propagator_config_;
 };
 
 } // namespace OpenTelemetry

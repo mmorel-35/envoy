@@ -31,10 +31,16 @@ envoy_cc_library(
         "//source/extensions/propagators/w3c:propagator_lib",
         "//source/extensions/propagators/b3:propagator_lib",
         "//envoy/tracing:trace_context_interface",
+        "//envoy/api:api_interface",
         "//source/common/tracing:trace_context_lib",
+        "//source/common/common:logger_lib",
+        "//source/common/common:utility_lib",
+        "//source/common/config:datasource_lib",
+        "@envoy_api//envoy/config/trace/v3:pkg_cc_proto",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
     ],
 )
 
