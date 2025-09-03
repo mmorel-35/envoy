@@ -463,6 +463,234 @@ TEST_F(PropagatorTest, InjectCompleteW3CContextWithBaggage) {
   ASSERT_TRUE(extracted_user.has_value());
   EXPECT_EQ(extracted_user.value(), "bob");
 }
+
+// Additional W3C Specification Compliance Tests
+class W3CSpecificationComplianceTest : public ::testing::Test {
+protected:
+  void SetUp() override {
+    headers_ = Http::RequestHeaderMapImpl::create();
+    trace_context_ = std::make_unique<Tracing::TraceContextImpl>(*headers_);
+  }
+
+  Http::RequestHeaderMapPtr headers_;
+  std::unique_ptr<Tracing::TraceContextImpl> trace_context_;
+};
+
+// Test header case insensitivity (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, HeaderCaseInsensitivity) {
+  // Test various case combinations
+  headers_->addCopy("TraceParent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  headers_->addCopy("TraceState", "vendor=value");
+  headers_->addCopy("Baggage", "key=value");
+  
+  EXPECT_TRUE(Propagator::isPresent(*trace_context_));
+  EXPECT_TRUE(Propagator::isBaggagePresent(*trace_context_));
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  headers_->clear();
+  headers_->addCopy("TRACEPARENT", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  EXPECT_TRUE(Propagator::isPresent(*trace_context_));
+}
+
+// Test future version compatibility (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, FutureVersionCompatibility) {
+  // Future version should be accepted but treated conservatively
+  headers_->addCopy("traceparent", "ff-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& context = result.value();
+  EXPECT_EQ(context.traceParent().version(), "ff");
+  EXPECT_EQ(context.traceParent().traceId(), "1234567890abcdef1234567890abcdef");
+  EXPECT_EQ(context.traceParent().parentId(), "fedcba0987654321");
+}
+
+// Test traceparent format validation edge cases
+TEST_F(W3CSpecificationComplianceTest, TraceparentFormatValidation) {
+  // Test exact length requirement
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-0"); // Too short
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+  
+  headers_->clear();
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01-extra"); // Too long
+  result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+  
+  // Test invalid characters
+  headers_->clear();
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-0g"); // Invalid hex
+  result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+}
+
+// Test all-zero trace ID rejection (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, RejectZeroTraceId) {
+  headers_->addCopy("traceparent", "00-00000000000000000000000000000000-fedcba0987654321-01");
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().message(), testing::HasSubstr("zero"));
+}
+
+// Test all-zero span ID rejection (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, RejectZeroSpanId) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-0000000000000000-01");
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+  EXPECT_THAT(result.status().message(), testing::HasSubstr("zero"));
+}
+
+// Test tracestate validation and handling
+TEST_F(W3CSpecificationComplianceTest, TracestateValidation) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  // Valid tracestate
+  headers_->addCopy("tracestate", "vendor1=value1,vendor2=value2");
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  
+  // Test maximum length handling (should not fail but may truncate)
+  headers_->clear();
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  std::string long_tracestate(600, 'a'); // Very long tracestate
+  headers_->addCopy("tracestate", long_tracestate);
+  result = Propagator::extract(*trace_context_);
+  // Should still work (implementation may truncate)
+  EXPECT_TRUE(result.ok());
+}
+
+// Test multiple tracestate headers concatenation (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, MultiplTracestateHeadersConcatenation) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  headers_->addCopy("tracestate", "vendor1=value1");
+  headers_->addCopy("tracestate", "vendor2=value2");
+  headers_->addCopy("tracestate", "vendor3=value3");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& context = result.value();
+  EXPECT_TRUE(context.hasTraceState());
+  
+  // All vendors should be present
+  EXPECT_TRUE(context.traceState().get("vendor1").has_value());
+  EXPECT_TRUE(context.traceState().get("vendor2").has_value());
+  EXPECT_TRUE(context.traceState().get("vendor3").has_value());
+}
+
+// Test baggage size limits (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, BaggageSizeLimits) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  // Create baggage that exceeds size limit
+  std::string large_baggage = "key1=";
+  large_baggage.append(9000, 'a'); // Exceed 8KB limit
+  headers_->addCopy("baggage", large_baggage);
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  // Should either succeed with truncated baggage or fail gracefully
+  if (result.ok()) {
+    // If parsing succeeds, it should respect size limits
+    const auto& baggage = result.value();
+    EXPECT_LE(baggage.toString().size(), 8192); // 8KB limit
+  } else {
+    // Failing due to size limits is also acceptable
+    EXPECT_THAT(result.status().message(), testing::HasSubstr("size"));
+  }
+}
+
+// Test baggage URL encoding/decoding (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, BaggageUrlEncoding) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  // Test URL encoded baggage values
+  headers_->addCopy("baggage", "user%20name=john%20doe,email=user%40example.com");
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& baggage = result.value();
+  auto user_name = baggage.get("user name"); // Should be URL decoded
+  ASSERT_TRUE(user_name.has_value());
+  EXPECT_EQ(user_name.value(), "john doe");
+  
+  auto email = baggage.get("email");
+  ASSERT_TRUE(email.has_value());
+  EXPECT_EQ(email.value(), "user@example.com");
+}
+
+// Test baggage properties handling (W3C spec feature)
+TEST_F(W3CSpecificationComplianceTest, BaggageProperties) {
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  
+  // Baggage with properties
+  headers_->addCopy("baggage", "key1=value1;prop1=propvalue1;prop2=propvalue2,key2=value2");
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& baggage = result.value();
+  EXPECT_FALSE(baggage.empty());
+  
+  // Should handle baggage with properties (even if properties are not exposed in API)
+  auto value1 = baggage.get("key1");
+  ASSERT_TRUE(value1.has_value());
+  EXPECT_EQ(value1.value(), "value1");
+  
+  auto value2 = baggage.get("key2");
+  ASSERT_TRUE(value2.has_value());
+  EXPECT_EQ(value2.value(), "value2");
+}
+
+// Test malformed header graceful handling
+TEST_F(W3CSpecificationComplianceTest, MalformedHeaderHandling) {
+  // Test various malformed headers that should be rejected gracefully
+  
+  // Empty traceparent
+  headers_->addCopy("traceparent", "");
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok());
+  
+  // Malformed tracestate (should not prevent traceparent extraction)
+  headers_->clear();
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  headers_->addCopy("tracestate", "invalid=format=value");
+  result = Propagator::extract(*trace_context_);
+  EXPECT_TRUE(result.ok()); // Should still work without tracestate
+  
+  // Malformed baggage (should not prevent other extraction)
+  headers_->clear();
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-01");
+  headers_->addCopy("baggage", "invalid format");
+  result = Propagator::extract(*trace_context_);
+  EXPECT_TRUE(result.ok()); // Should still work without baggage
+}
+
+// Test preservation of unknown trace flags (W3C spec requirement)
+TEST_F(W3CSpecificationComplianceTest, PreserveUnknownTraceFlags) {
+  // Test flags with unknown bits set
+  headers_->addCopy("traceparent", "00-1234567890abcdef1234567890abcdef-fedcba0987654321-ff");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << result.status().message();
+  
+  const auto& context = result.value();
+  EXPECT_EQ(context.traceParent().traceFlags(), "ff");
+  EXPECT_TRUE(context.traceParent().isSampled()); // Bit 0 is set
+  
+  // Inject and verify flags are preserved
+  Propagator::inject(context, *trace_context_);
+  
+  auto re_extracted = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(re_extracted.ok());
+  EXPECT_EQ(re_extracted.value().traceParent().traceFlags(), "ff");
+}
 }
 
 } // namespace

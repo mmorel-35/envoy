@@ -244,6 +244,42 @@ absl::StatusOr<std::string> TraceContext::toSingleHeader() const {
   return buildSingleHeaderWithOptionalFields(*this);
 }
 
+// Sampling state utility functions implementation
+
+SamplingState samplingStateFromString(absl::string_view value) {
+  if (value.empty()) {
+    return SamplingState::NOT_SAMPLED;
+  }
+  
+  // Convert to lowercase for case-insensitive comparison
+  std::string lower_value = absl::AsciiStrToLower(value);
+  
+  if (lower_value == "0" || lower_value == "false") {
+    return SamplingState::NOT_SAMPLED;
+  } else if (lower_value == "1" || lower_value == "true") {
+    return SamplingState::SAMPLED;
+  } else if (lower_value == "d") {
+    return SamplingState::DEBUG;
+  }
+  
+  // Unknown values default to not sampled per B3 specification
+  return SamplingState::NOT_SAMPLED;
+}
+
+std::string samplingStateToString(SamplingState state) {
+  switch (state) {
+    case SamplingState::NOT_SAMPLED:
+      return "0";
+    case SamplingState::SAMPLED:
+      return "1";
+    case SamplingState::DEBUG:
+      return "d";
+    case SamplingState::UNSPECIFIED:
+      return ""; // Don't output header if unspecified
+  }
+  return "0"; // Default fallback
+}
+
 } // namespace B3
 } // namespace Propagators
 } // namespace Extensions

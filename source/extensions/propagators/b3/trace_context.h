@@ -132,6 +132,21 @@ enum class SamplingState {
 };
 
 /**
+ * Converts string to B3 sampling state per specification.
+ * Supports: "0", "1", "d", "true", "false" (case insensitive)
+ * @param value The sampling value string
+ * @return SamplingState enum value
+ */
+SamplingState samplingStateFromString(absl::string_view value);
+
+/**
+ * Converts B3 sampling state to string representation.
+ * @param state The sampling state
+ * @return String representation ("0", "1", "d")
+ */
+std::string samplingStateToString(SamplingState state);
+
+/**
  * Represents a complete B3 trace context with all propagation headers.
  */
 class TraceContext {
@@ -165,6 +180,11 @@ public:
   const absl::optional<SpanId>& parentSpanId() const { return parent_span_id_; }
 
   /**
+   * @return true if parent span ID is present
+   */
+  bool hasParentSpanId() const { return parent_span_id_.has_value(); }
+
+  /**
    * @return the sampling state
    */
   SamplingState samplingState() const { return sampling_state_; }
@@ -175,9 +195,14 @@ public:
   bool debug() const { return debug_; }
 
   /**
+   * @return true if debug sampling is enabled
+   */
+  bool isDebug() const { return sampling_state_ == SamplingState::DEBUG; }
+
+  /**
    * @return true if sampling decision is true (sampled or debug)
    */
-  bool sampled() const {
+  bool isSampled() const {
     return sampling_state_ == SamplingState::SAMPLED || 
            sampling_state_ == SamplingState::DEBUG;
   }
