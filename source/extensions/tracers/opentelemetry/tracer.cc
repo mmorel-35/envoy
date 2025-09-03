@@ -92,16 +92,12 @@ void Span::finishSpan() {
 void Span::setOperation(absl::string_view operation) { span_.set_name(operation); };
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
-  std::string trace_id_hex = absl::BytesToHexString(span_.trace_id());
-  std::string span_id_hex = absl::BytesToHexString(span_.span_id());
-  std::vector<uint8_t> trace_flags_vec{sampled()};
-  std::string trace_flags_hex = Hex::encode(trace_flags_vec);
-  std::string traceparent_header_value =
-      absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
-  // Set the traceparent in the trace_context.
-  traceParentHeader().setRefKey(trace_context, traceparent_header_value);
-  // Also set the tracestate.
-  traceStateHeader().setRefKey(trace_context, span_.trace_state());
+  // Create a SpanContext from current span state
+  SpanContext span_context(std::string(kDefaultVersion), getTraceId(), spanId(), sampled(),
+                           std::string(tracestate()));
+  
+  // Use the propagator configuration to inject the context
+  parent_tracer_.propagator_config_.injectSpanContext(span_context, trace_context);
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {
@@ -187,10 +183,10 @@ Tracer::Tracer(OpenTelemetryTraceExporterPtr exporter, Envoy::TimeSource& time_s
                Random::RandomGenerator& random, Runtime::Loader& runtime,
                Event::Dispatcher& dispatcher, OpenTelemetryTracerStats tracing_stats,
                const ResourceConstSharedPtr resource, SamplerSharedPtr sampler,
-               uint64_t max_cache_size)
+               uint64_t max_cache_size, const PropagatorConfig& propagator_config)
     : exporter_(std::move(exporter)), time_source_(time_source), random_(random), runtime_(runtime),
       tracing_stats_(tracing_stats), resource_(resource), sampler_(sampler),
-      max_cache_size_(max_cache_size) {
+      max_cache_size_(max_cache_size), propagator_config_(propagator_config) {
   flush_timer_ = dispatcher.createTimer([this]() -> void {
     tracing_stats_.timer_flushed_.inc();
     flushSpans();

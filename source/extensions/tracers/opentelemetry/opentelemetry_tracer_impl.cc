@@ -70,9 +70,11 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
 Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetry_config,
                Server::Configuration::TracerFactoryContext& context,
                const ResourceProvider& resource_provider)
-    : tls_slot_ptr_(context.serverFactoryContext().threadLocal().allocateSlot()),
+    : opentelemetry_config_(opentelemetry_config),
+      tls_slot_ptr_(context.serverFactoryContext().threadLocal().allocateSlot()),
       tracing_stats_{OPENTELEMETRY_TRACER_STATS(
-          POOL_COUNTER_PREFIX(context.serverFactoryContext().scope(), "tracing.opentelemetry"))} {
+          POOL_COUNTER_PREFIX(context.serverFactoryContext().scope(), "tracing.opentelemetry"))},
+      propagator_config_(std::make_unique<PropagatorConfig>(opentelemetry_config, context.serverFactoryContext().api())) {
   auto& factory_context = context.serverFactoryContext();
 
   Resource resource = resource_provider.getResource(
@@ -113,7 +115,8 @@ Driver::Driver(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemetr
     TracerPtr tracer =
         std::make_unique<Tracer>(std::move(exporter), factory_context.timeSource(),
                                  factory_context.api().randomGenerator(), factory_context.runtime(),
-                                 dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size);
+                                 dispatcher, tracing_stats_, resource_ptr, sampler, max_cache_size,
+                                 *propagator_config_);
     return std::make_shared<TlsTracer>(std::move(tracer));
   });
 }
@@ -125,7 +128,7 @@ Tracing::SpanPtr Driver::startSpan(const Tracing::Config& config,
                                    Tracing::Decision tracing_decision) {
   // Get tracer from TLS and start span.
   auto& tracer = tls_slot_ptr_->getTyped<Driver::TlsTracer>().tracer();
-  SpanContextExtractor extractor(trace_context);
+  SpanContextExtractor extractor(trace_context, *propagator_config_);
   const auto span_kind = getSpanKind(config);
   if (!extractor.propagationHeaderPresent()) {
     // No propagation header, so we can create a fresh span with the given decision.
