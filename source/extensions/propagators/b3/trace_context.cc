@@ -16,6 +16,14 @@ namespace B3 {
 
 namespace {
 
+// Constants for improved maintainability
+constexpr char kEmptyTraceIdMessage[] = "Trace ID cannot be empty";
+constexpr char kZeroTraceIdMessage[] = "Trace ID cannot be zero";
+constexpr char kZeroSpanIdMessage[] = "Span ID cannot be zero";
+constexpr char kInvalidTraceIdLengthMessage[] = "Invalid trace ID length";
+constexpr char kInvalidSpanIdLengthMessage[] = "Invalid span ID length";
+constexpr char kInvalidContextMessage[] = "Invalid trace context: missing trace ID or span ID";
+
 /**
  * Validates that a string contains only valid hex characters.
  */
@@ -53,42 +61,125 @@ std::string toHexString(uint64_t value, int width) {
   return ss.str();
 }
 
+/**
+ * Validates trace ID length and format.
+ */
+absl::Status validateTraceIdFormat(absl::string_view hex_string) {
+  if (hex_string.empty()) {
+    return absl::InvalidArgumentError(kEmptyTraceIdMessage);
+  }
+
+  if (hex_string.size() != 16 && hex_string.size() != 32) {
+    return absl::InvalidArgumentError(
+        absl::StrCat(kInvalidTraceIdLengthMessage, ": ", hex_string.size(), 
+                     " (must be 16 or 32 characters)"));
+  }
+
+  return absl::OkStatus();
+}
+
+/**
+ * Validates span ID length and format.
+ */
+absl::Status validateSpanIdFormat(absl::string_view hex_string) {
+  if (hex_string.size() != 16) {
+    return absl::InvalidArgumentError(
+        absl::StrCat(kInvalidSpanIdLengthMessage, ": ", hex_string.size(), 
+                     " (must be 16 characters)"));
+  }
+
+  return absl::OkStatus();
+}
+
+/**
+ * Parses and validates 64-bit trace ID.
+ */
+absl::StatusOr<TraceId> parse64BitTraceId(absl::string_view hex_string) {
+  uint64_t value;
+  if (!parseHexString(hex_string, value)) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid 64-bit trace ID: ", hex_string));
+  }
+  if (value == 0) {
+    return absl::InvalidArgumentError(kZeroTraceIdMessage);
+  }
+  return TraceId::from64Bit(value);
+}
+
+/**
+ * Parses and validates 128-bit trace ID.
+ */
+absl::StatusOr<TraceId> parse128BitTraceId(absl::string_view hex_string) {
+  uint64_t high, low;
+  if (!parseHexString(hex_string.substr(0, 16), high) ||
+      !parseHexString(hex_string.substr(16, 16), low)) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid 128-bit trace ID: ", hex_string));
+  }
+  if (high == 0 && low == 0) {
+    return absl::InvalidArgumentError(kZeroTraceIdMessage);
+  }
+  return TraceId::from128Bit(high, low);
+}
+
+/**
+ * Determines sampling state string representation.
+ */
+std::string getSamplingStateString(SamplingState sampling_state, bool debug) {
+  if (debug) {
+    return "d";
+  }
+  
+  switch (sampling_state) {
+    case SamplingState::NOT_SAMPLED:
+      return "0";
+    case SamplingState::SAMPLED:
+      return "1";
+    case SamplingState::DEBUG:
+      return "d";
+    case SamplingState::UNSPECIFIED:
+      return "0"; // Default to not sampled
+  }
+  return "0";
+}
+
+/**
+ * Builds single header string with optional components.
+ */
+std::string buildSingleHeaderWithOptionalFields(const TraceContext& context) {
+  std::string result = context.traceId().toHexString() + "-" + context.spanId().toHexString();
+
+  // Add sampling state if specified or debug flag is set
+  if (context.samplingState() != SamplingState::UNSPECIFIED || context.debug()) {
+    result += "-" + getSamplingStateString(context.samplingState(), context.debug());
+  }
+
+  // Add parent span ID if present
+  if (context.parentSpanId().has_value()) {
+    if (context.samplingState() == SamplingState::UNSPECIFIED && !context.debug()) {
+      // Need to add sampling state if not already present
+      result += "-0";
+    }
+    result += "-" + context.parentSpanId().value().toHexString();
+  }
+
+  return result;
+}
+
 } // namespace
 
 // TraceId implementation
 
 absl::StatusOr<TraceId> TraceId::fromHexString(absl::string_view hex_string) {
-  if (hex_string.empty()) {
-    return absl::InvalidArgumentError("Trace ID cannot be empty");
+  auto format_validation = validateTraceIdFormat(hex_string);
+  if (!format_validation.ok()) {
+    return format_validation;
   }
 
   if (hex_string.size() == 16) {
-    // 64-bit trace ID
-    uint64_t value;
-    if (!parseHexString(hex_string, value)) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Invalid 64-bit trace ID: ", hex_string));
-    }
-    if (value == 0) {
-      return absl::InvalidArgumentError("Trace ID cannot be zero");
-    }
-    return TraceId(0, value);
-  } else if (hex_string.size() == 32) {
-    // 128-bit trace ID
-    uint64_t high, low;
-    if (!parseHexString(hex_string.substr(0, 16), high) ||
-        !parseHexString(hex_string.substr(16, 16), low)) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Invalid 128-bit trace ID: ", hex_string));
-    }
-    if (high == 0 && low == 0) {
-      return absl::InvalidArgumentError("Trace ID cannot be zero");
-    }
-    return TraceId(high, low);
+    return parse64BitTraceId(hex_string);
   } else {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Invalid trace ID length: ", hex_string.size(), 
-                     " (must be 16 or 32 characters)"));
+    return parse128BitTraceId(hex_string);
   }
 }
 
@@ -111,10 +202,9 @@ std::string TraceId::toHexString() const {
 // SpanId implementation
 
 absl::StatusOr<SpanId> SpanId::fromHexString(absl::string_view hex_string) {
-  if (hex_string.size() != 16) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Invalid span ID length: ", hex_string.size(), 
-                     " (must be 16 characters)"));
+  auto format_validation = validateSpanIdFormat(hex_string);
+  if (!format_validation.ok()) {
+    return format_validation;
   }
 
   uint64_t value;
@@ -124,7 +214,7 @@ absl::StatusOr<SpanId> SpanId::fromHexString(absl::string_view hex_string) {
   }
 
   if (value == 0) {
-    return absl::InvalidArgumentError("Span ID cannot be zero");
+    return absl::InvalidArgumentError(kZeroSpanIdMessage);
   }
 
   return SpanId(value);
@@ -148,45 +238,10 @@ TraceContext::TraceContext(const TraceId& trace_id, const SpanId& span_id,
 
 absl::StatusOr<std::string> TraceContext::toSingleHeader() const {
   if (!isValid()) {
-    return absl::InvalidArgumentError("Invalid trace context: missing trace ID or span ID");
+    return absl::InvalidArgumentError(kInvalidContextMessage);
   }
 
-  std::string result = trace_id_.toHexString() + "-" + span_id_.toHexString();
-
-  // Add sampling state if specified
-  if (sampling_state_ != SamplingState::UNSPECIFIED || debug_) {
-    result += "-";
-    switch (sampling_state_) {
-      case SamplingState::NOT_SAMPLED:
-        result += "0";
-        break;
-      case SamplingState::SAMPLED:
-        result += "1";
-        break;
-      case SamplingState::DEBUG:
-        result += "d";
-        break;
-      case SamplingState::UNSPECIFIED:
-        if (debug_) {
-          result += "d";
-        } else {
-          // Should not happen, but default to not sampled
-          result += "0";
-        }
-        break;
-    }
-  }
-
-  // Add parent span ID if present
-  if (parent_span_id_.has_value()) {
-    if (sampling_state_ == SamplingState::UNSPECIFIED && !debug_) {
-      // Need to add sampling state if not already present
-      result += "-0";
-    }
-    result += "-" + parent_span_id_.value().toHexString();
-  }
-
-  return result;
+  return buildSingleHeaderWithOptionalFields(*this);
 }
 
 } // namespace B3
