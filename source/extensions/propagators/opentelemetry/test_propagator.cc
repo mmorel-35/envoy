@@ -4,6 +4,7 @@
 #include "source/extensions/propagators/b3/propagator.h"
 #include "source/common/tracing/trace_context_impl.h"
 
+#include "test/mocks/api/mocks.h"
 #include "test/mocks/tracing/mocks.h"
 #include "test/test_common/utility.h"
 
@@ -18,6 +19,7 @@ namespace {
 
 using ::testing::Return;
 using ::testing::_;
+using ::testing::NiceMock;
 
 class OpenTelemetryPropagatorTest : public ::testing::Test {
 protected:
@@ -131,9 +133,9 @@ TEST_F(OpenTelemetryPropagatorTest, InjectB3Format) {
   B3::TraceContext b3_ctx(trace_id.value(), span_id.value(), absl::nullopt, B3::SamplingState::SAMPLED);
   CompositeTraceContext composite_context(b3_ctx);
   
-  // Configure for B3 injection
+  // Configure for B3 injection only
   Propagator::Config config;
-  config.injection_format = Propagator::InjectionFormat::B3_ONLY;
+  config.propagators = {PropagatorType::B3};
   
   // Clear headers and inject
   headers_.clear();
@@ -163,7 +165,7 @@ TEST_F(OpenTelemetryPropagatorTest, InjectBothFormats) {
   
   // Configure for both formats injection
   Propagator::Config config;
-  config.injection_format = Propagator::InjectionFormat::BOTH;
+  config.propagators = {PropagatorType::TraceContext, PropagatorType::B3};
   
   // Clear headers and inject
   headers_.clear();
@@ -175,6 +177,119 @@ TEST_F(OpenTelemetryPropagatorTest, InjectBothFormats) {
   EXPECT_TRUE(headers_.get("x-b3-traceid").has_value());
   EXPECT_TRUE(headers_.get("x-b3-spanid").has_value());
   EXPECT_TRUE(headers_.get("x-b3-sampled").has_value());
+}
+
+// Test new compliance features
+TEST_F(OpenTelemetryPropagatorTest, ExtractWithConfiguredOrder) {
+  // Set up both W3C and B3 headers - should respect configuration order
+  headers_.set("traceparent", "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01");
+  headers_.set("x-b3-traceid", "differenttraceid1234567890abcdef");
+  headers_.set("x-b3-spanid", "differentspanid12");
+  headers_.set("x-b3-sampled", "0");
+  
+  // Configure B3 first (should get B3 despite W3C being present)
+  Propagator::Config config;
+  config.propagators = {PropagatorType::B3, PropagatorType::TraceContext};
+  
+  auto result = Propagator::extract(*trace_context_, config);
+  ASSERT_TRUE(result.ok());
+  
+  auto context = result.value();
+  EXPECT_EQ(context.format(), TraceFormat::B3);
+  EXPECT_EQ(context.getTraceId(), "differenttraceid1234567890abcdef");
+  EXPECT_EQ(context.getSpanId(), "differentspanid12");
+  EXPECT_FALSE(context.isSampled());
+}
+
+TEST_F(OpenTelemetryPropagatorTest, InjectMultiplePropagators) {
+  // Create context
+  auto w3c_result = W3C::Propagator::createRoot("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331", true);
+  ASSERT_TRUE(w3c_result.ok());
+  
+  CompositeTraceContext composite_context(w3c_result.value());
+  
+  // Configure multiple propagators - should inject ALL configured
+  Propagator::Config config;
+  config.propagators = {PropagatorType::TraceContext, PropagatorType::B3, PropagatorType::Baggage};
+  
+  // Clear headers and inject
+  headers_.clear();
+  auto inject_result = Propagator::inject(composite_context, *trace_context_, config);
+  ASSERT_TRUE(inject_result.ok());
+  
+  // Check ALL propagator headers are present
+  EXPECT_TRUE(headers_.get("traceparent").has_value());
+  EXPECT_TRUE(headers_.get("x-b3-traceid").has_value());
+  EXPECT_TRUE(headers_.get("x-b3-spanid").has_value());
+  EXPECT_TRUE(headers_.get("x-b3-sampled").has_value());
+  // Note: baggage header would be injected if there was baggage content
+}
+
+TEST_F(OpenTelemetryPropagatorTest, NonePropagatorClearsHeaders) {
+  // Set up existing headers
+  headers_.set("traceparent", "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01");
+  headers_.set("x-b3-traceid", "0af7651916cd43dd8448eb211c80319c");
+  headers_.set("x-b3-spanid", "b7ad6b7169203331");
+  headers_.set("baggage", "key1=value1");
+  
+  // Create context
+  auto w3c_result = W3C::Propagator::createRoot("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331", true);
+  ASSERT_TRUE(w3c_result.ok());
+  CompositeTraceContext composite_context(w3c_result.value());
+  
+  // Configure "none" propagator - should clear all headers
+  Propagator::Config config;
+  config.propagators = {PropagatorType::None};
+  
+  auto inject_result = Propagator::inject(composite_context, *trace_context_, config);
+  ASSERT_TRUE(inject_result.ok());
+  
+  // Check all propagation headers are removed
+  EXPECT_FALSE(headers_.get("traceparent").has_value());
+  EXPECT_FALSE(headers_.get("tracestate").has_value());
+  EXPECT_FALSE(headers_.get("baggage").has_value());
+  EXPECT_FALSE(headers_.get("x-b3-traceid").has_value());
+  EXPECT_FALSE(headers_.get("x-b3-spanid").has_value());
+  EXPECT_FALSE(headers_.get("x-b3-sampled").has_value());
+  EXPECT_FALSE(headers_.get("b3").has_value());
+}
+
+// Test configuration parsing compliance
+TEST_F(OpenTelemetryPropagatorTest, DefaultConfigurationIsTraceContext) {
+  // Test default behavior when no configuration is provided
+  envoy::config::trace::v3::OpenTelemetryConfig empty_config;
+  NiceMock<Api::MockApi> mock_api;
+  
+  auto config = Propagator::createConfig(empty_config, mock_api);
+  
+  // Should default to tracecontext for backward compatibility
+  ASSERT_EQ(config.propagators.size(), 1);
+  EXPECT_EQ(config.propagators[0], PropagatorType::TraceContext);
+}
+
+TEST_F(OpenTelemetryPropagatorTest, NonePropagatorDisablesAll) {
+  // Test "none" propagator configuration
+  std::vector<PropagatorType> propagators = {PropagatorType::None};
+  auto config = Propagator::createConfig(propagators);
+  
+  ASSERT_EQ(config.propagators.size(), 1);
+  EXPECT_EQ(config.propagators[0], PropagatorType::None);
+}
+
+TEST_F(OpenTelemetryPropagatorTest, MultiplePropagatorConfiguration) {
+  // Test multiple propagators in specific order
+  std::vector<PropagatorType> propagators = {
+    PropagatorType::B3, 
+    PropagatorType::TraceContext, 
+    PropagatorType::Baggage
+  };
+  auto config = Propagator::createConfig(propagators);
+  
+  ASSERT_EQ(config.propagators.size(), 3);
+  EXPECT_EQ(config.propagators[0], PropagatorType::B3);
+  EXPECT_EQ(config.propagators[1], PropagatorType::TraceContext);
+  EXPECT_EQ(config.propagators[2], PropagatorType::Baggage);
+  EXPECT_TRUE(config.enable_baggage); // Should be auto-enabled when Baggage propagator is present
 }
 
 TEST_F(OpenTelemetryPropagatorTest, FormatConversion) {

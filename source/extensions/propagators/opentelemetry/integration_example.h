@@ -150,9 +150,9 @@ public:
     // Configure injection
     Propagator::Config config;
     if (preferred_format == TraceFormat::W3C) {
-      config.injection_format = Propagator::InjectionFormat::W3C_PRIMARY;
+      config.propagators = {PropagatorType::TraceContext, PropagatorType::B3};
     } else {
-      config.injection_format = Propagator::InjectionFormat::B3_PRIMARY;
+      config.propagators = {PropagatorType::B3, PropagatorType::TraceContext};
     }
     config.enable_baggage = true;
     
@@ -243,9 +243,9 @@ public:
     // Configure injection format
     Propagator::Config config;
     if (include_b3_headers) {
-      config.injection_format = Propagator::InjectionFormat::BOTH;
+      config.propagators = {PropagatorType::TraceContext, PropagatorType::B3, PropagatorType::Baggage};
     } else {
-      config.injection_format = Propagator::InjectionFormat::W3C_ONLY;
+      config.propagators = {PropagatorType::TraceContext, PropagatorType::Baggage};
     }
     
     return Propagator::inject(composite_result.value(), trace_context, config);
@@ -321,10 +321,10 @@ public:
     Propagator::Config config;
     switch (required_format) {
       case TraceFormat::W3C:
-        config.injection_format = Propagator::InjectionFormat::W3C_ONLY;
+        config.propagators = {PropagatorType::TraceContext};
         break;
       case TraceFormat::B3:
-        config.injection_format = Propagator::InjectionFormat::B3_ONLY;
+        config.propagators = {PropagatorType::B3};
         break;
       default:
         return absl::InvalidArgumentError("Unsupported target format");

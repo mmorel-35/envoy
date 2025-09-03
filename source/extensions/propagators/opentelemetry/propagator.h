@@ -54,21 +54,9 @@ enum class PropagatorType {
 class Propagator {
 public:
   /**
-   * Propagation format preferences for injection.
-   */
-  enum class InjectionFormat {
-    W3C_ONLY,           // Inject only W3C headers
-    B3_ONLY,            // Inject only B3 headers
-    W3C_PRIMARY,        // Inject W3C headers with B3 fallback
-    B3_PRIMARY,         // Inject B3 headers with W3C fallback
-    BOTH                // Inject both W3C and B3 headers
-  };
-
-  /**
    * Configuration for the composite propagator.
    */
   struct Config {
-    InjectionFormat injection_format = InjectionFormat::W3C_PRIMARY;
     bool enable_baggage = true;
     bool strict_validation = false; // If true, fail on any validation errors
     std::vector<PropagatorType> propagators; // List of enabled propagators in priority order
@@ -171,12 +159,10 @@ public:
   /**
    * Creates configuration with explicit propagator list.
    * @param propagators List of propagator types in priority order
-   * @param injection_format Preferred injection format
    * @param enable_baggage Whether to enable baggage propagation
    * @return Configuration
    */
   static Config createConfig(const std::vector<PropagatorType>& propagators,
-                           InjectionFormat injection_format = InjectionFormat::W3C_PRIMARY,
                            bool enable_baggage = true);
 
 private:
@@ -196,20 +182,15 @@ private:
       bool strict_validation);
 
   /**
-   * Handle injection for specific format with fallback.
+   * Clear all propagation headers when "none" is specified.
    */
-  static absl::Status injectWithFormatAndFallback(
-      const CompositeTraceContext& composite_context,
-      Tracing::TraceContext& trace_context,
-      InjectionFormat primary_format,
-      InjectionFormat fallback_format);
+  static absl::Status clearAllPropagationHeaders(Tracing::TraceContext& trace_context);
 
   /**
-   * Handle injection for both formats.
+   * Tries to extract W3C trace context.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not found/invalid
    */
-  static absl::Status injectBothFormats(
-      const CompositeTraceContext& composite_context,
-      Tracing::TraceContext& trace_context);
   static absl::optional<CompositeTraceContext> tryExtractW3C(const Tracing::TraceContext& trace_context);
 
   /**
@@ -253,11 +234,6 @@ private:
    * Convert string to propagator type.
    */
   static absl::StatusOr<PropagatorType> stringToPropagatorType(const std::string& propagator_str);
-
-  /**
-   * Determine injection format from propagator priority.
-   */
-  static InjectionFormat determineInjectionFormat(const std::vector<PropagatorType>& propagators);
 
   /**
    * Check if propagator type is valid for trace context extraction.

@@ -63,17 +63,26 @@ Main composite propagator implementation with configurable behavior:
 ```cpp
 class Propagator {
 public:
-  enum class InjectionFormat {
-    W3C_ONLY,      // Inject only W3C headers
-    B3_ONLY,       // Inject only B3 headers
-    W3C_PRIMARY,   // Inject W3C with B3 fallback
-    B3_PRIMARY,    // Inject B3 with W3C fallback
-    BOTH           // Inject both formats
+  // Supported propagator types for OpenTelemetry specification compliance
+  enum class PropagatorType {
+    TraceContext,  // W3C Trace Context
+    Baggage,       // W3C Baggage  
+    B3,            // B3 single header
+    B3Multi,       // B3 multiple headers
+    None           // No propagation
+  };
+
+  struct Config {
+    bool enable_baggage = true;
+    bool strict_validation = false; // If true, fail on any validation errors
+    std::vector<PropagatorType> propagators; // List of enabled propagators in priority order
   };
   
-  // Core extraction/injection
+  // Core extraction/injection - OpenTelemetry specification compliant
   static absl::StatusOr<CompositeTraceContext> extract(const Tracing::TraceContext& trace_context);
+  static absl::StatusOr<CompositeTraceContext> extract(const Tracing::TraceContext& trace_context, const Config& config);
   static absl::Status inject(const CompositeTraceContext& composite_context, Tracing::TraceContext& trace_context);
+  static absl::Status inject(const CompositeTraceContext& composite_context, Tracing::TraceContext& trace_context, const Config& config);
   
   // Baggage operations
   static absl::StatusOr<CompositeBaggage> extractBaggage(const Tracing::TraceContext& trace_context);
@@ -213,9 +222,9 @@ public:
     
     // Inject in target format
     Propagator::Config config;
-    config.injection_format = (preferred_format == TraceFormat::W3C) 
-        ? Propagator::InjectionFormat::W3C_PRIMARY 
-        : Propagator::InjectionFormat::B3_PRIMARY;
+    config.propagators = (preferred_format == TraceFormat::W3C) 
+        ? std::vector<PropagatorType>{PropagatorType::TraceContext, PropagatorType::B3}
+        : std::vector<PropagatorType>{PropagatorType::B3, PropagatorType::TraceContext};
     config.enable_baggage = true;
     
     return Propagator::inject(child_context, outgoing_context, config);
@@ -267,9 +276,9 @@ public:
     }
     
     Propagator::Config config;
-    config.injection_format = include_b3_headers 
-        ? Propagator::InjectionFormat::BOTH 
-        : Propagator::InjectionFormat::W3C_ONLY;
+    config.propagators = include_b3_headers 
+        ? std::vector<PropagatorType>{PropagatorType::TraceContext, PropagatorType::B3, PropagatorType::Baggage}
+        : std::vector<PropagatorType>{PropagatorType::TraceContext, PropagatorType::Baggage};
     
     return Propagator::inject(composite_result.value(), trace_context, config);
   }
@@ -336,10 +345,10 @@ public:
     Propagator::Config config;
     switch (required_format) {
       case TraceFormat::W3C:
-        config.injection_format = Propagator::InjectionFormat::W3C_ONLY;
+        config.propagators = {PropagatorType::TraceContext};
         break;
       case TraceFormat::B3:
-        config.injection_format = Propagator::InjectionFormat::B3_ONLY;
+        config.propagators = {PropagatorType::B3};
         break;
       default:
         return absl::InvalidArgumentError("Unsupported target format");
@@ -385,9 +394,15 @@ public:
 
 ```cpp
 Propagator::Config config;
-config.injection_format = Propagator::InjectionFormat::W3C_PRIMARY; // Prefer W3C, fallback to B3
-config.enable_baggage = true;                                      // Include baggage handling
-config.strict_validation = false;                                  // Relaxed validation for compatibility
+config.propagators = {PropagatorType::TraceContext, PropagatorType::B3}; // W3C primary, B3 fallback
+config.enable_baggage = true;                                           // Include baggage handling
+config.strict_validation = false;                                       // Relaxed validation for compatibility
+
+// OpenTelemetry specification compliant configuration examples:
+config.propagators = {PropagatorType::TraceContext};                    // W3C only
+config.propagators = {PropagatorType::B3};                             // B3 only  
+config.propagators = {PropagatorType::TraceContext, PropagatorType::Baggage}; // W3C with baggage
+config.propagators = {PropagatorType::None};                           // Disable all propagation
 ```
 
 ### TracingHelper Configuration

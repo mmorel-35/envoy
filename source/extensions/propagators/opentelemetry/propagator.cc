@@ -61,6 +61,8 @@ absl::StatusOr<CompositeTraceContext> Propagator::extractWithPropagators(
     const std::vector<PropagatorType>& propagators,
     bool strict_validation) {
   
+  // OpenTelemetry specification: try propagators in the exact order configured
+  // and return the first successful extraction (priority-based, not merged)
   for (const auto& propagator_type : propagators) {
     if (!isTraceContextPropagator(propagator_type)) {
       continue; // Skip non-trace propagators like Baggage
@@ -105,68 +107,62 @@ absl::Status Propagator::inject(const CompositeTraceContext& composite_context,
     return absl::InvalidArgumentError("Cannot inject invalid trace context");
   }
   
-  switch (config.injection_format) {
-    case InjectionFormat::W3C_ONLY:
-      return injectW3C(composite_context, trace_context);
-      
-    case InjectionFormat::B3_ONLY:
-      return injectB3(composite_context, trace_context);
-      
-    case InjectionFormat::W3C_PRIMARY:
-      return injectWithFormatAndFallback(composite_context, trace_context,
-                                       InjectionFormat::W3C_ONLY, InjectionFormat::B3_ONLY);
-      
-    case InjectionFormat::B3_PRIMARY:
-      return injectWithFormatAndFallback(composite_context, trace_context,
-                                       InjectionFormat::B3_ONLY, InjectionFormat::W3C_ONLY);
-      
-    case InjectionFormat::BOTH:
-      return injectBothFormats(composite_context, trace_context);
-      
-    default:
-      return absl::InvalidArgumentError("Unknown injection format");
-  }
-}
-
-absl::Status Propagator::injectWithFormatAndFallback(
-    const CompositeTraceContext& composite_context,
-    Tracing::TraceContext& trace_context,
-    InjectionFormat primary_format,
-    InjectionFormat fallback_format) {
+  // OpenTelemetry specification: inject headers for ALL configured propagators
+  std::vector<std::string> injection_errors;
+  bool any_success = false;
   
-  absl::Status primary_status;
-  
-  if (primary_format == InjectionFormat::W3C_ONLY) {
-    primary_status = injectW3C(composite_context, trace_context);
-    if (!primary_status.ok() && composite_context.format() != TraceFormat::W3C) {
-      return injectB3(composite_context, trace_context);
+  for (const auto& propagator_type : config.propagators) {
+    absl::Status status;
+    
+    switch (propagator_type) {
+      case PropagatorType::TraceContext: {
+        status = injectW3C(composite_context, trace_context);
+        break;
+      }
+      case PropagatorType::B3:
+      case PropagatorType::B3Multi: {
+        status = injectB3(composite_context, trace_context);
+        break;
+      }
+      case PropagatorType::Baggage: {
+        // Baggage injection handled separately via injectBaggage method
+        status = absl::OkStatus();
+        break;
+      }
+      case PropagatorType::None: {
+        // "none" means skip all propagation - clear any existing headers
+        return clearAllPropagationHeaders(trace_context);
+      }
+      default: {
+        status = absl::InvalidArgumentError(absl::StrCat("Unknown propagator type: ", 
+                                                         static_cast<int>(propagator_type)));
+        break;
+      }
     }
-  } else if (primary_format == InjectionFormat::B3_ONLY) {
-    primary_status = injectB3(composite_context, trace_context);
-    if (!primary_status.ok() && composite_context.format() != TraceFormat::B3) {
-      return injectW3C(composite_context, trace_context);
+    
+    if (status.ok()) {
+      any_success = true;
+    } else {
+      injection_errors.push_back(absl::StrCat("Propagator ", static_cast<int>(propagator_type), 
+                                            ": ", status.ToString()));
     }
   }
   
-  return primary_status;
-}
-
-absl::Status Propagator::injectBothFormats(
-    const CompositeTraceContext& composite_context,
-    Tracing::TraceContext& trace_context) {
-  
-  auto w3c_status = injectW3C(composite_context, trace_context);
-  auto b3_status = injectB3(composite_context, trace_context);
-  
-  // Return error only if both injections fail
-  if (!w3c_status.ok() && !b3_status.ok()) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Both W3C and B3 injection failed: W3C=%s, B3=%s",
-        w3c_status.ToString(), b3_status.ToString()));
+  // If no propagators configured, use default behavior (W3C)
+  if (config.propagators.empty()) {
+    return injectW3C(composite_context, trace_context);
   }
   
-  return absl::OkStatus();
+  // Return success if at least one propagator succeeded
+  if (any_success) {
+    return absl::OkStatus();
+  }
+  
+  // All propagators failed
+  return absl::InvalidArgumentError(absl::StrCat("All propagator injections failed: ", 
+                                                absl::StrJoin(injection_errors, "; ")));
 }
+
 
 absl::StatusOr<CompositeBaggage> Propagator::extractBaggage(const Tracing::TraceContext& trace_context) {
   // Only W3C supports baggage currently
@@ -373,11 +369,22 @@ absl::Status TracingHelper::injectFromTracer(const CompositeTraceContext& compos
   
   // Map tracer config to propagator config
   if (config.preferred_format == TraceFormat::W3C) {
-    prop_config.injection_format = Propagator::InjectionFormat::W3C_PRIMARY;
+    prop_config.propagators = {PropagatorType::TraceContext};
+    if (config.enable_format_fallback) {
+      prop_config.propagators.push_back(PropagatorType::B3);
+    }
   } else if (config.preferred_format == TraceFormat::B3) {
-    prop_config.injection_format = Propagator::InjectionFormat::B3_PRIMARY;
+    prop_config.propagators = {PropagatorType::B3};
+    if (config.enable_format_fallback) {
+      prop_config.propagators.push_back(PropagatorType::TraceContext);
+    }
   } else {
-    prop_config.injection_format = Propagator::InjectionFormat::W3C_PRIMARY; // Default
+    prop_config.propagators = {PropagatorType::TraceContext}; // Default
+  }
+  
+  // Add baggage support if enabled
+  if (config.enable_baggage) {
+    prop_config.propagators.push_back(PropagatorType::Baggage);
   }
   
   prop_config.enable_baggage = config.enable_baggage;
@@ -560,7 +567,6 @@ Propagator::Config Propagator::createConfig(const envoy::config::trace::v3::Open
                                            Api::Api& api) {
   Config config;
   config.propagators = parsePropagatorConfig(otel_config, api);
-  config.injection_format = determineInjectionFormat(config.propagators);
   
   // Enable baggage if configured
   config.enable_baggage = std::find(config.propagators.begin(), config.propagators.end(), 
@@ -570,11 +576,9 @@ Propagator::Config Propagator::createConfig(const envoy::config::trace::v3::Open
 }
 
 Propagator::Config Propagator::createConfig(const std::vector<PropagatorType>& propagators,
-                                           InjectionFormat injection_format,
                                            bool enable_baggage) {
   Config config;
   config.propagators = propagators;
-  config.injection_format = injection_format;
   config.enable_baggage = enable_baggage;
   return config;
 }
@@ -586,17 +590,23 @@ std::vector<PropagatorType> Propagator::parsePropagatorConfig(
   
   // Convert strings to propagator types
   std::vector<PropagatorType> propagators;
+  
+  // Handle "none" special case first - if any "none" is present, disable all propagation
   for (const auto& propagator_str : propagator_strings) {
     auto propagator_type = stringToPropagatorType(propagator_str);
-    if (propagator_type.ok()) {
+    if (propagator_type.ok() && propagator_type.value() == PropagatorType::None) {
+      propagators.clear();
+      propagators.push_back(PropagatorType::None);
+      return propagators; // Return immediately with only "none"
+    }
+  }
+  
+  // Process other propagators (if no "none" was found)
+  for (const auto& propagator_str : propagator_strings) {
+    auto propagator_type = stringToPropagatorType(propagator_str);
+    if (propagator_type.ok() && propagator_type.value() != PropagatorType::None) {
       propagators.push_back(propagator_type.value());
-      
-      // Handle "none" special case
-      if (propagator_type.value() == PropagatorType::None) {
-        propagators.clear();
-        break;
-      }
-    } else {
+    } else if (!propagator_type.ok()) {
       ENVOY_LOG(warn, "Unknown propagator type '{}', ignoring", propagator_str);
     }
   }
@@ -642,21 +652,7 @@ std::vector<std::string> Propagator::extractPropagatorStrings(
   return propagator_strings;
 }
 
-Propagator::InjectionFormat Propagator::determineInjectionFormat(const std::vector<PropagatorType>& propagators) {
-  if (propagators.empty()) {
-    return InjectionFormat::W3C_PRIMARY;
-  }
-  
-  switch (propagators[0]) {
-    case PropagatorType::TraceContext:
-      return InjectionFormat::W3C_PRIMARY;
-    case PropagatorType::B3:
-    case PropagatorType::B3Multi:
-      return InjectionFormat::B3_PRIMARY;
-    default:
-      return InjectionFormat::W3C_PRIMARY;
-  }
-}
+
 
 bool Propagator::isTraceContextPropagator(PropagatorType type) {
   switch (type) {
@@ -750,6 +746,25 @@ absl::StatusOr<CompositeTraceContext> PropagatorService::createFromTracerData(
   }
   
   return TracingHelper::createFromTracerData(trace_id, span_id, parent_span_id, sampled, trace_state, format);
+}
+
+absl::Status Propagator::clearAllPropagationHeaders(Tracing::TraceContext& trace_context) {
+  // Clear W3C headers
+  trace_context.remove("traceparent");
+  trace_context.remove("tracestate");
+  trace_context.remove("baggage");
+  
+  // Clear B3 multiple headers
+  trace_context.remove("x-b3-traceid");
+  trace_context.remove("x-b3-spanid");
+  trace_context.remove("x-b3-parentspanid");
+  trace_context.remove("x-b3-sampled");
+  trace_context.remove("x-b3-flags");
+  
+  // Clear B3 single header
+  trace_context.remove("b3");
+  
+  return absl::OkStatus();
 }
 
 } // namespace OpenTelemetry
