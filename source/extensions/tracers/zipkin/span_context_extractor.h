@@ -4,7 +4,8 @@
 #include "envoy/tracing/tracer.h"
 
 #include "source/common/http/header_map_impl.h"
-#include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
+#include "source/extensions/propagators/b3/propagator.h"
+#include "source/extensions/propagators/w3c/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -18,7 +19,9 @@ struct ExtractorException : public EnvoyException {
 };
 
 /**
- * This class is used to SpanContext extracted from the Http header
+ * This class is used to extract SpanContext from HTTP headers.
+ * Refactored to use the new B3 and W3C propagators for better
+ * specification compliance and reduced code duplication.
  */
 class SpanContextExtractor {
 public:
@@ -29,20 +32,17 @@ public:
 
 private:
   /*
-   * Use to SpanContext extracted from B3 single format Http header
-   * b3: {x-b3-traceid}-{x-b3-spanid}-{if x-b3-flags 'd' else x-b3-sampled}-{x-b3-parentspanid}
-   * See: "https://github.com/openzipkin/b3-propagation
+   * Convert B3 trace context to Zipkin span context format
    */
-  std::pair<SpanContext, bool> extractSpanContextFromB3SingleFormat(bool is_sampled);
+  std::pair<SpanContext, bool> convertB3ToZipkin(
+      const Extensions::Propagators::B3::TraceContext& b3_context, bool fallback_sampled);
 
   /*
-   * Convert W3C span context to Zipkin span context format
+   * Convert W3C trace context to Zipkin span context format
    */
-  std::pair<SpanContext, bool>
-  convertW3CToZipkin(const Extensions::Tracers::OpenTelemetry::SpanContext& w3c_context,
-                     bool fallback_sampled);
+  std::pair<SpanContext, bool> convertW3CToZipkin(
+      const Extensions::Propagators::W3C::TraceContext& w3c_context, bool fallback_sampled);
 
-  bool tryExtractSampledFromB3SingleFormat();
   const Tracing::TraceContext& trace_context_;
   bool w3c_fallback_enabled_;
 };

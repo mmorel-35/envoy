@@ -6,6 +6,7 @@
 #include "source/common/common/statusor.h"
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
 
 namespace Envoy {
@@ -13,17 +14,10 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-class OpenTelemetryConstantValues {
-public:
-  const Tracing::TraceContextHandler TRACE_PARENT{"traceparent"};
-  const Tracing::TraceContextHandler TRACE_STATE{"tracestate"};
-};
-
-using OpenTelemetryConstants = ConstSingleton<OpenTelemetryConstantValues>;
-
 /**
- * This class is used to SpanContext extracted from the HTTP traceparent header
- * See https://www.w3.org/TR/trace-context/#traceparent-header.
+ * This class is used to extract SpanContext from HTTP headers.
+ * Refactored to use the new OpenTelemetry composite propagator for
+ * multi-format support (W3C + B3) and improved specification compliance.
  */
 class SpanContextExtractor {
 public:
@@ -33,6 +27,12 @@ public:
   bool propagationHeaderPresent();
 
 private:
+  /**
+   * Convert composite trace context to OpenTelemetry span context format
+   */
+  absl::StatusOr<SpanContext> convertCompositeToOtel(
+      const Extensions::Propagators::OpenTelemetry::CompositeTraceContext& composite_context);
+
   const Tracing::TraceContext& trace_context_;
 };
 
