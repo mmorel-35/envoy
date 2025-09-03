@@ -451,6 +451,177 @@ TEST_F(B3PropagatorTest, TracingHelperCreateTraceContext) {
   EXPECT_EQ(context.samplingState(), SamplingState::SAMPLED);
 }
 
+// Additional B3 Specification Compliance Tests
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_HeaderCaseInsensitivity) {
+  // Test case insensitive header names per HTTP specification
+  headers_->addCopy("X-B3-TraceId", valid_trace_id);
+  headers_->addCopy("X-B3-SpanId", valid_span_id);
+  headers_->addCopy("X-B3-Sampled", "1");
+  
+  EXPECT_TRUE(Propagator::isPresent(*trace_context_));
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceId().toHexString(), valid_trace_id);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_MixedCaseHeaders) {
+  headers_->addCopy("x-B3-TRACEID", valid_trace_id);
+  headers_->addCopy("X-b3-spanid", valid_span_id);
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().spanId().toHexString(), valid_span_id);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_ZeroTraceIdRejection) {
+  // Zero trace ID should be rejected per B3 specification
+  addB3MultipleHeaders("0000000000000000", valid_span_id, "", "1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok()) << "Zero trace ID should be rejected per B3 specification";
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_ZeroSpanIdRejection) {
+  // Zero span ID should be rejected per B3 specification
+  addB3MultipleHeaders(valid_trace_id, "0000000000000000", "", "1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok()) << "Zero span ID should be rejected per B3 specification";
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_SamplingStateCaseInsensitive) {
+  // Test case insensitive sampling states per B3 specification
+  addB3MultipleHeaders(valid_trace_id, valid_span_id, "", "TRUE");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().samplingState(), SamplingState::SAMPLED);
+  
+  // Test "FALSE" 
+  headers_->remove("x-b3-sampled");
+  headers_->addCopy("x-b3-sampled", "FALSE");
+  
+  auto result2 = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result2.ok());
+  EXPECT_EQ(result2.value().samplingState(), SamplingState::NOT_SAMPLED);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_DebugSamplingFlag) {
+  // Test debug sampling flag per B3 specification
+  addB3MultipleHeaders(valid_trace_id, valid_span_id, "", "d");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().samplingState(), SamplingState::DEBUG);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_128BitTraceIdSupport) {
+  // Test 128-bit trace ID support per B3 specification
+  std::string trace_id_128 = "1234567890abcdef1234567890abcdef";
+  addB3MultipleHeaders(trace_id_128, valid_span_id, "", "1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceId().toHexString(), trace_id_128);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_64BitTraceIdSupport) {
+  // Test 64-bit trace ID support per B3 specification
+  std::string trace_id_64 = "1234567890abcdef";
+  addB3MultipleHeaders(trace_id_64, valid_span_id, "", "1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceId().toHexString(), trace_id_64);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_SingleHeaderFormatDetection) {
+  // Test single header format detection per B3 specification
+  addB3SingleHeader("1234567890abcdef1234567890abcdef-1234567890abcdef-1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceId().toHexString(), "1234567890abcdef1234567890abcdef");
+  EXPECT_EQ(result.value().spanId().toHexString(), "1234567890abcdef");
+  EXPECT_EQ(result.value().samplingState(), SamplingState::SAMPLED);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_SingleHeaderWithParentSpan) {
+  // Test single header with parent span per B3 specification
+  addB3SingleHeader("1234567890abcdef1234567890abcdef-1234567890abcdef-1-fedcba0987654321");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_TRUE(result.value().parentSpanId().has_value());
+  EXPECT_EQ(result.value().parentSpanId().value().toHexString(), "fedcba0987654321");
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_InvalidHexRejection) {
+  // Test rejection of invalid hex values per B3 specification
+  addB3MultipleHeaders("invalid_hex_value", valid_span_id, "", "1");
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok()) << "Invalid hex values should be rejected";
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_FormatPriorityMultipleVsSingle) {
+  // Test format priority when both single and multiple headers present
+  addB3MultipleHeaders(valid_trace_id, valid_span_id, "", "1");
+  addB3SingleHeader("abcdef1234567890-fedcba0987654321-0");
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  
+  // Should prefer single header format when both present
+  EXPECT_EQ(result.value().traceId().toHexString(), "abcdef1234567890");
+  EXPECT_EQ(result.value().spanId().toHexString(), "fedcba0987654321");
+  EXPECT_EQ(result.value().samplingState(), SamplingState::NOT_SAMPLED);
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_RoundTripConsistency) {
+  // Test round-trip consistency per B3 specification
+  addB3MultipleHeaders(valid_trace_id, valid_span_id, valid_parent_span_id, "1");
+  
+  auto original = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(original.ok());
+  
+  // Create new trace context for injection
+  auto new_headers = Http::RequestHeaderMapImpl::create();
+  auto new_trace_context = std::make_unique<Tracing::TraceContextImpl>(*new_headers);
+  
+  // Inject and re-extract
+  Propagator::inject(original.value(), *new_trace_context);
+  auto round_trip = Propagator::extract(*new_trace_context);
+  
+  ASSERT_TRUE(round_trip.ok());
+  EXPECT_EQ(round_trip.value().traceId().toHexString(), original.value().traceId().toHexString());
+  EXPECT_EQ(round_trip.value().spanId().toHexString(), original.value().spanId().toHexString());
+  EXPECT_EQ(round_trip.value().samplingState(), original.value().samplingState());
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_OptionalParentSpanHandling) {
+  // Test optional parent span handling per B3 specification
+  addB3MultipleHeaders(valid_trace_id, valid_span_id, "", "1"); // No parent span
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_FALSE(result.value().parentSpanId().has_value()) << "Parent span should be optional";
+}
+
+TEST_F(B3PropagatorTest, B3SpecCompliance_SamplingStatePrecedence) {
+  // Test sampling state precedence: x-b3-flags takes precedence over x-b3-sampled
+  headers_->addCopy("x-b3-traceid", valid_trace_id);
+  headers_->addCopy("x-b3-spanid", valid_span_id);
+  headers_->addCopy("x-b3-sampled", "0");
+  headers_->addCopy("x-b3-flags", "1"); // Debug flag overrides sampled=0
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().samplingState(), SamplingState::DEBUG);
+}
+
 } // namespace
 } // namespace B3
 } // namespace Propagators

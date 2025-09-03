@@ -13,18 +13,36 @@ namespace Propagators {
 namespace B3 {
 
 /**
- * B3 Propagator provides comprehensive support for extracting and injecting
- * B3 distributed tracing headers according to the B3 specification.
+ * B3 Propagator provides comprehensive, specification-compliant support for extracting 
+ * and injecting B3 distributed tracing headers according to the official B3 specification.
  * 
- * Supports both multiple headers and single header formats:
- * - Multiple headers: x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags
- * - Single header: b3 (format: {traceid}-{spanid}-{sampled}-{parentspanid})
+ * OFFICIAL B3 SPECIFICATION COMPLIANCE:
+ * Reference: https://github.com/openzipkin/b3-propagation
+ * Reference: https://zipkin.io/pages/instrumenting.html
  * 
- * Features:
- * - 64-bit and 128-bit trace ID support
- * - Proper sampling state management including debug sampling
- * - Comprehensive validation and error handling
- * - Clean separation between data structures and business logic
+ * ✅ Multiple Headers Format:
+ *    - x-b3-traceid: 64-bit or 128-bit trace ID (hex encoded)
+ *    - x-b3-spanid: 64-bit span ID (hex encoded)
+ *    - x-b3-parentspanid: 64-bit parent span ID (optional, hex encoded)
+ *    - x-b3-sampled: Sampling decision ("0", "1", "true", "false" - case insensitive)
+ *    - x-b3-flags: Debug sampling flag ("1" for debug)
+ * 
+ * ✅ Single Header Format:
+ *    - b3: {traceId}-{spanId}-{sampled}-{parentSpanId} format
+ *    - Supports all combinations per B3 specification
+ * 
+ * ✅ Specification Requirements:
+ *    - Header case-insensitivity per HTTP specification
+ *    - Zero trace ID and span ID rejection
+ *    - 64-bit and 128-bit trace ID support with proper validation
+ *    - Sampling states: "0" (not sampled), "1" (sampled), "d" (debug)
+ *    - Case-insensitive "true"/"false" sampling values
+ *    - Proper hex validation for all ID fields
+ *    - Optional parent span ID handling
+ *    - Debug sampling flag precedence over regular sampling
+ * 
+ * This provides a reusable interface eliminating B3 parsing code duplication
+ * while ensuring complete B3 specification compliance.
  */
 class Propagator {
 public:

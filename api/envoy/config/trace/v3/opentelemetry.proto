@@ -69,9 +69,23 @@ message OpenTelemetryConfig {
   // Supported values: "tracecontext", "baggage", "b3", "b3multi", "none".
   // If not specified, defaults to ["tracecontext"] for backward compatibility.
   // This can also be overridden by the OTEL_PROPAGATORS environment variable.
-  // When multiple propagators are specified, they are used in priority order for extraction,
-  // and all enabled propagators are used for injection.
+  // 
+  // Propagator behavior per OpenTelemetry specification:
+  // - "tracecontext": W3C Trace Context format (traceparent/tracestate headers)
+  // - "baggage": W3C Baggage format (baggage header)  
+  // - "b3": B3 single header format (b3 header)
+  // - "b3multi": B3 multiple headers format (x-b3-* headers)
+  // - "none": Disables all trace propagation
+  //
+  // Extraction behavior: Propagators are tried in the specified order, and the
+  // first successful extraction is used (priority-based, no format mixing).
+  // Injection behavior: Headers are injected for ALL configured propagators
+  // simultaneously to support downstream services with different format requirements.
+  //
+  // Environment variable precedence: OTEL_PROPAGATORS takes precedence over this
+  // configuration field. Format: comma-separated list (e.g., "tracecontext,b3,baggage").
   //
   // See: `OpenTelemetry propagators specification <https://opentelemetry.io/docs/specs/otel/context/api-propagators/>`_
+  // See: `OpenTelemetry SDK configuration <https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators>`_
   repeated string propagators = 7;
 }

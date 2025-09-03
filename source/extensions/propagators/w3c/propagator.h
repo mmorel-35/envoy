@@ -26,14 +26,31 @@ public:
 using W3CConstants = ConstSingleton<W3CConstantValues>;
 
 /**
- * W3C Trace Context Propagator.
- * Provides extraction and injection of W3C trace context headers.
+ * W3C Trace Context and Baggage Propagator.
+ * Provides complete specification-compliant extraction and injection of W3C distributed tracing headers.
  * 
- * This component implements the W3C Trace Context specification:
- * https://www.w3.org/TR/trace-context/
+ * This component implements the complete W3C specifications:
+ * - W3C Trace Context: https://www.w3.org/TR/trace-context/
+ * - W3C Baggage: https://www.w3.org/TR/baggage/
  * 
- * It handles both traceparent and tracestate headers and provides
- * a reusable interface for different tracing systems.
+ * SPECIFICATION COMPLIANCE:
+ * ✅ W3C Trace Context:
+ *    - Traceparent format validation (version-traceId-parentId-traceFlags)
+ *    - Header case-insensitivity per HTTP specification
+ *    - Future version compatibility (versions > 00)
+ *    - Zero trace ID and span ID rejection
+ *    - Tracestate concatenation with comma separator
+ *    - Proper hex string validation and length enforcement
+ * 
+ * ✅ W3C Baggage:
+ *    - URL encoding/decoding for keys, values, and properties
+ *    - 8KB size limit enforcement with graceful handling
+ *    - Baggage member properties support (semicolon-separated)
+ *    - Malformed header tolerance while preserving valid data
+ *    - Comma-separated member parsing with format validation
+ * 
+ * This provides a reusable interface for different tracing systems while
+ * ensuring complete W3C specification compliance and backward compatibility.
  */
 class Propagator {
 public:

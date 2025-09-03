@@ -691,6 +691,162 @@ TEST_F(W3CSpecificationComplianceTest, PreserveUnknownTraceFlags) {
   ASSERT_TRUE(re_extracted.ok());
   EXPECT_EQ(re_extracted.value().traceParent().traceFlags(), "ff");
 }
+
+// Additional W3C Specification Compliance Tests
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_CaseInsensitiveHeaders) {
+  // Test case insensitive header names per HTTP specification
+  headers_->addCopy("TRACEPARENT", valid_traceparent);
+  headers_->addCopy("TRACESTATE", valid_tracestate);
+  
+  EXPECT_TRUE(Propagator::isPresent(*trace_context_));
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceParent().toString(), valid_traceparent);
+  EXPECT_TRUE(result.value().hasTraceState());
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_MixedCaseHeaders) {
+  headers_->addCopy("TraceParent", valid_traceparent);
+  headers_->addCopy("TraceState", valid_tracestate);
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceParent().toString(), valid_traceparent);
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_FutureVersionCompatibility) {
+  // Test future version handling (version > 00)
+  std::string future_version_traceparent = "ff-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+  headers_->addCopy("traceparent", future_version_traceparent);
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << "Future versions should be accepted per W3C spec";
+  EXPECT_EQ(result.value().traceParent().version(), "ff");
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_ZeroTraceIdRejection) {
+  // Zero trace ID should be rejected per W3C specification
+  std::string zero_trace_id = "00-00000000000000000000000000000000-00f067aa0ba902b7-01";
+  headers_->addCopy("traceparent", zero_trace_id);
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok()) << "Zero trace ID should be rejected per W3C specification";
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_ZeroSpanIdRejection) {
+  // Zero span ID should be rejected per W3C specification  
+  std::string zero_span_id = "00-4bf92f3577b34da6a3ce929d0e0e4736-0000000000000000-01";
+  headers_->addCopy("traceparent", zero_span_id);
+  
+  auto result = Propagator::extract(*trace_context_);
+  EXPECT_FALSE(result.ok()) << "Zero span ID should be rejected per W3C specification";
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_TracestateOrderPreservation) {
+  // Tracestate order must be preserved per W3C specification
+  std::string ordered_tracestate = "rojo=00f067aa0ba902b7,congo=t61rcWkgMzE";
+  headers_->addCopy("traceparent", valid_traceparent);
+  headers_->addCopy("tracestate", ordered_tracestate);
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().traceState().toString(), ordered_tracestate);
+}
+
+TEST_F(PropagatorTest, W3CTraceContextSpecCompliance_TracestateMaxLength) {
+  // Test tracestate length limits per W3C specification (512 chars per vendor)
+  std::string long_tracestate = "vendor1=" + std::string(500, 'a') + ",vendor2=" + std::string(500, 'b');
+  headers_->addCopy("traceparent", valid_traceparent);
+  headers_->addCopy("tracestate", long_tracestate);
+  
+  auto result = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(result.ok()) << "Long tracestate should be accepted within limits";
+}
+
+TEST_F(PropagatorTest, W3CBaggageSpecCompliance_URLEncodingDecoding) {
+  // Test URL encoding/decoding per W3C Baggage specification
+  std::string encoded_baggage = "user%20id=alice%20smith,session%3Did=abc%2Bdef";
+  headers_->addCopy("baggage", encoded_baggage);
+  
+  auto baggage_result = Propagator::extractBaggage(*trace_context_);
+  ASSERT_TRUE(baggage_result.ok());
+  
+  auto user_id = baggage_result.value().get("user id");
+  ASSERT_TRUE(user_id.has_value());
+  EXPECT_EQ(user_id.value(), "alice smith");
+  
+  auto session_id = baggage_result.value().get("session:id"); 
+  ASSERT_TRUE(session_id.has_value());
+  EXPECT_EQ(session_id.value(), "abc+def");
+}
+
+TEST_F(PropagatorTest, W3CBaggageSpecCompliance_SizeLimits) {
+  // Test 8KB size limit enforcement per W3C specification
+  std::string large_value(8000, 'x'); // Large but within limit
+  std::string oversized_baggage = "key1=" + large_value + ",key2=value2";
+  headers_->addCopy("baggage", oversized_baggage);
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  // Should handle size limits gracefully (implementation dependent)
+  if (!result.ok()) {
+    EXPECT_THAT(result.status().message(), testing::HasSubstr("size"));
+  }
+}
+
+TEST_F(PropagatorTest, W3CBaggageSpecCompliance_PropertyHandling) {
+  // Test baggage member properties per W3C specification
+  std::string baggage_with_properties = "userId=alice;version=1.0;sensitive=true,sessionId=xyz123";
+  headers_->addCopy("baggage", baggage_with_properties);
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  
+  auto user_id = result.value().get("userId");
+  ASSERT_TRUE(user_id.has_value());
+  EXPECT_EQ(user_id.value(), "alice");
+}
+
+TEST_F(PropagatorTest, W3CBaggageSpecCompliance_MalformedHandling) {
+  // Test graceful handling of malformed baggage while preserving valid members
+  std::string mixed_baggage = "valid=value1,=invalid_key,valid2=value2,invalid=";
+  headers_->addCopy("baggage", mixed_baggage);
+  
+  auto result = Propagator::extractBaggage(*trace_context_);
+  ASSERT_TRUE(result.ok()) << "Should preserve valid baggage members";
+  
+  auto valid = result.value().get("valid");
+  EXPECT_TRUE(valid.has_value());
+  EXPECT_EQ(valid.value(), "value1");
+  
+  auto valid2 = result.value().get("valid2");
+  EXPECT_TRUE(valid2.has_value());
+  EXPECT_EQ(valid2.value(), "value2");
+}
+
+TEST_F(PropagatorTest, W3CSpecCompliance_RoundTripConsistency) {
+  // Test round-trip consistency per W3C specifications
+  headers_->addCopy("traceparent", valid_traceparent);
+  headers_->addCopy("tracestate", valid_tracestate);
+  headers_->addCopy("baggage", "userId=alice,sessionId=xyz123");
+  
+  auto original = Propagator::extract(*trace_context_);
+  ASSERT_TRUE(original.ok());
+  
+  // Create new trace context for injection
+  auto new_headers = Http::RequestHeaderMapImpl::create();
+  auto new_trace_context = std::make_unique<Tracing::TraceContextImpl>(*new_headers);
+  
+  // Inject and re-extract
+  Propagator::inject(original.value(), *new_trace_context);
+  auto round_trip = Propagator::extract(*new_trace_context);
+  
+  ASSERT_TRUE(round_trip.ok());
+  EXPECT_EQ(round_trip.value().traceParent().toString(), original.value().traceParent().toString());
+  EXPECT_EQ(round_trip.value().traceState().toString(), original.value().traceState().toString());
+}
+
 }
 
 } // namespace

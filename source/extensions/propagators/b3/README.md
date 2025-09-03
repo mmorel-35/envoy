@@ -1,10 +1,10 @@
 # B3 Propagator
 
-This directory contains a comprehensive B3 propagator implementation that provides reusable B3 distributed tracing support for Envoy extensions.
+This directory contains a comprehensive B3 propagator implementation that provides reusable B3 distributed tracing support for Envoy extensions with full compliance to the [B3 Propagation specification](https://github.com/openzipkin/b3-propagation).
 
 ## Overview
 
-The B3 propagator implements the [B3 Propagation specification](https://github.com/openzipkin/b3-propagation) and provides a clean, reusable interface for B3 header extraction and injection across all Envoy tracers.
+The B3 propagator implements the complete B3 specification and provides a clean, reusable interface for B3 header extraction and injection across all Envoy tracers, eliminating code duplication while ensuring specification compliance.
 
 ## Problem
 
@@ -31,15 +31,23 @@ This B3 propagator provides:
 - **`TracingHelper`**: Backward compatibility layer for existing tracers
 - Support for both multiple headers and single header formats
 
-## Key Features
+## Specification Compliance
 
-- ✅ Full B3 specification compliance for both multiple and single header formats
-- ✅ 64-bit and 128-bit trace ID support with proper validation
-- ✅ Sampling state management including debug sampling
-- ✅ Comprehensive validation of encoding, field lengths, and format structure
-- ✅ Clean separation between data structures and business logic
-- ✅ Uses official B3 terminology throughout
-- ✅ Backward compatibility for existing tracers
+### Complete B3 Propagation Specification Support
+- ✅ **Multiple Headers Format**: Full support for `x-b3-traceid`, `x-b3-spanid`, `x-b3-parentspanid`, `x-b3-sampled`, `x-b3-flags`
+- ✅ **Single Header Format**: Complete `b3` header support with format `{traceId}-{spanId}-{sampled}-{parentSpanId}`
+- ✅ **Header Case Insensitivity**: Handles `X-B3-TraceId`, `x-b3-traceid`, `X-B3-TRACEID` correctly
+- ✅ **64-bit and 128-bit Trace IDs**: Proper handling of both trace ID formats with validation
+- ✅ **Zero ID Rejection**: Rejects all-zero trace IDs and span IDs per B3 specification
+- ✅ **Sampling States**: Complete support for "0" (not sampled), "1" (sampled), "d" (debug), and case-insensitive "true"/"false"
+- ✅ **Hex Validation**: Strict validation of trace IDs and span IDs as proper hex strings
+- ✅ **Parent Span Handling**: Optional parent span ID support for distributed tracing chains
+
+### Format Detection and Compatibility
+- **Automatic Format Detection**: Intelligently detects single vs multiple header formats
+- **Format-Specific Injection**: Respects original format preference when re-injecting
+- **Backward Compatibility**: Seamless integration with existing B3-based tracers
+- **Error Tolerance**: Graceful handling of malformed headers while preserving valid data
 
 ## Usage Examples
 
@@ -121,13 +129,28 @@ b3: 80f198ee56343ba864fe8b2a57d3eff7-e457b5a2e4d86bd1-1-05e3ac9a4f6e3b90
 
 ## Testing
 
-The implementation includes comprehensive testing that validates:
-- B3 specification compliance for both single and multiple header formats
-- 64-bit and 128-bit trace ID handling
-- Sampling state management including debug sampling
-- Round-trip serialization/deserialization
-- Error handling for invalid formats and edge cases
-- Integration with Envoy's trace context system
-- Tracer helper compatibility
+The implementation includes comprehensive testing that validates complete B3 specification compliance:
+
+### B3 Specification Compliance Testing
+- **Multiple Headers Format**: Complete validation of all x-b3-* header combinations
+- **Single Header Format**: Full b3 header parsing and format validation
+- **Header Case Insensitivity**: Mixed case header name handling per HTTP specification
+- **Trace ID Formats**: Both 64-bit and 128-bit trace ID extraction and validation
+- **Sampling State Handling**: All sampling values including "0", "1", "d", "true", "false" (case-insensitive)
+- **Zero ID Rejection**: Proper rejection of invalid zero trace IDs and span IDs
+- **Hex Validation**: Invalid hex string detection and error handling
+
+### Integration and Compatibility Testing
+- **Format Detection**: Automatic detection between single and multiple header formats
+- **Round-trip Consistency**: Extraction followed by injection maintains data integrity  
+- **Error Handling**: Robust handling of malformed headers and invalid formats
+- **Tracer Compatibility**: Integration testing with Envoy's trace context system
+- **Performance**: Efficient parsing and injection with minimal overhead
+
+### Edge Case Coverage
+- **Partial Headers**: Handling of incomplete header sets gracefully
+- **Mixed Formats**: Proper priority when both single and multiple headers present
+- **Parent Span Handling**: Optional parent span ID processing
+- **Debug Sampling**: Special handling of debug sampling flag combinations
 
 This provides the foundation for eliminating B3 parsing duplication across tracers while ensuring full B3 specification compliance.

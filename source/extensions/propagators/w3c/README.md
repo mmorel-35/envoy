@@ -1,10 +1,27 @@
 # W3C Trace Context and Baggage Propagator
 
-This component provides a reusable implementation of the [W3C Trace Context specification](https://www.w3.org/TR/trace-context/) and [W3C Baggage specification](https://www.w3.org/TR/baggage/) for Envoy.
+This component provides a comprehensive, specification-compliant implementation of the [W3C Trace Context specification](https://www.w3.org/TR/trace-context/) and [W3C Baggage specification](https://www.w3.org/TR/baggage/) for Envoy.
 
 ## Overview
 
-The W3C propagator separates the data structures from the business logic and provides a clean interface for extracting and injecting W3C distributed tracing headers. It is designed to be compliant with the official W3C specifications and uses the official terminology.
+The W3C propagator provides clean separation between data structures and business logic, offering a reusable interface for extracting and injecting W3C distributed tracing headers. It is designed for full compliance with the official W3C specifications and uses official W3C terminology throughout.
+
+## Specification Compliance
+
+### W3C Trace Context Specification Compliance
+- ✅ **Traceparent Format**: Complete support for version-traceId-parentId-traceFlags format with proper validation
+- ✅ **Header Case Insensitivity**: Handles `traceparent`, `Traceparent`, `TRACEPARENT` correctly per specification
+- ✅ **Future Version Compatibility**: Gracefully handles version values beyond 00 for forward compatibility
+- ✅ **Zero ID Rejection**: Properly rejects all-zero trace IDs and span IDs per specification requirement
+- ✅ **Field Length Validation**: Enforces exact hex string lengths (32-char trace ID, 16-char span ID)
+- ✅ **Tracestate Concatenation**: Properly concatenates multiple tracestate headers with comma separator
+
+### W3C Baggage Specification Compliance  
+- ✅ **URL Encoding/Decoding**: Complete percent-encoding support for keys, values, and properties
+- ✅ **Size Limits**: Enforces 8KB maximum total baggage size with configurable member limits
+- ✅ **Member Properties**: Full support for baggage member metadata (semicolon-separated properties)
+- ✅ **Format Validation**: Robust parsing of comma-separated members and property validation
+- ✅ **Error Handling**: Graceful handling of malformed headers while preserving valid data
 
 ## Components
 
@@ -142,19 +159,28 @@ auto result = Baggage::parse("userId=alice;version=2.0,sessionId=xyz123;ttl=3600
 
 ## Compliance
 
-This implementation follows both W3C specifications:
+This implementation provides complete compliance with both W3C specifications:
 
-### W3C Trace Context
-- Proper traceparent format validation (version-trace-id-parent-id-trace-flags)
-- Tracestate handling with vendor-specific key-value pairs
-- Correct handling of sampling flags
-- Validation of hex encoding and field lengths
+### W3C Trace Context Compliance
+- **Traceparent Validation**: Enforces exact 55-character length, version-traceId-parentId-traceFlags format
+- **Header Case Handling**: Case-insensitive header processing per HTTP specification requirements
+- **Zero ID Rejection**: Rejects zero trace IDs and span IDs as required by specification
+- **Future Version Support**: Handles version values beyond 00 with backward compatibility
+- **Hex Validation**: Validates all trace and span IDs as proper hex strings
+- **Sampling Flags**: Proper handling of trace-flags field for sampling decisions
 
-### W3C Baggage
-- URL encoding/decoding of baggage members
-- Support for baggage properties (metadata)
-- Size limit enforcement and validation
-- Proper parsing of comma-separated members and semicolon-separated properties
+### W3C Baggage Compliance
+- **URL Encoding**: Percent-encoding/decoding for all baggage keys, values, and properties per specification
+- **Size Enforcement**: 8KB total size limit with proper rejection of oversized baggage
+- **Member Format**: Comma-separated members with semicolon-separated properties
+- **Property Support**: Full support for baggage member metadata and properties
+- **Error Tolerance**: Graceful handling of invalid members while preserving valid ones
+- **Character Validation**: Proper validation of allowed characters in keys and values
+
+### Specification References
+- [W3C Trace Context Specification](https://www.w3.org/TR/trace-context/)
+- [W3C Baggage Specification](https://www.w3.org/TR/baggage/)
+- Official W3C terminology and data structures used throughout
 
 ## Migration Benefits
 
@@ -168,12 +194,25 @@ For existing Envoy tracers:
 
 ## Testing
 
-Comprehensive tests validate:
+Comprehensive test coverage validates specification compliance including:
 
-- W3C Trace Context specification compliance
-- W3C Baggage specification compliance
-- Round-trip serialization/deserialization
-- Error handling for invalid inputs
-- Size limit enforcement
-- Integration with Envoy's trace context system
-- Span baggage interface compatibility
+### W3C Trace Context Testing
+- **Format Validation**: All traceparent format requirements and edge cases
+- **Case Insensitivity**: Header processing with mixed case variations  
+- **Version Compatibility**: Future version handling and backward compatibility
+- **Zero ID Rejection**: Validation of zero trace ID and span ID handling
+- **Hex Validation**: Invalid hex string rejection and proper error handling
+- **Round-trip Consistency**: Extraction followed by injection maintains data integrity
+
+### W3C Baggage Testing  
+- **Size Limits**: 8KB enforcement and proper rejection behavior
+- **URL Encoding**: Complete percent-encoding/decoding test coverage
+- **Member Properties**: Property parsing and preservation validation
+- **Error Handling**: Malformed header handling while preserving valid data
+- **Format Compliance**: Comma/semicolon parsing and format validation
+- **Integration**: End-to-end testing with Envoy's trace context system
+
+### Span Baggage Interface Testing
+- **Standard API**: getBaggage()/setBaggage() method compatibility
+- **Data Persistence**: Baggage preservation across span operations  
+- **Multi-value Support**: Multiple baggage entries and property handling

@@ -36,20 +36,44 @@ enum class PropagatorType {
 };
 
 /**
- * OpenTelemetry Composite Propagator implements the OpenTelemetry specification
+ * OpenTelemetry Composite Propagator implements the complete OpenTelemetry specification
  * for propagator composition, allowing multiple trace formats to be handled
- * through a single, unified interface.
+ * through a single, unified interface with full specification compliance.
  * 
- * This propagator follows the OpenTelemetry API specification:
- * https://opentelemetry.io/docs/specs/otel/context/api-propagators
+ * OPENTELEMETRY SPECIFICATION COMPLIANCE:
+ * Official References:
+ * - https://opentelemetry.io/docs/specs/otel/context/api-propagators/
+ * - https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators
  * 
- * Features:
- * - Supports both W3C Trace Context and B3 Propagation formats
- * - Priority-based extraction (W3C first, B3 fallback)
- * - Configurable injection format preferences
- * - Complete baggage support through W3C
- * - Backward compatibility with existing OpenTelemetry tracer
- * - Thread-safe operations
+ * ✅ Configuration Compliance:
+ *    - OTEL_PROPAGATORS environment variable support with precedence
+ *    - Default behavior: "tracecontext" only (per specification)
+ *    - Supported propagators: "tracecontext", "baggage", "b3", "b3multi", "none"
+ *    - Case-insensitive propagator names
+ *    - Graceful handling of unknown/duplicate propagator names
+ * 
+ * ✅ Extraction Behavior Compliance:
+ *    - Priority-based extraction: tries propagators in exact configuration order
+ *    - First-match-wins: returns context from first successful propagator
+ *    - Format-specific behavior: "b3" uses single header, "b3multi" uses multiple headers
+ *    - No format mixing: does not merge contexts from different propagators
+ *    - Graceful error handling with fallback through propagator list
+ * 
+ * ✅ Injection Behavior Compliance:
+ *    - Multi-propagator injection: injects headers for ALL configured propagators
+ *    - Format distinction: proper single vs multiple B3 header injection
+ *    - Independent header management: each propagator manages its own headers
+ *    - "none" propagator: completely disables propagation and clears headers
+ * 
+ * ✅ Composite Features:
+ *    - Complete W3C Trace Context and Baggage support
+ *    - Full B3 single and multiple header format support
+ *    - Automatic format detection and conversion
+ *    - Thread-safe operations and IoC pattern implementation
+ *    - Backward compatibility with existing Envoy tracers
+ * 
+ * This eliminates code duplication across Envoy tracers while providing
+ * comprehensive distributed tracing capabilities per OpenTelemetry standards.
  */
 class Propagator {
 public:

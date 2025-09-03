@@ -2,9 +2,31 @@
 
 ## Overview
 
-The OpenTelemetry Composite Propagator provides a unified interface for handling multiple distributed tracing formats (W3C and B3) through a single API, following the [OpenTelemetry specification for composite propagators](https://opentelemetry.io/docs/specs/otel/context/api-propagators).
+The OpenTelemetry Composite Propagator provides a unified, specification-compliant interface for handling multiple distributed tracing formats (W3C Trace Context, W3C Baggage, and B3 Propagation) through a single API. This implementation follows the [OpenTelemetry Propagators specification](https://opentelemetry.io/docs/specs/otel/context/api-propagators/) and supports the standard [OTEL_PROPAGATORS configuration](https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_propagators).
 
-This implementation eliminates code duplication across Envoy tracers and provides comprehensive distributed tracing capabilities with automatic format detection and conversion.
+This implementation eliminates code duplication across Envoy tracers and provides comprehensive distributed tracing capabilities with automatic format detection, priority-based extraction, and configurable multi-format injection.
+
+## OpenTelemetry Specification Compliance
+
+### Propagator Configuration Compliance
+- ✅ **OTEL_PROPAGATORS Environment Variable**: Full support with precedence over configuration
+- ✅ **Default Behavior**: Uses "tracecontext" only when no configuration specified (per specification)
+- ✅ **Supported Propagators**: "tracecontext", "baggage", "b3", "b3multi", "none" as per OpenTelemetry spec
+- ✅ **Case-Insensitive Names**: Handles propagator names in any case combination
+- ✅ **Duplicate Handling**: Proper deduplication of repeated propagator names
+- ✅ **Unknown Propagator Handling**: Ignores unknown propagator names gracefully
+
+### Extraction Behavior Compliance  
+- ✅ **Priority-Based Extraction**: Tries propagators in exact configuration order (first-match-wins)
+- ✅ **Format-Specific Behavior**: "b3" uses single header, "b3multi" uses multiple headers
+- ✅ **No Format Mixing**: Returns context from first successful propagator only (no merging)
+- ✅ **Error Handling**: Graceful fallback through propagator list on parsing failures
+
+### Injection Behavior Compliance
+- ✅ **Multi-Propagator Injection**: Injects headers for ALL configured propagators simultaneously
+- ✅ **Format Distinction**: Proper format-specific injection (single vs multiple B3 headers)
+- ✅ **Header Isolation**: Each propagator manages its own headers independently
+- ✅ **None Propagator**: Completely disables propagation and clears existing headers
 
 ## Architecture
 

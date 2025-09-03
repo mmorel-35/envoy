@@ -643,6 +643,179 @@ TEST_F(OpenTelemetrySpecComplianceTest, PropagatorServiceCompliance) {
   EXPECT_TRUE(trace_context_->getByKey("x-b3-traceid").has_value());
 }
 
+// Additional OpenTelemetry Specification Compliance Tests
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_DefaultPropagatorBehavior) {
+  // Test default behavior per OpenTelemetry specification (tracecontext only)
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  addB3Headers("1234567890abcdef", "abcdef1234567890");
+  
+  // Without configuration, should only extract tracecontext
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{}); 
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().format(), TraceFormat::W3C) << "Default should be tracecontext only";
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_EnvironmentVariablePrecedence) {
+  // Test OTEL_PROPAGATORS environment variable precedence
+  EXPECT_CALL(api_, getEnv("OTEL_PROPAGATORS"))
+      .WillOnce(Return(absl::optional<std::string>("b3,tracecontext")));
+  
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  addB3Headers("1234567890abcdef", "abcdef1234567890");
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"tracecontext"}, &api_);
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().format(), TraceFormat::B3) << "Environment variable should take precedence";
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_PropagatorOrderRespected) {
+  // Test extraction order per OpenTelemetry specification
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  addB3Headers("1234567890abcdef", "abcdef1234567890");
+  
+  // B3 first should extract B3
+  auto service_b3_first = std::make_unique<PropagatorService>(std::vector<std::string>{"b3", "tracecontext"});
+  auto result_b3 = service_b3_first->extract(*trace_context_);
+  ASSERT_TRUE(result_b3.ok());
+  EXPECT_EQ(result_b3.value().format(), TraceFormat::B3);
+  
+  // W3C first should extract W3C
+  auto service_w3c_first = std::make_unique<PropagatorService>(std::vector<std::string>{"tracecontext", "b3"});
+  auto result_w3c = service_w3c_first->extract(*trace_context_);
+  ASSERT_TRUE(result_w3c.ok());
+  EXPECT_EQ(result_w3c.value().format(), TraceFormat::W3C);
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_B3FormatDistinction) {
+  // Test b3 vs b3multi format distinction per OpenTelemetry specification
+  addB3SingleHeader("1234567890abcdef-abcdef1234567890-1");
+  addB3Headers("fedcba0987654321", "123456789abcdef0"); // Multiple headers
+  
+  // "b3" should prefer single header format
+  auto service_b3 = std::make_unique<PropagatorService>(std::vector<std::string>{"b3"});
+  auto result_b3 = service_b3->extract(*trace_context_);
+  ASSERT_TRUE(result_b3.ok());
+  EXPECT_EQ(result_b3.value().getTraceId(), "1234567890abcdef");
+  
+  // "b3multi" should prefer multiple headers format
+  auto service_b3multi = std::make_unique<PropagatorService>(std::vector<std::string>{"b3multi"});
+  auto result_b3multi = service_b3multi->extract(*trace_context_);
+  ASSERT_TRUE(result_b3multi.ok());
+  EXPECT_EQ(result_b3multi.value().getTraceId(), "fedcba0987654321");
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_NonePropagatorDisabling) {
+  // Test "none" propagator disabling all propagation
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"none"});
+  auto result = service->extract(*trace_context_);
+  
+  EXPECT_FALSE(result.ok()) << "none propagator should disable all extraction";
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_MultiPropagatorInjection) {
+  // Test injection to ALL configured propagators per OpenTelemetry specification
+  CompositeTraceContext context(TraceFormat::W3C);
+  context.setTraceId("4bf92f3577b34da6a3ce929d0e0e4736");
+  context.setSpanId("00f067aa0ba902b7");
+  context.setSampled(true);
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"tracecontext", "b3", "baggage"});
+  auto status = service->inject(context, *trace_context_);
+  
+  ASSERT_TRUE(status.ok());
+  
+  // Should inject ALL configured formats
+  EXPECT_TRUE(trace_context_->getByKey("traceparent").has_value()) << "W3C headers should be injected";
+  EXPECT_TRUE(trace_context_->getByKey("x-b3-traceid").has_value()) << "B3 headers should be injected";
+  EXPECT_TRUE(trace_context_->getByKey("baggage").has_value() || 
+              !service->getBaggageValue(*trace_context_, "test").empty()) << "Baggage should be supported";
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_CaseInsensitivePropagatorNames) {
+  // Test case insensitive propagator names per OpenTelemetry specification
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"TRACECONTEXT", "Baggage", "b3"});
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok()) << "Propagator names should be case insensitive";
+  EXPECT_EQ(result.value().format(), TraceFormat::W3C);
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_DuplicatePropagatorHandling) {
+  // Test handling of duplicate propagator names
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  
+  auto service = std::make_unique<PropagatorService>(
+      std::vector<std::string>{"tracecontext", "tracecontext", "b3", "tracecontext"});
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok()) << "Should handle duplicate propagator names gracefully";
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_UnknownPropagatorIgnored) {
+  // Test unknown propagator names are ignored per OpenTelemetry specification
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  
+  auto service = std::make_unique<PropagatorService>(
+      std::vector<std::string>{"unknown_propagator", "tracecontext", "another_unknown"});
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok()) << "Unknown propagators should be ignored";
+  EXPECT_EQ(result.value().format(), TraceFormat::W3C);
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_BaggagePropagatorSupport) {
+  // Test standalone baggage propagator per OpenTelemetry specification
+  headers_->addCopy("baggage", "userId=alice,sessionId=xyz123");
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"baggage"});
+  
+  auto baggage_value = service->getBaggageValue(*trace_context_, "userId");
+  EXPECT_EQ(baggage_value, "alice");
+  
+  auto session_value = service->getBaggageValue(*trace_context_, "sessionId");
+  EXPECT_EQ(session_value, "xyz123");
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_NoFormatMixing) {
+  // Test no format mixing per OpenTelemetry specification (first-match-wins)
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  addB3Headers("1234567890abcdef", "abcdef1234567890");
+  
+  auto service = std::make_unique<PropagatorService>(std::vector<std::string>{"tracecontext", "b3"});
+  auto result = service->extract(*trace_context_);
+  
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().format(), TraceFormat::W3C) << "Should return first successful extraction only";
+  // Should not contain mixed format data
+  EXPECT_EQ(result.value().getTraceId(), "4bf92f3577b34da6a3ce929d0e0e4736");
+}
+
+TEST_F(OpenTelemetryPropagatorTest, OTelSpecCompliance_PropagatorServiceIoCPattern) {
+  // Test PropagatorService follows IoC pattern correctly
+  std::vector<std::string> config_propagators = {"tracecontext", "b3"};
+  auto service = std::make_unique<PropagatorService>(config_propagators);
+  
+  // Service should encapsulate all propagation logic
+  addW3CHeaders("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+  
+  auto result = service->extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  
+  // Service should handle injection without exposing internal configuration
+  CompositeTraceContext context(result.value());
+  auto status = service->inject(context, *trace_context_);
+  EXPECT_TRUE(status.ok());
+}
+
 } // namespace
 } // namespace OpenTelemetry
 } // namespace Propagators
