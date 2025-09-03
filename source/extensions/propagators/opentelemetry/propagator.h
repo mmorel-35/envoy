@@ -194,7 +194,21 @@ private:
   static absl::optional<CompositeTraceContext> tryExtractW3C(const Tracing::TraceContext& trace_context);
 
   /**
-   * Tries to extract B3 trace context.
+   * Tries to extract B3 trace context using single header format.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not found/invalid
+   */
+  static absl::optional<CompositeTraceContext> tryExtractB3Single(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Tries to extract B3 trace context using multiple headers format.
+   * @param trace_context The trace context containing headers
+   * @return CompositeTraceContext or nullopt if not found/invalid
+   */
+  static absl::optional<CompositeTraceContext> tryExtractB3Multiple(const Tracing::TraceContext& trace_context);
+
+  /**
+   * Tries to extract B3 trace context (auto-detect format).
    * @param trace_context The trace context containing headers
    * @return CompositeTraceContext or nullopt if not found/invalid
    */
@@ -210,7 +224,25 @@ private:
                                Tracing::TraceContext& trace_context);
 
   /**
-   * Injects trace context in B3 format.
+   * Injects trace context in B3 single header format.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status or error
+   */
+  static absl::Status injectB3Single(const CompositeTraceContext& composite_context,
+                                   Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects trace context in B3 multiple headers format.
+   * @param composite_context The composite context to inject
+   * @param trace_context The target trace context
+   * @return Success status or error
+   */
+  static absl::Status injectB3Multiple(const CompositeTraceContext& composite_context,
+                                     Tracing::TraceContext& trace_context);
+
+  /**
+   * Injects trace context in B3 format (auto-select format).
    * @param composite_context The composite context to inject
    * @param trace_context The target trace context
    * @return Success status or error

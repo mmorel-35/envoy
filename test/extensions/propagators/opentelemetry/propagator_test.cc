@@ -434,6 +434,215 @@ TEST_F(OpenTelemetryPropagatorTest, BaggageHelperOperations) {
   EXPECT_TRUE(BaggageHelper::hasBaggage(*trace_context_));
 }
 
+// OpenTelemetry Specification Compliance Tests
+class OpenTelemetrySpecComplianceTest : public OpenTelemetryPropagatorTest {
+protected:
+  void testPropagatorConfigOrder(const std::vector<std::string>& propagator_names,
+                                const std::vector<PropagatorType>& expected_types) {
+    envoy::config::trace::v3::OpenTelemetryConfig otel_config;
+    for (const auto& name : propagator_names) {
+      otel_config.add_propagators(name);
+    }
+    
+    auto config = Propagator::createConfig(otel_config, api_);
+    ASSERT_EQ(config.propagators.size(), expected_types.size());
+    
+    for (size_t i = 0; i < expected_types.size(); ++i) {
+      EXPECT_EQ(config.propagators[i], expected_types[i]) 
+        << "Propagator at index " << i << " doesn't match expected type";
+    }
+  }
+};
+
+// Test propagator name parsing compliance
+TEST_F(OpenTelemetrySpecComplianceTest, PropagatorNameCompliance) {
+  // Test standard propagator names
+  EXPECT_EQ(Propagator::stringToPropagatorType("tracecontext").value(), PropagatorType::TraceContext);
+  EXPECT_EQ(Propagator::stringToPropagatorType("baggage").value(), PropagatorType::Baggage);
+  EXPECT_EQ(Propagator::stringToPropagatorType("b3").value(), PropagatorType::B3);
+  EXPECT_EQ(Propagator::stringToPropagatorType("b3multi").value(), PropagatorType::B3Multi);
+  EXPECT_EQ(Propagator::stringToPropagatorType("none").value(), PropagatorType::None);
+  
+  // Test case insensitivity
+  EXPECT_EQ(Propagator::stringToPropagatorType("TRACECONTEXT").value(), PropagatorType::TraceContext);
+  EXPECT_EQ(Propagator::stringToPropagatorType("TraceContext").value(), PropagatorType::TraceContext);
+  EXPECT_EQ(Propagator::stringToPropagatorType("B3MULTI").value(), PropagatorType::B3Multi);
+  EXPECT_EQ(Propagator::stringToPropagatorType("NONE").value(), PropagatorType::None);
+}
+
+// Test default behavior compliance
+TEST_F(OpenTelemetrySpecComplianceTest, DefaultBehaviorCompliance) {
+  // When no configuration is provided, should default to "tracecontext"
+  envoy::config::trace::v3::OpenTelemetryConfig empty_config;
+  auto config = Propagator::createConfig(empty_config, api_);
+  
+  ASSERT_EQ(config.propagators.size(), 1);
+  EXPECT_EQ(config.propagators[0], PropagatorType::TraceContext);
+}
+
+// Test OTEL_PROPAGATORS environment variable precedence
+TEST_F(OpenTelemetrySpecComplianceTest, EnvironmentVariablePrecedence) {
+  // Set up environment variable
+  EXPECT_CALL(api_, getEnv("OTEL_PROPAGATORS"))
+    .WillOnce(Return(std::string("b3,baggage,tracecontext")));
+  
+  // Configure different propagators in proto
+  envoy::config::trace::v3::OpenTelemetryConfig otel_config;
+  otel_config.add_propagators("tracecontext");
+  otel_config.add_propagators("b3multi");
+  
+  auto config = Propagator::createConfig(otel_config, api_);
+  
+  // Environment variable should take precedence
+  ASSERT_EQ(config.propagators.size(), 3);
+  EXPECT_EQ(config.propagators[0], PropagatorType::B3);
+  EXPECT_EQ(config.propagators[1], PropagatorType::Baggage);
+  EXPECT_EQ(config.propagators[2], PropagatorType::TraceContext);
+}
+
+// Test "none" propagator behavior
+TEST_F(OpenTelemetrySpecComplianceTest, NonePropagatorCompliance) {
+  // "none" should disable all propagation regardless of other propagators
+  testPropagatorConfigOrder(
+    {"tracecontext", "none", "b3"},
+    {PropagatorType::None}
+  );
+  
+  testPropagatorConfigOrder(
+    {"none"},
+    {PropagatorType::None}
+  );
+  
+  // Test that "none" clears all headers
+  addW3CHeaders(valid_traceparent, "vendor=data", valid_baggage);
+  addB3Headers("1234567890abcdef", "fedcba0987654321", "", "1");
+  headers_->addCopy("b3", "1234567890abcdef-fedcba0987654321-1");
+  
+  Propagator::Config config;
+  config.propagators = {PropagatorType::None};
+  
+  CompositeTraceContext dummy_context;
+  auto status = Propagator::inject(dummy_context, *trace_context_, config);
+  EXPECT_TRUE(status.ok());
+  
+  // All headers should be cleared
+  EXPECT_FALSE(trace_context_->getByKey("traceparent").has_value());
+  EXPECT_FALSE(trace_context_->getByKey("tracestate").has_value());
+  EXPECT_FALSE(trace_context_->getByKey("baggage").has_value());
+  EXPECT_FALSE(trace_context_->getByKey("x-b3-traceid").has_value());
+  EXPECT_FALSE(trace_context_->getByKey("b3").has_value());
+}
+
+// Test extraction order compliance
+TEST_F(OpenTelemetrySpecComplianceTest, ExtractionOrderCompliance) {
+  // Add both W3C and B3 headers
+  addW3CHeaders(valid_traceparent);
+  addB3Headers("1234567890abcdef", "fedcba0987654321", "", "1");
+  
+  // Test W3C first
+  Propagator::Config w3c_first_config;
+  w3c_first_config.propagators = {PropagatorType::TraceContext, PropagatorType::B3};
+  
+  auto result1 = Propagator::extract(*trace_context_, w3c_first_config);
+  ASSERT_TRUE(result1.ok());
+  EXPECT_EQ(result1.value().format(), TraceFormat::W3C);
+  
+  // Test B3 first
+  Propagator::Config b3_first_config;
+  b3_first_config.propagators = {PropagatorType::B3, PropagatorType::TraceContext};
+  
+  auto result2 = Propagator::extract(*trace_context_, b3_first_config);
+  ASSERT_TRUE(result2.ok());
+  EXPECT_EQ(result2.value().format(), TraceFormat::B3);
+}
+
+// Test B3 format distinction compliance
+TEST_F(OpenTelemetrySpecComplianceTest, B3FormatDistinctionCompliance) {
+  // Test B3 single header format
+  headers_->addCopy("b3", "1234567890abcdef-fedcba0987654321-1");
+  
+  // Configure b3 (single header)
+  Propagator::Config b3_config;
+  b3_config.propagators = {PropagatorType::B3};
+  
+  auto result1 = Propagator::extract(*trace_context_, b3_config);
+  ASSERT_TRUE(result1.ok());
+  EXPECT_EQ(result1.value().format(), TraceFormat::B3);
+  
+  // Clear and add multiple headers
+  headers_->remove("b3");
+  addB3Headers("1234567890abcdef", "fedcba0987654321", "", "1");
+  
+  // Configure b3multi (multiple headers)
+  Propagator::Config b3multi_config;
+  b3multi_config.propagators = {PropagatorType::B3Multi};
+  
+  auto result2 = Propagator::extract(*trace_context_, b3multi_config);
+  ASSERT_TRUE(result2.ok());
+  EXPECT_EQ(result2.value().format(), TraceFormat::B3);
+}
+
+// Test injection behavior compliance
+TEST_F(OpenTelemetrySpecComplianceTest, InjectionBehaviorCompliance) {
+  // Create a W3C context
+  auto w3c_result = W3C::Propagator::createRoot(valid_trace_id, valid_span_id, true);
+  ASSERT_TRUE(w3c_result.ok());
+  CompositeTraceContext composite_context(w3c_result.value());
+  
+  // Configure multiple propagators
+  Propagator::Config multi_config;
+  multi_config.propagators = {PropagatorType::TraceContext, PropagatorType::B3Multi, PropagatorType::Baggage};
+  
+  auto status = Propagator::inject(composite_context, *trace_context_, multi_config);
+  ASSERT_TRUE(status.ok());
+  
+  // All configured formats should be injected
+  EXPECT_TRUE(trace_context_->getByKey("traceparent").has_value());
+  EXPECT_TRUE(trace_context_->getByKey("x-b3-traceid").has_value());
+  EXPECT_TRUE(trace_context_->getByKey("x-b3-spanid").has_value());
+  // Baggage header injection depends on presence of baggage data
+}
+
+// Test duplicate propagator handling
+TEST_F(OpenTelemetrySpecComplianceTest, DuplicatePropagatorHandling) {
+  // Duplicates should be removed while preserving order
+  testPropagatorConfigOrder(
+    {"tracecontext", "b3", "tracecontext", "baggage", "b3"},
+    {PropagatorType::TraceContext, PropagatorType::B3, PropagatorType::Baggage}
+  );
+}
+
+// Test unknown propagator handling
+TEST_F(OpenTelemetrySpecComplianceTest, UnknownPropagatorHandling) {
+  // Unknown propagators should be ignored
+  testPropagatorConfigOrder(
+    {"tracecontext", "unknown", "b3", "invalid", "baggage"},
+    {PropagatorType::TraceContext, PropagatorType::B3, PropagatorType::Baggage}
+  );
+}
+
+// Test propagator service IoC compliance
+TEST_F(OpenTelemetrySpecComplianceTest, PropagatorServiceCompliance) {
+  Propagator::Config config;
+  config.propagators = {PropagatorType::TraceContext, PropagatorType::B3Multi};
+  
+  PropagatorService service(config);
+  
+  // Test extraction
+  addW3CHeaders(valid_traceparent);
+  auto result = service.extract(*trace_context_);
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.value().format(), TraceFormat::W3C);
+  
+  // Test injection
+  auto status = service.inject(result.value(), *trace_context_);
+  EXPECT_TRUE(status.ok());
+  
+  // Both formats should be present
+  EXPECT_TRUE(trace_context_->getByKey("traceparent").has_value());
+  EXPECT_TRUE(trace_context_->getByKey("x-b3-traceid").has_value());
+}
+
 } // namespace
 } // namespace OpenTelemetry
 } // namespace Propagators

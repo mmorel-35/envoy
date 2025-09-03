@@ -23,8 +23,8 @@ bool Propagator::isPresent(const Tracing::TraceContext& trace_context) {
 
 absl::StatusOr<CompositeTraceContext> Propagator::extract(const Tracing::TraceContext& trace_context) {
   Config default_config;
-  // Default to W3C first, then B3 for backward compatibility
-  default_config.propagators = {PropagatorType::TraceContext, PropagatorType::B3};
+  // Default to tracecontext only per OpenTelemetry specification
+  default_config.propagators = {PropagatorType::TraceContext};
   return extract(trace_context, default_config);
 }
 
@@ -39,16 +39,10 @@ absl::StatusOr<CompositeTraceContext> Propagator::extract(const Tracing::TraceCo
 
 absl::StatusOr<CompositeTraceContext> Propagator::extractWithDefaults(
     const Tracing::TraceContext& trace_context, bool strict_validation) {
-  // Try W3C format first (preferred standard)
+  // OpenTelemetry specification default: only tracecontext
   auto w3c_result = tryExtractW3C(trace_context);
   if (w3c_result.has_value()) {
     return w3c_result.value();
-  }
-  
-  // Try B3 format as fallback
-  auto b3_result = tryExtractB3(trace_context);
-  if (b3_result.has_value()) {
-    return b3_result.value();
   }
   
   return strict_validation 
@@ -76,9 +70,17 @@ absl::StatusOr<CompositeTraceContext> Propagator::extractWithPropagators(
         }
         break;
       }
-      case PropagatorType::B3:
+      case PropagatorType::B3: {
+        // Use single header format for "b3"
+        auto b3_result = tryExtractB3Single(trace_context);
+        if (b3_result.has_value()) {
+          return b3_result.value();
+        }
+        break;
+      }
       case PropagatorType::B3Multi: {
-        auto b3_result = tryExtractB3(trace_context);
+        // Use multiple headers format for "b3multi"
+        auto b3_result = tryExtractB3Multiple(trace_context);
         if (b3_result.has_value()) {
           return b3_result.value();
         }
@@ -97,6 +99,8 @@ absl::StatusOr<CompositeTraceContext> Propagator::extractWithPropagators(
 absl::Status Propagator::inject(const CompositeTraceContext& composite_context,
                                Tracing::TraceContext& trace_context) {
   Config default_config;
+  // Default to tracecontext only per OpenTelemetry specification
+  default_config.propagators = {PropagatorType::TraceContext};
   return inject(composite_context, trace_context, default_config);
 }
 
@@ -119,14 +123,19 @@ absl::Status Propagator::inject(const CompositeTraceContext& composite_context,
         status = injectW3C(composite_context, trace_context);
         break;
       }
-      case PropagatorType::B3:
+      case PropagatorType::B3: {
+        status = injectB3Single(composite_context, trace_context);
+        break;
+      }
       case PropagatorType::B3Multi: {
-        status = injectB3(composite_context, trace_context);
+        status = injectB3Multiple(composite_context, trace_context);
         break;
       }
       case PropagatorType::Baggage: {
-        // Baggage injection handled separately via injectBaggage method
-        status = absl::OkStatus();
+        // Baggage propagator is responsible for baggage headers only
+        // During injection, we preserve any existing baggage in the trace_context
+        // This is correct per OpenTelemetry spec - baggage is independent of trace context
+        status = absl::OkStatus(); // Baggage is handled separately via injectBaggage method
         break;
       }
       case PropagatorType::None: {
@@ -241,6 +250,24 @@ absl::optional<CompositeTraceContext> Propagator::tryExtractW3C(const Tracing::T
   return CompositeTraceContext(w3c_result.value());
 }
 
+absl::optional<CompositeTraceContext> Propagator::tryExtractB3Single(const Tracing::TraceContext& trace_context) {
+  auto b3_result = B3::Propagator::extractSingleHeader(trace_context);
+  if (!b3_result.ok()) {
+    return absl::nullopt;
+  }
+  
+  return CompositeTraceContext(b3_result.value());
+}
+
+absl::optional<CompositeTraceContext> Propagator::tryExtractB3Multiple(const Tracing::TraceContext& trace_context) {
+  auto b3_result = B3::Propagator::extractMultipleHeaders(trace_context);
+  if (!b3_result.ok()) {
+    return absl::nullopt;
+  }
+  
+  return CompositeTraceContext(b3_result.value());
+}
+
 absl::optional<CompositeTraceContext> Propagator::tryExtractB3(const Tracing::TraceContext& trace_context) {
   if (!B3::Propagator::isPresent(trace_context)) {
     return absl::nullopt;
@@ -281,6 +308,62 @@ absl::Status Propagator::injectW3C(const CompositeTraceContext& composite_contex
   
   W3C::Propagator::inject(w3c_context, trace_context);
   return absl::OkStatus();
+}
+
+absl::Status Propagator::injectB3Single(const CompositeTraceContext& composite_context,
+                                       Tracing::TraceContext& trace_context) {
+  B3::TraceContext b3_context;
+  
+  if (composite_context.format() == TraceFormat::B3) {
+    // Direct injection from B3 context
+    auto b3_ctx = composite_context.getB3Context();
+    if (!b3_ctx.has_value()) {
+      return absl::InternalError("B3 context not available");
+    }
+    b3_context = b3_ctx.value();
+  } else {
+    // Convert from other format to B3
+    auto converted_result = composite_context.convertTo(TraceFormat::B3);
+    if (!converted_result.ok()) {
+      return converted_result.status();
+    }
+    
+    auto b3_ctx = converted_result.value().getB3Context();
+    if (!b3_ctx.has_value()) {
+      return absl::InternalError("Conversion to B3 failed");
+    }
+    b3_context = b3_ctx.value();
+  }
+  
+  return B3::Propagator::injectSingleHeader(b3_context, trace_context);
+}
+
+absl::Status Propagator::injectB3Multiple(const CompositeTraceContext& composite_context,
+                                         Tracing::TraceContext& trace_context) {
+  B3::TraceContext b3_context;
+  
+  if (composite_context.format() == TraceFormat::B3) {
+    // Direct injection from B3 context
+    auto b3_ctx = composite_context.getB3Context();
+    if (!b3_ctx.has_value()) {
+      return absl::InternalError("B3 context not available");
+    }
+    b3_context = b3_ctx.value();
+  } else {
+    // Convert from other format to B3
+    auto converted_result = composite_context.convertTo(TraceFormat::B3);
+    if (!converted_result.ok()) {
+      return converted_result.status();
+    }
+    
+    auto b3_ctx = converted_result.value().getB3Context();
+    if (!b3_ctx.has_value()) {
+      return absl::InternalError("Conversion to B3 failed");
+    }
+    b3_context = b3_ctx.value();
+  }
+  
+  return B3::Propagator::injectMultipleHeaders(b3_context, trace_context);
 }
 
 absl::Status Propagator::injectB3(const CompositeTraceContext& composite_context,
