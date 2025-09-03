@@ -12,6 +12,7 @@
 #include "source/common/common/logger.h"
 #include "source/extensions/tracers/common/factory_base.h"
 #include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
+#include "source/extensions/propagators/opentelemetry/propagator.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 #include "source/extensions/tracers/opentelemetry/samplers/sampler.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
@@ -40,7 +41,8 @@ public:
   Tracer(OpenTelemetryTraceExporterPtr exporter, Envoy::TimeSource& time_source,
          Random::RandomGenerator& random, Runtime::Loader& runtime, Event::Dispatcher& dispatcher,
          OpenTelemetryTracerStats tracing_stats, const ResourceConstSharedPtr resource,
-         SamplerSharedPtr sampler, uint64_t max_cache_size);
+         SamplerSharedPtr sampler, uint64_t max_cache_size, 
+         Extensions::Propagators::OpenTelemetry::PropagatorServicePtr propagator_service);
 
   void sendSpan(::opentelemetry::proto::trace::v1::Span& span);
 
@@ -55,6 +57,13 @@ public:
                              const SpanContext& previous_span_context,
                              OptRef<const Tracing::TraceContext> trace_context,
                              OTelSpanKind span_kind);
+
+  /**
+   * Get the propagator service for extracting trace context.
+   */
+  const Extensions::Propagators::OpenTelemetry::PropagatorService& getPropagatorService() const {
+    return *propagator_service_;
+  }
 
 private:
   /**
@@ -76,6 +85,7 @@ private:
   const ResourceConstSharedPtr resource_;
   SamplerSharedPtr sampler_;
   uint64_t max_cache_size_;
+  Extensions::Propagators::OpenTelemetry::PropagatorServicePtr propagator_service_;
 };
 
 /**
@@ -113,8 +123,8 @@ public:
    */
   bool sampled() const { return sampled_; }
 
-  std::string getBaggage(absl::string_view /*key*/) override { return EMPTY_STRING; };
-  void setBaggage(absl::string_view /*key*/, absl::string_view /*value*/) override{};
+  std::string getBaggage(absl::string_view key) override;
+  void setBaggage(absl::string_view key, absl::string_view value) override;
 
   // Additional methods
 
@@ -171,6 +181,11 @@ public:
    */
   const ::opentelemetry::proto::trace::v1::Span& spanForTest() const { return span_; }
 
+  /**
+   * Set the trace context for baggage operations.
+   */
+  void setTraceContext(Tracing::TraceContext* trace_context) { trace_context_ = trace_context; }
+
 private:
   ::opentelemetry::proto::trace::v1::Span span_;
   const StreamInfo::StreamInfo& stream_info_;
@@ -178,6 +193,7 @@ private:
   Envoy::TimeSource& time_source_;
   bool sampled_;
   const bool use_local_decision_{false};
+  Tracing::TraceContext* trace_context_{nullptr}; // For baggage operations
 };
 
 using TracerPtr = std::unique_ptr<Tracer>;
