@@ -93,7 +93,6 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   // Use the W3C propagator to inject trace context
   std::string trace_id_hex = absl::BytesToHexString(span_.trace_id());
   std::string span_id_hex = absl::BytesToHexString(span_.span_id());
-  std::string trace_flags = convertToW3CTraceFlags(sampled());
   
   // Create W3C trace context and inject using propagator
   auto w3c_context_result = Extensions::Propagators::W3C::Propagator::createRoot(
@@ -102,11 +101,13 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   if (w3c_context_result.ok()) {
     auto w3c_context = std::move(w3c_context_result.value());
     
-    // Add tracestate if present
+    // If tracestate is present, create a new context with it
     if (!span_.trace_state().empty()) {
       auto tracestate_result = Extensions::Propagators::W3C::TraceState::parse(span_.trace_state());
       if (tracestate_result.ok()) {
-        w3c_context.setTraceState(std::move(tracestate_result.value()));
+        // Create new context with tracestate
+        w3c_context = Extensions::Propagators::W3C::TraceContext(
+            w3c_context.traceParent(), std::move(tracestate_result.value()));
       }
     }
     
@@ -114,6 +115,7 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
     Extensions::Propagators::W3C::Propagator::inject(w3c_context, trace_context);
   } else {
     // Fallback to manual injection if propagator fails
+    std::string trace_flags = convertToW3CTraceFlags(sampled());
     std::string traceparent_header_value =
         absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags);
     Extensions::Propagators::W3C::W3CConstants::get().TRACE_PARENT.set(trace_context, traceparent_header_value);
