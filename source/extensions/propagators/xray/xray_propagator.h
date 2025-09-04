@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "source/extensions/propagators/propagator_interface.h"
 
 namespace Envoy {
