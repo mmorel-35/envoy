@@ -266,7 +266,7 @@ void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
       fmt::format("00-{}-{:016x}-{}", trace_id_str, id_, sampled() ? "01" : "00");
 
   // Set the W3C traceparent header
-  Envoy::Extensions::Propagators::W3c::Constants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
+  Envoy::Extensions::Propagators::W3c::W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
 
   // For now, we don't set tracestate as it's optional and we don't have vendor-specific data
 }
