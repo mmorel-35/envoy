@@ -31,6 +31,8 @@ envoy_extension_cc_test(
         "//source/common/network:utility_lib",
         "//source/common/protobuf:utility_lib",
         "//source/common/runtime:runtime_lib",
+        "//source/extensions/propagators/b3:propagator_lib",
+        "//source/extensions/propagators/w3c:propagator_lib",
         "//source/extensions/tracers/zipkin:zipkin_lib",
         "//test/mocks:common_lib",
         "//test/mocks/http:http_mocks",
