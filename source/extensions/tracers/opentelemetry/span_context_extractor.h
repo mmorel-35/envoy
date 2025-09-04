@@ -6,8 +6,8 @@
 #include "source/common/common/statusor.h"
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
+#include "source/extensions/propagators/w3c/propagator.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
-#include "source/extensions/tracers/propagation/w3c/propagator.h"
 
 namespace Envoy {
 namespace Extensions {

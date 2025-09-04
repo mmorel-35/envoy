@@ -11,7 +11,7 @@
 #include "source/common/common/fmt.h"
 #include "source/common/protobuf/utility.h"
 #include "source/common/tracing/http_tracer_impl.h"
-#include "source/extensions/tracers/propagation/xray/propagator.h"
+#include "source/extensions/propagators/xray/propagator.h"
 #include "source/extensions/tracers/xray/daemon.pb.validate.h"
 
 namespace Envoy {
@@ -19,7 +19,7 @@ namespace Extensions {
 namespace Tracers {
 namespace XRay {
 
-using XRayConstants = Envoy::Extensions::Tracers::Propagation::XRay::XRayConstants;
+using XRayConstants = Envoy::Extensions::Propagators::XRay::XRayConstants;
 
 namespace {
 constexpr absl::string_view XRaySerializationVersion = "1";

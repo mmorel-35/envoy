@@ -6,8 +6,8 @@
 
 #include "source/common/singleton/const_singleton.h"
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/tracers/propagation/b3/propagator.h"
-#include "source/extensions/tracers/propagation/w3c/propagator.h"
+#include "source/extensions/propagators/b3/propagator.h"
+#include "source/extensions/propagators/w3c/propagator.h"
 
 namespace Envoy {
 namespace Extensions {

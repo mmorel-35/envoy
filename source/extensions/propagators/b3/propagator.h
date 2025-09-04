@@ -6,12 +6,11 @@
 
 #include "source/common/singleton/const_singleton.h"
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/tracers/propagation/b3/trace_context.h"
+#include "source/extensions/propagators/b3/trace_context.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
-namespace Propagation {
+namespace Propagators {
 namespace B3 {
 
 /**
@@ -35,7 +34,6 @@ public:
 using B3Constants = ConstSingleton<B3ConstantValues>;
 
 } // namespace B3
-} // namespace Propagation
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

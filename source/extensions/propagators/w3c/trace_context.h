@@ -7,8 +7,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
-namespace Propagation {
+namespace Propagators {
 namespace W3c {
 
 /**
@@ -43,7 +42,6 @@ constexpr size_t kMaxValueLength = 4096;
 } // namespace Constants
 
 } // namespace W3c
-} // namespace Propagation
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy

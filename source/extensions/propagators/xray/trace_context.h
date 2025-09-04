@@ -4,8 +4,7 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
-namespace Propagation {
+namespace Propagators {
 namespace XRay {
 
 /**
@@ -19,7 +18,6 @@ constexpr absl::string_view kTraceIdHeader = "x-amzn-trace-id";
 } // namespace Constants
 
 } // namespace XRay
-} // namespace Propagation
-} // namespace Tracers
+} // namespace Propagators
 } // namespace Extensions
 } // namespace Envoy
