@@ -19,6 +19,8 @@ namespace Extensions {
 namespace Tracers {
 namespace Fluentd {
 
+using W3cConstants = Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants;
+
 // Tests adapted from OpenTelemetry tracer extension @alexanderellis @yanavlasov
 class FluentdTracerIntegrationTest : public testing::Test {
 public:
@@ -84,10 +86,10 @@ TEST_F(FluentdTracerIntegrationTest, Span) {
                                       trace_flags};
   const std::string parent_trace_header = absl::StrJoin(v, "-");
   trace_context.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key(),
+      W3cConstants::get().TRACE_PARENT.key(),
       parent_trace_header);
   trace_context.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key(),
+      W3cConstants::get().TRACE_STATE.key(),
       "test=foo");
 
   // Mock the random call for generating span ID so we can check it later.
@@ -135,10 +137,10 @@ TEST_F(FluentdTracerIntegrationTest, ParseSpanContextFromHeadersTest) {
                                       trace_flags};
   const std::string parent_trace_header = absl::StrJoin(v, "-");
   trace_context.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key(),
+      W3cConstants::get().TRACE_PARENT.key(),
       parent_trace_header);
   trace_context.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key(),
+      W3cConstants::get().TRACE_STATE.key(),
       "test=foo");
 
   // Mock the random call for generating span ID so we can check it later.
@@ -158,21 +160,21 @@ TEST_F(FluentdTracerIntegrationTest, ParseSpanContextFromHeadersTest) {
 
   // Remove headers, then inject context into header from the span.
   trace_context.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   trace_context.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key());
+      W3cConstants::get().TRACE_STATE.key());
   span->injectContext(trace_context, Tracing::UpstreamContext());
 
   // Check the headers
   auto sampled_entry = trace_context.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   EXPECT_TRUE(sampled_entry.has_value());
   EXPECT_EQ(
       sampled_entry.value(),
       absl::StrJoin({version, trace_id_hex, Hex::uint64ToHex(new_span_id), trace_flags}, "-"));
 
   auto sampled_tracestate_entry = trace_context.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key());
+      W3cConstants::get().TRACE_STATE.key());
   EXPECT_TRUE(sampled_tracestate_entry.has_value());
   EXPECT_EQ(sampled_tracestate_entry.value(), "test=foo");
 }
@@ -208,12 +210,12 @@ TEST_F(FluentdTracerIntegrationTest, GenerateSpanContextWithoutHeadersTest) {
 
   // Remove headers, then inject context into header from the span.
   trace_context.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   span->injectContext(trace_context, Tracing::UpstreamContext());
 
   // Check the headers
   auto sampled_entry = trace_context.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   EXPECT_TRUE(sampled_entry.has_value());
   EXPECT_EQ(sampled_entry.value(), "00-00000000000000010000000000000002-0000000000000003-01");
 }
@@ -225,7 +227,7 @@ TEST_F(FluentdTracerIntegrationTest, NullSpanWithPropagationHeaderError) {
   Tracing::TestTraceContextImpl trace_context{
       {":authority", "test.com"}, {":path", "/"}, {":method", "GET"}};
   trace_context.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key(),
+      W3cConstants::get().TRACE_PARENT.key(),
       "invalid00-0000000000000003-01");
 
   Tracing::SpanPtr span = driver_->startSpan(mock_tracing_config_, trace_context, stream_info_,

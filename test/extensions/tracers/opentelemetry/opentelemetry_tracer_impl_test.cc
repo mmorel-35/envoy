@@ -23,6 +23,8 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+using W3cConstants = Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants;
+
 using testing::_;
 using testing::InSequence;
 using testing::Invoke;
@@ -166,11 +168,11 @@ TEST_F(OpenTelemetryDriverTest, ParseSpanContextFromHeadersTest) {
                                       trace_flags};
   const std::string parent_trace_header = absl::StrJoin(v, "-");
   request_headers.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key(),
+      W3cConstants::get().TRACE_PARENT.key(),
       parent_trace_header);
   // Also add tracestate.
   request_headers.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key(),
+      W3cConstants::get().TRACE_STATE.key(),
       "test=foo");
 
   // Mock the random call for generating span ID so we can check it later.
@@ -186,20 +188,20 @@ TEST_F(OpenTelemetryDriverTest, ParseSpanContextFromHeadersTest) {
 
   // Remove headers, then inject context into header from the span.
   request_headers.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   request_headers.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key());
+      W3cConstants::get().TRACE_STATE.key());
   span->injectContext(request_headers, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   EXPECT_EQ(sampled_entry.has_value(), true);
   EXPECT_EQ(
       sampled_entry.value(),
       absl::StrJoin({version, trace_id_hex, Hex::uint64ToHex(new_span_id), trace_flags}, "-"));
 
   auto sampled_tracestate_entry = request_headers.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.key());
+      W3cConstants::get().TRACE_STATE.key());
   EXPECT_EQ(sampled_tracestate_entry.has_value(), true);
   EXPECT_EQ(sampled_tracestate_entry.value(), "test=foo");
   constexpr absl::string_view request_yaml = R"(
@@ -280,11 +282,11 @@ TEST_F(OpenTelemetryDriverTest, GenerateSpanContextWithoutHeadersTest) {
 
   // Remove headers, then inject context into header from the span.
   request_headers.remove(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
   span->injectContext(request_headers, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers.get(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key());
+      W3cConstants::get().TRACE_PARENT.key());
 
   // Ends in 01 because span should be sampled. See
   // https://w3c.github.io/trace-context/#trace-flags.
@@ -299,7 +301,7 @@ TEST_F(OpenTelemetryDriverTest, NullSpanWithPropagationHeaderError) {
   Tracing::TestTraceContextImpl request_headers{
       {":authority", "test.com"}, {":path", "/"}, {":method", "GET"}};
   request_headers.set(
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.key(),
+      W3cConstants::get().TRACE_PARENT.key(),
       "invalid00-0000000000000003-01");
 
   Tracing::SpanPtr span = driver_->startSpan(mock_tracing_config_, request_headers, stream_info_,

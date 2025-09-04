@@ -14,6 +14,8 @@ namespace Extensions {
 namespace Tracers {
 namespace Fluentd {
 
+using W3cConstants = Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants;
+
 // Handle Span and Trace context extraction and validation
 // Adapted from OpenTelemetry tracer extension @alexanderellis @yanavlasov
 // See https://www.w3.org/TR/trace-context/#traceparent-header
@@ -39,14 +41,14 @@ SpanContextExtractor::~SpanContextExtractor() = default;
 
 bool SpanContextExtractor::propagationHeaderPresent() {
   auto propagation_header =
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.get(
+      W3cConstants::get().TRACE_PARENT.get(
           trace_context_);
   return propagation_header.has_value();
 }
 
 absl::StatusOr<SpanContext> SpanContextExtractor::extractSpanContext() {
   auto propagation_header =
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.get(
+      W3cConstants::get().TRACE_PARENT.get(
           trace_context_);
   if (!propagation_header.has_value()) {
     // We should have already caught this, but just in case.
@@ -94,7 +96,7 @@ absl::StatusOr<SpanContext> SpanContextExtractor::extractSpanContext() {
   // traceparent header above, we don't need to check here.
   // See https://www.w3.org/TR/trace-context/#processing-model-for-working-with-trace-context
   const auto tracestate_values =
-      Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_STATE.getAll(
+      W3cConstants::get().TRACE_STATE.getAll(
           trace_context_);
 
   SpanContext parent_context(version, trace_id, parent_id, sampled,

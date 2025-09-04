@@ -38,6 +38,9 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace Zipkin {
+
+using B3Constants = Envoy::Extensions::Tracers::Propagation::B3::B3Constants;
+
 namespace {
 
 class ZipkinDriverTest : public testing::Test {
@@ -631,15 +634,15 @@ TEST_F(ZipkinDriverTest, NoB3ContextSampledTrue) {
 
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key())
+           .get(B3Constants::get().X_B3_SPAN_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key())
+           .get(B3Constants::get().X_B3_TRACE_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key())
+           .get(B3Constants::get().X_B3_SAMPLED.key())
            .has_value());
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -654,15 +657,15 @@ TEST_F(ZipkinDriverTest, NoB3ContextSampledFalse) {
 
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key())
+           .get(B3Constants::get().X_B3_SPAN_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key())
+           .get(B3Constants::get().X_B3_TRACE_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key())
+           .get(B3Constants::get().X_B3_SAMPLED.key())
            .has_value());
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -676,14 +679,14 @@ TEST_F(ZipkinDriverTest, PropagateB3NoSampleDecisionSampleTrue) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key())
+           .get(B3Constants::get().X_B3_SAMPLED.key())
            .has_value());
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -697,14 +700,14 @@ TEST_F(ZipkinDriverTest, PropagateB3NoSampleDecisionSampleFalse) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key())
+           .get(B3Constants::get().X_B3_SAMPLED.key())
            .has_value());
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -719,27 +722,27 @@ TEST_F(ZipkinDriverTest, PropagateB3NotSampled) {
 
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key())
+           .get(B3Constants::get().X_B3_SPAN_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key())
+           .get(B3Constants::get().X_B3_TRACE_ID.key())
            .has_value());
 
   // Only context header set is B3 sampled to indicate trace should not be sampled
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(),
+      B3Constants::get().X_B3_SAMPLED.key(),
       NOT_SAMPLED);
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
                                              operation_name_, {Tracing::Reason::Sampling, true});
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   // Check B3 sampled flag is set to not sample
   EXPECT_EQ(NOT_SAMPLED, sampled_entry.value());
@@ -750,28 +753,28 @@ TEST_F(ZipkinDriverTest, PropagateB3NotSampledWithFalse) {
 
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key())
+           .get(B3Constants::get().X_B3_SPAN_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key())
+           .get(B3Constants::get().X_B3_TRACE_ID.key())
            .has_value());
 
   // Only context header set is B3 sampled to indicate trace should not be sampled (using legacy
   // 'false' value)
   const std::string sampled = "false";
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(), sampled);
+      B3Constants::get().X_B3_SAMPLED.key(), sampled);
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
                                              operation_name_, {Tracing::Reason::Sampling, true});
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   // Check B3 sampled flag is set to not sample
   EXPECT_EQ(NOT_SAMPLED, sampled_entry.value());
 }
@@ -781,28 +784,28 @@ TEST_F(ZipkinDriverTest, PropagateB3SampledWithTrue) {
 
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key())
+           .get(B3Constants::get().X_B3_SPAN_ID.key())
            .has_value());
   EXPECT_TRUE(
       !request_headers_
-           .get(Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key())
+           .get(B3Constants::get().X_B3_TRACE_ID.key())
            .has_value());
 
   // Only context header set is B3 sampled to indicate trace should be sampled (using legacy
   // 'true' value)
   const std::string sampled = "true";
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(), sampled);
+      B3Constants::get().X_B3_SAMPLED.key(), sampled);
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
                                              operation_name_, {Tracing::Reason::Sampling, false});
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   // Check B3 sampled flag is set to sample
   EXPECT_EQ(SAMPLED, sampled_entry.value());
 }
@@ -811,13 +814,13 @@ TEST_F(ZipkinDriverTest, PropagateB3SampleFalse) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(),
+      B3Constants::get().X_B3_SAMPLED.key(),
       NOT_SAMPLED);
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -926,12 +929,12 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromB3HeadersTest) {
   const std::string parent_id = Hex::uint64ToHex(generateRandom64());
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       trace_id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(), span_id);
+      B3Constants::get().X_B3_SPAN_ID.key(), span_id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       parent_id);
 
   // New span will have an SR annotation - so its span and parent ids will be
@@ -953,16 +956,16 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromB3HeadersEmptyParentSpanTest) {
   // Root span so have same trace and span id
   const std::string id = Hex::uint64ToHex(generateRandom64());
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(), id);
+      B3Constants::get().X_B3_TRACE_ID.key(), id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(), id);
+      B3Constants::get().X_B3_SPAN_ID.key(), id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(), SAMPLED);
+      B3Constants::get().X_B3_SAMPLED.key(), SAMPLED);
 
   // Set parent span id to empty string, to ensure it is ignored
   const std::string parent_span_id = "";
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       parent_span_id);
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -982,12 +985,12 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromB3Headers128TraceIdTest) {
   const std::string parent_id = Hex::uint64ToHex(generateRandom64());
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       trace_id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(), span_id);
+      B3Constants::get().X_B3_SPAN_ID.key(), span_id);
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       parent_id);
 
   // New span will have an SR annotation - so its span and parent ids will be
@@ -1011,13 +1014,13 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromInvalidTraceIdB3HeadersTest) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       std::string("xyz"));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -1029,13 +1032,13 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromInvalidSpanIdB3HeadersTest) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       std::string("xyz"));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -1047,13 +1050,13 @@ TEST_F(ZipkinDriverTest, ZipkinSpanContextFromInvalidParentIdB3HeadersTest) {
   setupValidDriver("HTTP_JSON");
 
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       std::string("xyz"));
 
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
@@ -1070,12 +1073,12 @@ TEST_F(ZipkinDriverTest, ExplicitlySetSampledFalse) {
   span->setSampled(false);
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   // Check B3 sampled flag is set to not sample
   EXPECT_EQ(NOT_SAMPLED, sampled_entry.value());
 }
@@ -1089,12 +1092,12 @@ TEST_F(ZipkinDriverTest, ExplicitlySetSampledTrue) {
   span->setSampled(true);
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   // Check B3 sampled flag is set to sample
   EXPECT_EQ(SAMPLED, sampled_entry.value());
 }
@@ -1107,19 +1110,19 @@ TEST_F(ZipkinDriverTest, UseLocalDecisionTrue) {
   EXPECT_TRUE(span->useLocalDecision());
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   EXPECT_EQ(SAMPLED, sampled_entry.value());
 }
 
 TEST_F(ZipkinDriverTest, UseLocalDecisionFalse) {
   setupValidDriver("HTTP_JSON");
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key(),
+      B3Constants::get().X_B3_SAMPLED.key(),
       NOT_SAMPLED);
 
   // Envoy tracing decision is ignored if the B3 sampled header is set to not sample.
@@ -1128,25 +1131,25 @@ TEST_F(ZipkinDriverTest, UseLocalDecisionFalse) {
   EXPECT_FALSE(span->useLocalDecision());
 
   request_headers_.remove(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
 
   span->injectContext(request_headers_, Tracing::UpstreamContext());
 
   auto sampled_entry = request_headers_.get(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.key());
+      B3Constants::get().X_B3_SAMPLED.key());
   EXPECT_EQ(NOT_SAMPLED, sampled_entry.value());
 }
 
 TEST_F(ZipkinDriverTest, DuplicatedHeader) {
   setupValidDriver("HTTP_JSON");
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.key(),
+      B3Constants::get().X_B3_TRACE_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.key(),
+      B3Constants::get().X_B3_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   request_headers_.set(
-      Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
+      B3Constants::get().X_B3_PARENT_SPAN_ID.key(),
       Hex::uint64ToHex(generateRandom64()));
   Tracing::SpanPtr span = driver_->startSpan(config_, request_headers_, stream_info_,
                                              operation_name_, {Tracing::Reason::Sampling, false});

@@ -11,12 +11,15 @@
 #include "source/common/common/fmt.h"
 #include "source/common/protobuf/utility.h"
 #include "source/common/tracing/http_tracer_impl.h"
+#include "source/extensions/tracers/propagation/xray/propagator.h"
 #include "source/extensions/tracers/xray/daemon.pb.validate.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace XRay {
+
+using XRayConstants = Envoy::Extensions::Tracers::Propagation::XRay::XRayConstants;
 
 namespace {
 constexpr absl::string_view XRaySerializationVersion = "1";
@@ -102,7 +105,7 @@ void Span::finishSpan() {
 } // namespace XRay
 
 const Tracing::TraceContextHandler& xRayTraceHeader() {
-  CONSTRUCT_ON_FIRST_USE(Tracing::TraceContextHandler, "x-amzn-trace-id");
+  return XRayConstants::get().X_AMZN_TRACE_ID;
 }
 
 const Tracing::TraceContextHandler& xForwardedForHeader() {
