@@ -6,7 +6,7 @@
 
 #include "source/common/singleton/const_singleton.h"
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/propagators/xray/constants.h"
+#include "source/extensions/propagators/xray/trace_context.h"
 
 namespace Envoy {
 namespace Extensions {
