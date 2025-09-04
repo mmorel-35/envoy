@@ -250,16 +250,6 @@ void Span::injectContext(Tracing::TraceContext& trace_context,
     
     // Inject using W3C propagator
     Extensions::Propagators::W3C::Propagator::inject(w3c_context, trace_context);
-  } else {
-    // Fallback to manual injection if propagator fails
-    std::string trace_flags = convertToW3CTraceFlags(sampled());
-    std::string traceparent_header_value =
-        absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags);
-    Extensions::Propagators::W3C::W3CConstants::get().TRACE_PARENT.set(trace_context, traceparent_header_value);
-    
-    if (!span_context_.tracestate().empty()) {
-      Extensions::Propagators::W3C::W3CConstants::get().TRACE_STATE.set(trace_context, span_context_.tracestate());
-    }
   }
 }
 
