@@ -218,16 +218,16 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   auto trace_context_option = tracer_.traceContextOption();
 
   // Always inject B3 headers
-  ZipkinCoreConstants::get().X_B3_TRACE_ID.setRefKey(trace_context, traceIdAsHexString());
-  ZipkinCoreConstants::get().X_B3_SPAN_ID.setRefKey(trace_context, idAsHexString());
+  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_TRACE_ID.setRefKey(trace_context, traceIdAsHexString());
+  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_SPAN_ID.setRefKey(trace_context, idAsHexString());
 
   // Set the parent-span header properly, based on the newly-created span structure.
   if (isSetParentId()) {
-    ZipkinCoreConstants::get().X_B3_PARENT_SPAN_ID.setRefKey(trace_context, parentIdAsHexString());
+    Envoy::Extensions::Propagators::B3::Constants::get().X_B3_PARENT_SPAN_ID.setRefKey(trace_context, parentIdAsHexString());
   }
 
   // Set the sampled header.
-  ZipkinCoreConstants::get().X_B3_SAMPLED.setRefKey(trace_context,
+  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_SAMPLED.setRefKey(trace_context,
                                                     sampled() ? SAMPLED : NOT_SAMPLED);
 
   // Additionally inject W3C headers if dual propagation is enabled
@@ -266,7 +266,7 @@ void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
       fmt::format("00-{}-{:016x}-{}", trace_id_str, id_, sampled() ? "01" : "00");
 
   // Set the W3C traceparent header
-  ZipkinCoreConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
+  Envoy::Extensions::Propagators::W3c::Constants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
 
   // For now, we don't set tracestate as it's optional and we don't have vendor-specific data
 }

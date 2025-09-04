@@ -6,6 +6,8 @@
 
 #include "source/common/singleton/const_singleton.h"
 #include "source/common/tracing/trace_context_impl.h"
+#include "source/extensions/propagators/b3/constants.h"
+#include "source/extensions/propagators/w3c/constants.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -42,24 +44,8 @@ constexpr bool DEFAULT_SHARED_SPAN_CONTEXT = true;
 
 } // namespace
 
-class ZipkinCoreConstantValues {
-public:
-  // Zipkin B3 headers
-  const Tracing::TraceContextHandler X_B3_TRACE_ID{"x-b3-traceid"};
-  const Tracing::TraceContextHandler X_B3_SPAN_ID{"x-b3-spanid"};
-  const Tracing::TraceContextHandler X_B3_PARENT_SPAN_ID{"x-b3-parentspanid"};
-  const Tracing::TraceContextHandler X_B3_SAMPLED{"x-b3-sampled"};
-  const Tracing::TraceContextHandler X_B3_FLAGS{"x-b3-flags"};
-
-  // Zipkin b3 single header
-  const Tracing::TraceContextHandler B3{"b3"};
-
-  // W3C trace context headers
-  const Tracing::TraceContextHandler TRACE_PARENT{"traceparent"};
-  const Tracing::TraceContextHandler TRACE_STATE{"tracestate"};
-};
-
-using ZipkinCoreConstants = ConstSingleton<ZipkinCoreConstantValues>;
+// Use B3 and W3C propagator constants instead of duplicating them
+// Keep only Zipkin-specific constants here if any in the future
 
 } // namespace Zipkin
 } // namespace Tracers

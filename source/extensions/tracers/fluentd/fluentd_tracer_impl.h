@@ -12,6 +12,7 @@
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/common/fluentd/fluentd_base.h"
+#include "source/extensions/propagators/w3c/constants.h"
 #include "source/extensions/tracers/common/factory_base.h"
 
 #include "absl/strings/string_view.h"
@@ -53,14 +54,7 @@ private:
   std::string tracestate_;
 };
 
-// Trace context definitions
-class FluentdConstantValues {
-public:
-  const Tracing::TraceContextHandler TRACE_PARENT{"traceparent"};
-  const Tracing::TraceContextHandler TRACE_STATE{"tracestate"};
-};
-
-using FluentdConstants = ConstSingleton<FluentdConstantValues>;
+// Use W3C propagator constants instead of duplicating them
 
 // SpanContextExtractor extracts the span context from the trace context
 class SpanContextExtractor {
