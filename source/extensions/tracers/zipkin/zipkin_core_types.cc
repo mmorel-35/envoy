@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "source/extensions/propagators/w3c/propagator.h"
 #include "source/extensions/tracers/zipkin/span_context.h"
 #include "source/extensions/tracers/zipkin/util.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"
@@ -247,9 +248,8 @@ SpanContext Span::spanContext() const {
 }
 
 void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
-  // Convert Zipkin span context to W3C traceparent format
-  // W3C traceparent format: 00-{trace-id}-{span-id}-{trace-flags}
-
+  // Convert Zipkin span context to W3C format and inject using propagator
+  
   // Construct the 128-bit trace ID (32 hex chars)
   std::string trace_id_str;
   if (trace_id_high_.has_value() && trace_id_high_.value() != 0) {
@@ -260,15 +260,23 @@ void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
     // We have a 64-bit trace ID, pad with zeros for the high part
     trace_id_str = absl::StrCat("0000000000000000", fmt::format("{:016x}", trace_id_));
   }
-
-  // Construct the traceparent header value in W3C format: version-traceid-spanid-flags
-  std::string traceparent_value =
-      fmt::format("00-{}-{:016x}-{}", trace_id_str, id_, sampled() ? "01" : "00");
-
-  // Set the W3C traceparent header
-  ZipkinCoreConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
-
-  // For now, we don't set tracestate as it's optional and we don't have vendor-specific data
+  
+  // Format span ID as 16 hex characters
+  std::string span_id_str = fmt::format("{:016x}", id_);
+  
+  // Create W3C trace context using the propagator
+  auto w3c_context_result = Extensions::Propagators::W3C::Propagator::createRoot(
+      trace_id_str, span_id_str, sampled());
+  
+  if (w3c_context_result.ok()) {
+    // Inject using W3C propagator
+    Extensions::Propagators::W3C::Propagator::inject(w3c_context_result.value(), trace_context);
+  } else {
+    // Fallback to manual injection if propagator fails  
+    std::string traceparent_value =
+        fmt::format("00-{}-{}-{}", trace_id_str, span_id_str, sampled() ? "01" : "00");
+    ZipkinCoreConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
+  }
 }
 
 } // namespace Zipkin

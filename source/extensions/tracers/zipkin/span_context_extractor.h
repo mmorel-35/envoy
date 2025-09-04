@@ -39,7 +39,7 @@ private:
    * Convert W3C span context to Zipkin span context format
    */
   std::pair<SpanContext, bool>
-  convertW3CToZipkin(const Extensions::Tracers::OpenTelemetry::SpanContext& w3c_context,
+  convertW3CToZipkin(const Extensions::Propagators::W3C::TraceContext& w3c_context,
                      bool fallback_sampled);
 
   bool tryExtractSampledFromB3SingleFormat();

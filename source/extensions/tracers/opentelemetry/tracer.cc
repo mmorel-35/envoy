@@ -10,6 +10,7 @@
 #include "source/common/tracing/common_values.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/common/version/version.h"
+#include "source/extensions/propagators/w3c/propagator.h"
 #include "source/extensions/tracers/opentelemetry/otlp_utils.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
@@ -26,12 +27,9 @@ using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;
 
 namespace {
 
-const Tracing::TraceContextHandler& traceParentHeader() {
-  CONSTRUCT_ON_FIRST_USE(Tracing::TraceContextHandler, "traceparent");
-}
-
-const Tracing::TraceContextHandler& traceStateHeader() {
-  CONSTRUCT_ON_FIRST_USE(Tracing::TraceContextHandler, "tracestate");
+// Helper to convert trace flags to W3C format
+std::string convertToW3CTraceFlags(bool sampled) {
+  return sampled ? "01" : "00";
 }
 
 void callSampler(SamplerSharedPtr sampler, const StreamInfo::StreamInfo& stream_info,
@@ -92,16 +90,38 @@ void Span::finishSpan() {
 void Span::setOperation(absl::string_view operation) { span_.set_name(operation); };
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
+  // Use the W3C propagator to inject trace context
   std::string trace_id_hex = absl::BytesToHexString(span_.trace_id());
   std::string span_id_hex = absl::BytesToHexString(span_.span_id());
-  std::vector<uint8_t> trace_flags_vec{sampled()};
-  std::string trace_flags_hex = Hex::encode(trace_flags_vec);
-  std::string traceparent_header_value =
-      absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
-  // Set the traceparent in the trace_context.
-  traceParentHeader().setRefKey(trace_context, traceparent_header_value);
-  // Also set the tracestate.
-  traceStateHeader().setRefKey(trace_context, span_.trace_state());
+  std::string trace_flags = convertToW3CTraceFlags(sampled());
+  
+  // Create W3C trace context and inject using propagator
+  auto w3c_context_result = Extensions::Propagators::W3C::Propagator::createRoot(
+      trace_id_hex, span_id_hex, sampled());
+  
+  if (w3c_context_result.ok()) {
+    auto w3c_context = std::move(w3c_context_result.value());
+    
+    // Add tracestate if present
+    if (!span_.trace_state().empty()) {
+      auto tracestate_result = Extensions::Propagators::W3C::TraceState::parse(span_.trace_state());
+      if (tracestate_result.ok()) {
+        w3c_context.setTraceState(std::move(tracestate_result.value()));
+      }
+    }
+    
+    // Inject using W3C propagator
+    Extensions::Propagators::W3C::Propagator::inject(w3c_context, trace_context);
+  } else {
+    // Fallback to manual injection if propagator fails
+    std::string traceparent_header_value =
+        absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags);
+    Extensions::Propagators::W3C::W3CConstants::get().TRACE_PARENT.set(trace_context, traceparent_header_value);
+    
+    if (!span_.trace_state().empty()) {
+      Extensions::Propagators::W3C::W3CConstants::get().TRACE_STATE.set(trace_context, span_.trace_state());
+    }
+  }
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {
