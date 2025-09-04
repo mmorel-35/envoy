@@ -9,14 +9,10 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "b3_propagator_lib",
-    srcs = ["b3_propagator.cc"],
-    hdrs = ["b3_propagator.h"],
+    name = "constants_lib",
+    hdrs = ["constants.h"],
     deps = [
-        "//source/extensions/propagators:propagator_constants_lib",
-        "//source/extensions/propagators:propagator_interface_lib",
-        "//source/common/common:hex_lib",
-        "//source/common/common:utility_lib",
-        "@com_google_absl//absl/strings",
+        "//source/common/singleton:const_singleton",
+        "//source/common/tracing:trace_context_impl",
     ],
 )
