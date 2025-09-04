@@ -11,8 +11,8 @@ envoy_extension_package()
 envoy_cc_library(
     name = "all_propagators_constants_lib",
     deps = [
-        "//source/extensions/propagators/b3:constants_lib",
+        "//source/extensions/propagators/b3:propagator_lib",
         "//source/extensions/propagators/w3c:propagator_lib", 
-        "//source/extensions/propagators/xray:constants_lib",
+        "//source/extensions/propagators/xray:propagator_lib",
     ],
 )

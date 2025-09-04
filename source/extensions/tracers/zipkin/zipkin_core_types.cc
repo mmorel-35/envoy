@@ -218,16 +218,16 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   auto trace_context_option = tracer_.traceContextOption();
 
   // Always inject B3 headers
-  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_TRACE_ID.setRefKey(trace_context, traceIdAsHexString());
-  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_SPAN_ID.setRefKey(trace_context, idAsHexString());
+  Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_TRACE_ID.setRefKey(trace_context, traceIdAsHexString());
+  Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_SPAN_ID.setRefKey(trace_context, idAsHexString());
 
   // Set the parent-span header properly, based on the newly-created span structure.
   if (isSetParentId()) {
-    Envoy::Extensions::Propagators::B3::Constants::get().X_B3_PARENT_SPAN_ID.setRefKey(trace_context, parentIdAsHexString());
+    Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.setRefKey(trace_context, parentIdAsHexString());
   }
 
   // Set the sampled header.
-  Envoy::Extensions::Propagators::B3::Constants::get().X_B3_SAMPLED.setRefKey(trace_context,
+  Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_SAMPLED.setRefKey(trace_context,
                                                     sampled() ? SAMPLED : NOT_SAMPLED);
 
   // Additionally inject W3C headers if dual propagation is enabled
