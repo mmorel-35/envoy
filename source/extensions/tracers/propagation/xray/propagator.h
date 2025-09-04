@@ -6,11 +6,12 @@
 
 #include "source/common/singleton/const_singleton.h"
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/propagators/xray/trace_context.h"
+#include "source/extensions/tracers/propagation/xray/trace_context.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
+namespace Propagation {
 namespace XRay {
 
 /**
@@ -26,6 +27,7 @@ public:
 using XRayConstants = ConstSingleton<XRayConstantValues>;
 
 } // namespace XRay
-} // namespace Propagators
+} // namespace Propagation
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

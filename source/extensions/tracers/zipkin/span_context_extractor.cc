@@ -48,7 +48,7 @@ SpanContextExtractor::~SpanContextExtractor() = default;
 absl::optional<bool> SpanContextExtractor::extractSampled() {
   bool sampled(false);
   // Try B3 single format first.
-  auto b3_header_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().B3.get(trace_context_);
+  auto b3_header_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().B3.get(trace_context_);
   if (b3_header_entry.has_value()) {
     // This is an implicitly untrusted header, so only the first value is used.
     absl::string_view b3 = b3_header_entry.value();
@@ -75,7 +75,7 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
   }
 
   // Try individual B3 sampled header.
-  auto x_b3_sampled_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_SAMPLED.get(trace_context_);
+  auto x_b3_sampled_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.get(trace_context_);
 
   if (x_b3_sampled_entry.has_value()) {
     // Checking if sampled flag has been specified. Also checking for 'true' value, as some old
@@ -103,13 +103,13 @@ absl::optional<bool> SpanContextExtractor::extractSampled() {
 
 std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sampled) {
   // Try B3 single format first.
-  if (Envoy::Extensions::Propagators::B3::B3Constants::get().B3.get(trace_context_).has_value()) {
+  if (Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().B3.get(trace_context_).has_value()) {
     return extractSpanContextFromB3SingleFormat(is_sampled);
   }
 
   // Try individual B3 headers.
-  auto b3_trace_id_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_TRACE_ID.get(trace_context_);
-  auto b3_span_id_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_SPAN_ID.get(trace_context_);
+  auto b3_trace_id_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.get(trace_context_);
+  auto b3_span_id_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.get(trace_context_);
   if (b3_span_id_entry.has_value() && b3_trace_id_entry.has_value()) {
     uint64_t trace_id(0);
     uint64_t trace_id_high(0);
@@ -138,7 +138,7 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
       throw ExtractorException(absl::StrCat("Invalid span id ", spid.c_str()));
     }
 
-    auto b3_parent_id_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.get(trace_context_);
+    auto b3_parent_id_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.get(trace_context_);
     if (b3_parent_id_entry.has_value() && !b3_parent_id_entry.value().empty()) {
       // This is an implicitly untrusted header, so only the first value is used.
       const std::string pspid(b3_parent_id_entry.value());
@@ -167,7 +167,7 @@ std::pair<SpanContext, bool> SpanContextExtractor::extractSpanContext(bool is_sa
 
 std::pair<SpanContext, bool>
 SpanContextExtractor::extractSpanContextFromB3SingleFormat(bool is_sampled) {
-  auto b3_head_entry = Envoy::Extensions::Propagators::B3::B3Constants::get().B3.get(trace_context_);
+  auto b3_head_entry = Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().B3.get(trace_context_);
   ASSERT(b3_head_entry.has_value());
   // This is an implicitly untrusted header, so only the first value is used.
   const std::string b3(b3_head_entry.value());

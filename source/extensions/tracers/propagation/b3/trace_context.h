@@ -4,7 +4,8 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Propagators {
+namespace Tracers {
+namespace Propagation {
 namespace B3 {
 
 /**
@@ -24,6 +25,7 @@ constexpr absl::string_view kB3Header = "b3";
 } // namespace Constants
 
 } // namespace B3
-} // namespace Propagators
+} // namespace Propagation
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
