@@ -6,15 +6,13 @@
 #include "source/common/common/statusor.h"
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/tracers/propagation/w3c/propagator.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
+#include "source/extensions/tracers/propagation/w3c/propagator.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
-
-// Use W3C propagator constants instead of duplicating them
 
 /**
  * This class is used to SpanContext extracted from the HTTP traceparent header

@@ -12,8 +12,8 @@
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/common/fluentd/fluentd_base.h"
-#include "source/extensions/tracers/propagation/w3c/propagator.h"
 #include "source/extensions/tracers/common/factory_base.h"
+#include "source/extensions/tracers/propagation/w3c/propagator.h"
 
 #include "absl/strings/string_view.h"
 
@@ -53,8 +53,6 @@ private:
   bool sampled_{false};
   std::string tracestate_;
 };
-
-// Use W3C propagator constants instead of duplicating them
 
 // SpanContextExtractor extracts the span context from the trace context
 class SpanContextExtractor {

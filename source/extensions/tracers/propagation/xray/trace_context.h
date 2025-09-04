@@ -10,7 +10,8 @@ namespace XRay {
 
 /**
  * AWS X-Ray trace propagation specification constants.
- * See https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-tracingheader
+ * See
+ * https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-tracingheader
  */
 namespace Constants {
 // AWS X-Ray trace header name

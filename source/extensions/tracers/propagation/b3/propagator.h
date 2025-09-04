@@ -23,7 +23,8 @@ public:
   // B3 multi-header format headers
   const Tracing::TraceContextHandler X_B3_TRACE_ID{std::string(Constants::kTraceIdHeader)};
   const Tracing::TraceContextHandler X_B3_SPAN_ID{std::string(Constants::kSpanIdHeader)};
-  const Tracing::TraceContextHandler X_B3_PARENT_SPAN_ID{std::string(Constants::kParentSpanIdHeader)};
+  const Tracing::TraceContextHandler X_B3_PARENT_SPAN_ID{
+      std::string(Constants::kParentSpanIdHeader)};
   const Tracing::TraceContextHandler X_B3_SAMPLED{std::string(Constants::kSampledHeader)};
   const Tracing::TraceContextHandler X_B3_FLAGS{std::string(Constants::kFlagsHeader)};
 

@@ -218,17 +218,20 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   auto trace_context_option = tracer_.traceContextOption();
 
   // Always inject B3 headers
-  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.setRefKey(trace_context, traceIdAsHexString());
-  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.setRefKey(trace_context, idAsHexString());
+  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_TRACE_ID.setRefKey(
+      trace_context, traceIdAsHexString());
+  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SPAN_ID.setRefKey(
+      trace_context, idAsHexString());
 
   // Set the parent-span header properly, based on the newly-created span structure.
   if (isSetParentId()) {
-    Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.setRefKey(trace_context, parentIdAsHexString());
+    Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_PARENT_SPAN_ID.setRefKey(
+        trace_context, parentIdAsHexString());
   }
 
   // Set the sampled header.
-  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.setRefKey(trace_context,
-                                                    sampled() ? SAMPLED : NOT_SAMPLED);
+  Envoy::Extensions::Tracers::Propagation::B3::B3Constants::get().X_B3_SAMPLED.setRefKey(
+      trace_context, sampled() ? SAMPLED : NOT_SAMPLED);
 
   // Additionally inject W3C headers if dual propagation is enabled
   if (trace_context_option == envoy::config::trace::v3::ZipkinConfig::USE_B3_WITH_W3C_PROPAGATION) {
@@ -266,7 +269,8 @@ void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
       fmt::format("00-{}-{:016x}-{}", trace_id_str, id_, sampled() ? "01" : "00");
 
   // Set the W3C traceparent header
-  Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
+  Envoy::Extensions::Tracers::Propagation::W3c::W3cConstants::get().TRACE_PARENT.setRefKey(
+      trace_context, traceparent_value);
 
   // For now, we don't set tracestate as it's optional and we don't have vendor-specific data
 }

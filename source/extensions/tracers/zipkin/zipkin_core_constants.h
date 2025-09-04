@@ -43,10 +43,6 @@ constexpr char NOT_SAMPLED[] = "0";
 constexpr bool DEFAULT_SHARED_SPAN_CONTEXT = true;
 
 } // namespace
-
-// Use B3 and W3C propagator constants instead of duplicating them
-// Keep only Zipkin-specific constants here if any in the future
-
 } // namespace Zipkin
 } // namespace Tracers
 } // namespace Extensions

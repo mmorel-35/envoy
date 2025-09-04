@@ -212,12 +212,6 @@ removed_config_or_runtime:
     Removed runtime guard ``envoy.reloadable_features.proxy_104`` and legacy code paths.
 
 new_features:
-- area: propagators
-  change: |
-    Added centralized propagator constants infrastructure with unified file naming structure.
-    All propagators (W3C, B3, XRay) now follow consistent ``trace_context.h`` + ``propagator.h`` pattern
-    with standardized BUILD targets. Updated existing tracers to use the centralized propagator constants
-    instead of duplicated local constants, establishing foundation for unified trace context management.
 - area: stats
   change: |
     Added support to remove unused metrics from memory for extensions that
