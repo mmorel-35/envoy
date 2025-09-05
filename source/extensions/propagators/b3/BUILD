@@ -1,6 +1,5 @@
 load(
     "//bazel:envoy_build_system.bzl",
-    "envoy_cc_library",
     "envoy_extension_package",
 )
 
@@ -8,20 +7,15 @@ licenses(["notice"])  # Apache 2
 
 envoy_extension_package()
 
-envoy_cc_library(
+# Alias libraries for backward compatibility
+alias(
     name = "multi_lib",
-    hdrs = ["multi.h"],
-    deps = [
-        "//source/common/singleton:const_singleton",
-        "//source/common/tracing:trace_context_lib",
-    ],
+    actual = "//source/extensions/propagators/b3/multi:multi_lib",
+    visibility = ["//visibility:public"],
 )
 
-envoy_cc_library(
-    name = "single_lib",
-    hdrs = ["single.h"],
-    deps = [
-        "//source/common/singleton:const_singleton",
-        "//source/common/tracing:trace_context_lib",
-    ],
+alias(
+    name = "single_lib", 
+    actual = "//source/extensions/propagators/b3/single:single_lib",
+    visibility = ["//visibility:public"],
 )

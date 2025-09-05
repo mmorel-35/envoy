@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "source/extensions/propagators/b3/multi.h"
-#include "source/extensions/propagators/w3c/trace_context.h"
+#include "source/extensions/propagators/b3/multi/multi.h"
+#include "source/extensions/propagators/w3c/tracecontext/trace_context.h"
 #include "source/extensions/tracers/zipkin/span_context.h"
 #include "source/extensions/tracers/zipkin/util.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"

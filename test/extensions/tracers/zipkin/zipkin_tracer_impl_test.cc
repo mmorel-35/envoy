@@ -7,7 +7,7 @@
 
 #include "source/common/http/headers.h"
 #include "source/common/http/message_impl.h"
-#include "source/extensions/propagators/b3/multi.h"
+#include "source/extensions/propagators/b3/multi/multi.h"
 #include "source/extensions/tracers/zipkin/zipkin_tracer_impl.h"
 
 #include "test/mocks/http/mocks.h"

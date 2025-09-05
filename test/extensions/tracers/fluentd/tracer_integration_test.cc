@@ -1,4 +1,4 @@
-#include "source/extensions/propagators/w3c/trace_context.h"
+#include "source/extensions/propagators/w3c/tracecontext/trace_context.h"
 #include "source/extensions/tracers/fluentd/config.h"
 #include "source/extensions/tracers/fluentd/fluentd_tracer_impl.h"
 

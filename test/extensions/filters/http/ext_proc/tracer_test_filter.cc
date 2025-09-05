@@ -2,7 +2,7 @@
 #include "envoy/tracing/trace_context.h"
 
 #include "source/common/tracing/trace_context_impl.h"
-#include "source/extensions/propagators/w3c/trace_context.h"
+#include "source/extensions/propagators/w3c/tracecontext/trace_context.h"
 #include "source/extensions/tracers/common/factory_base.h"
 
 #include "test/extensions/filters/http/ext_proc/tracer_test_filter.pb.h"
