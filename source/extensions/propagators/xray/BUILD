@@ -10,6 +10,7 @@ envoy_extension_package()
 
 envoy_cc_library(
     name = "xray_propagator_lib",
+    srcs = ["xray_propagator.cc"],
     hdrs = ["xray_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",

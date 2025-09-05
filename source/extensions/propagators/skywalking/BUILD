@@ -10,6 +10,7 @@ envoy_extension_package()
 
 envoy_cc_library(
     name = "skywalking_propagator_lib",
+    srcs = ["skywalking_propagator.cc"],
     hdrs = ["skywalking_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",

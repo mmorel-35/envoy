@@ -10,6 +10,7 @@ envoy_extension_package()
 
 envoy_cc_library(
     name = "tracecontext_propagator_lib",
+    srcs = ["tracecontext_propagator.cc"],
     hdrs = ["tracecontext_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",

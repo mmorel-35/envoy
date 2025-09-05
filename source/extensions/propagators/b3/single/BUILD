@@ -10,6 +10,7 @@ envoy_extension_package()
 
 envoy_cc_library(
     name = "b3_single_propagator_lib",
+    srcs = ["b3_single_propagator.cc"],
     hdrs = ["b3_single_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",

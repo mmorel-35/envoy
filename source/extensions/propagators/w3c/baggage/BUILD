@@ -10,6 +10,7 @@ envoy_extension_package()
 
 envoy_cc_library(
     name = "baggage_propagator_lib",
+    srcs = ["baggage_propagator.cc"],
     hdrs = ["baggage_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",
