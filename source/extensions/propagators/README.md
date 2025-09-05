@@ -23,16 +23,16 @@ propagators/
 All propagator files follow a standardized naming convention for clarity and maintainability:
 
 - **Header files**: `<protocol>_<variant>_propagator.h`
-- **Implementation files**: `<protocol>_<variant>_propagator.cc` (when needed)
+- **Implementation files**: `<protocol>_<variant>_propagator.cc`
 - **Test files**: `<protocol>_<variant>_propagator_test.cc`
 
 ### Examples
-- `b3_multi_propagator.h` - B3 multi-header format
-- `b3_single_propagator.h` - B3 single-header format
-- `tracecontext_propagator.h` - W3C TraceContext specification
-- `baggage_propagator.h` - W3C Baggage specification
-- `skywalking_propagator.h` - SkyWalking trace propagation
-- `xray_propagator.h` - AWS X-Ray trace propagation
+- `b3_multi_propagator.h/.cc` - B3 multi-header format
+- `b3_single_propagator.h/.cc` - B3 single-header format
+- `tracecontext_propagator.h/.cc` - W3C TraceContext specification
+- `baggage_propagator.h/.cc` - W3C Baggage specification
+- `skywalking_propagator.h/.cc` - SkyWalking trace propagation
+- `xray_propagator.h/.cc` - AWS X-Ray trace propagation
 
 ## Usage
 
