@@ -37,6 +37,10 @@ public:
 using SingleConstants = ConstSingleton<SingleConstantValues>;
 
 } // namespace Single
+
+// Convenient alias for easier usage, similar to other propagators like SkyWalking and XRay
+using B3SingleConstants = Single::SingleConstants;
+
 } // namespace B3
 } // namespace Propagators
 } // namespace Extensions

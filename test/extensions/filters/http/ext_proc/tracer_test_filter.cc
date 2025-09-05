@@ -15,7 +15,7 @@ namespace Extensions {
 namespace HttpFilters {
 namespace ExternalProcessing {
 
-using TraceContextConstants = Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextConstants;
+using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
 
 struct ExpectedSpan {
   std::string operation_name;
@@ -85,7 +85,7 @@ public:
                      const Tracing::UpstreamContext&) override {
     ENVOY_LOG_MISC(trace, "TestTracer injectContext");
     std::string traceparent_header_value = "1";
-    TraceContextConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_header_value);
+    W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_header_value);
     context_injected_ = true;
     ENVOY_LOG_MISC(trace, "TestTracer context injected");
   }

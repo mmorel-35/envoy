@@ -43,6 +43,10 @@ public:
 using BaggageConstants = ConstSingleton<BaggageConstantValues>;
 
 } // namespace Baggage
+
+// Convenient alias for easier usage, similar to other propagators like SkyWalking and XRay
+using W3cBaggageConstants = Baggage::BaggageConstants;
+
 } // namespace W3c
 } // namespace Propagators
 } // namespace Extensions

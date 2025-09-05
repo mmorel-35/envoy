@@ -52,6 +52,10 @@ public:
 using TraceContextConstants = ConstSingleton<TraceContextConstantValues>;
 
 } // namespace TraceContext
+
+// Convenient alias for easier usage, similar to other propagators like SkyWalking and XRay
+using W3cConstants = TraceContext::TraceContextConstants;
+
 } // namespace W3c
 } // namespace Propagators
 } // namespace Extensions

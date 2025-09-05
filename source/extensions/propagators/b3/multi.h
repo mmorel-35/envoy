@@ -46,6 +46,10 @@ public:
 using MultiConstants = ConstSingleton<MultiConstantValues>;
 
 } // namespace Multi
+
+// Convenient alias for easier usage, similar to other propagators like SkyWalking and XRay
+using B3Constants = Multi::MultiConstants;
+
 } // namespace B3
 } // namespace Propagators
 } // namespace Extensions
