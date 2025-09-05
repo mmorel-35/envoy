@@ -9,10 +9,17 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "baggage_lib",
-    hdrs = ["baggage.h"],
+    name = "baggage_propagator_lib",
+    hdrs = ["baggage_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",
         "//source/common/tracing:trace_context_lib",
     ],
+)
+
+# Backward compatibility alias
+alias(
+    name = "baggage_lib",
+    actual = ":baggage_propagator_lib",
+    visibility = ["//visibility:public"],
 )

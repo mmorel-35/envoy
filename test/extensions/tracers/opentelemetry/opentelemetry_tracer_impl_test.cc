@@ -4,7 +4,7 @@
 
 #include "source/common/tracing/http_tracer_impl.h"
 #include "source/common/version/version.h"
-#include "source/extensions/propagators/w3c/tracecontext/trace_context.h"
+#include "source/extensions/propagators/w3c/tracecontext/tracecontext_propagator.h"
 #include "source/extensions/tracers/opentelemetry/opentelemetry_tracer_impl.h"
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
 

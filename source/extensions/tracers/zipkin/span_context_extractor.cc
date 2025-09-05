@@ -4,8 +4,8 @@
 
 #include "source/common/common/assert.h"
 #include "source/common/common/utility.h"
-#include "source/extensions/propagators/b3/multi/multi.h"
-#include "source/extensions/propagators/b3/single/single.h"
+#include "source/extensions/propagators/b3/multi/b3_multi_propagator.h"
+#include "source/extensions/propagators/b3/single/b3_single_propagator.h"
 #include "source/extensions/tracers/zipkin/span_context.h"
 #include "source/extensions/tracers/zipkin/zipkin_core_constants.h"
 

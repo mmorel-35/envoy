@@ -10,12 +10,12 @@ envoy_extension_package()
 # Alias libraries for backward compatibility
 alias(
     name = "trace_context_lib",
-    actual = "//source/extensions/propagators/w3c/tracecontext:trace_context_lib",
+    actual = "//source/extensions/propagators/w3c/tracecontext:tracecontext_propagator_lib",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "baggage_lib",
-    actual = "//source/extensions/propagators/w3c/baggage:baggage_lib", 
+    actual = "//source/extensions/propagators/w3c/baggage:baggage_propagator_lib", 
     visibility = ["//visibility:public"],
 )

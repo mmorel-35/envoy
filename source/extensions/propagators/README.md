@@ -18,6 +18,22 @@ propagators/
 └── xray/                  # AWS X-Ray trace propagation (single variant)
 ```
 
+## File Naming Convention
+
+All propagator files follow a standardized naming convention for clarity and maintainability:
+
+- **Header files**: `<protocol>_<variant>_propagator.h`
+- **Implementation files**: `<protocol>_<variant>_propagator.cc` (when needed)
+- **Test files**: `<protocol>_<variant>_propagator_test.cc`
+
+### Examples
+- `b3_multi_propagator.h` - B3 multi-header format
+- `b3_single_propagator.h` - B3 single-header format
+- `tracecontext_propagator.h` - W3C TraceContext specification
+- `baggage_propagator.h` - W3C Baggage specification
+- `skywalking_propagator.h` - SkyWalking trace propagation
+- `xray_propagator.h` - AWS X-Ray trace propagation
+
 ## Usage
 
 Each propagator defines constants for header names and formats used by their respective tracing systems:
@@ -29,4 +45,8 @@ Each propagator defines constants for header names and formats used by their res
 
 ## Build
 
-Each variant has its own BUILD file defining the library target. Parent directories provide aliases for backward compatibility where needed.
+Each variant has its own BUILD file defining the library target with the standardized naming:
+- Primary library target: `<protocol>_<variant>_propagator_lib`
+- Backward compatibility aliases are provided where needed
+
+Parent directories provide aliases for backward compatibility with existing code.

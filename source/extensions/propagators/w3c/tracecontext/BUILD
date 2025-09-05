@@ -9,10 +9,17 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "trace_context_lib",
-    hdrs = ["trace_context.h"],
+    name = "tracecontext_propagator_lib",
+    hdrs = ["tracecontext_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",
         "//source/common/tracing:trace_context_lib",
     ],
+)
+
+# Backward compatibility alias
+alias(
+    name = "trace_context_lib",
+    actual = ":tracecontext_propagator_lib",
+    visibility = ["//visibility:public"],
 )

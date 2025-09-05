@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "source/extensions/propagators/skywalking/trace_context.h"
+#include "source/extensions/propagators/skywalking/skywalking_propagator.h"
 
 namespace Envoy {
 namespace Extensions {

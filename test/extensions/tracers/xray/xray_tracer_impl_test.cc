@@ -1,6 +1,6 @@
 #include <string>
 
-#include "source/extensions/propagators/xray/trace_context.h"
+#include "source/extensions/propagators/xray/xray_propagator.h"
 #include "source/extensions/tracers/xray/tracer.h"
 #include "source/extensions/tracers/xray/xray_configuration.h"
 #include "source/extensions/tracers/xray/xray_tracer_impl.h"

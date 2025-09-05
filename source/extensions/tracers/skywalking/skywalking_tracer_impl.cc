@@ -5,7 +5,7 @@
 #include "source/common/common/macros.h"
 #include "source/common/common/utility.h"
 #include "source/common/http/path_utility.h"
-#include "source/extensions/propagators/skywalking/trace_context.h"
+#include "source/extensions/propagators/skywalking/skywalking_propagator.h"
 
 #include "cpp2sky/propagation.h"
 

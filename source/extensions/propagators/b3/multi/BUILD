@@ -9,10 +9,17 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "multi_lib",
-    hdrs = ["multi.h"],
+    name = "b3_multi_propagator_lib",
+    hdrs = ["b3_multi_propagator.h"],
     deps = [
         "//source/common/singleton:const_singleton",
         "//source/common/tracing:trace_context_lib",
     ],
+)
+
+# Backward compatibility alias
+alias(
+    name = "multi_lib",
+    actual = ":b3_multi_propagator_lib",
+    visibility = ["//visibility:public"],
 )
