@@ -16,10 +16,3 @@ envoy_cc_library(
         "//source/common/tracing:trace_context_lib",
     ],
 )
-
-# Backward compatibility alias
-alias(
-    name = "multi_lib",
-    actual = ":b3_multi_propagator_lib",
-    visibility = ["//visibility:public"],
-)

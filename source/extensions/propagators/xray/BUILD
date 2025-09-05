@@ -16,10 +16,3 @@ envoy_cc_library(
         "//source/common/tracing:trace_context_lib",
     ],
 )
-
-# Backward compatibility alias
-alias(
-    name = "trace_context_lib",
-    actual = ":xray_propagator_lib",
-    visibility = ["//visibility:public"],
-)

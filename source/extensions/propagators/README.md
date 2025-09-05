@@ -47,6 +47,11 @@ Each propagator defines constants for header names and formats used by their res
 
 Each variant has its own BUILD file defining the library target with the standardized naming:
 - Primary library target: `<protocol>_<variant>_propagator_lib`
-- Backward compatibility aliases are provided where needed
 
-Parent directories provide aliases for backward compatibility with existing code.
+### Build Target Examples
+- `b3_multi_propagator_lib` - B3 multi-header format library
+- `b3_single_propagator_lib` - B3 single-header format library  
+- `tracecontext_propagator_lib` - W3C TraceContext library
+- `baggage_propagator_lib` - W3C Baggage library
+- `skywalking_propagator_lib` - SkyWalking library
+- `xray_propagator_lib` - AWS X-Ray library
