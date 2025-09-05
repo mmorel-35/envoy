@@ -10,7 +10,7 @@
 #include "source/common/tracing/common_values.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/common/version/version.h"
-#include "source/extensions/propagators/w3c/propagator.h"
+#include "source/extensions/propagators/w3c/trace_context.h"
 #include "source/extensions/tracers/opentelemetry/otlp_utils.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
@@ -24,7 +24,7 @@ namespace OpenTelemetry {
 constexpr absl::string_view kDefaultVersion = "00";
 
 using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;
-using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
+using TraceContextConstants = Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextConstants;
 
 namespace {
 
@@ -93,9 +93,9 @@ void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::Up
   std::string traceparent_header_value =
       absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
   // Set the traceparent in the trace_context.
-  W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_header_value);
+  TraceContextConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_header_value);
   // Also set the tracestate.
-  W3cConstants::get().TRACE_STATE.setRefKey(trace_context, span_.trace_state());
+  TraceContextConstants::get().TRACE_STATE.setRefKey(trace_context, span_.trace_state());
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {

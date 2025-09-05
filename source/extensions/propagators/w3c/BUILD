@@ -18,10 +18,9 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
-    name = "propagator_lib",
-    hdrs = ["propagator.h"],
+    name = "baggage_lib",
+    hdrs = ["baggage.h"],
     deps = [
-        ":trace_context_lib",
         "//source/common/singleton:const_singleton",
         "//source/common/tracing:trace_context_lib",
     ],

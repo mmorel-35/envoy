@@ -9,15 +9,18 @@ licenses(["notice"])  # Apache 2
 envoy_extension_package()
 
 envoy_cc_library(
-    name = "trace_context_lib",
-    hdrs = ["trace_context.h"],
+    name = "multi_lib",
+    hdrs = ["multi.h"],
+    deps = [
+        "//source/common/singleton:const_singleton",
+        "//source/common/tracing:trace_context_lib",
+    ],
 )
 
 envoy_cc_library(
-    name = "propagator_lib",
-    hdrs = ["propagator.h"],
+    name = "single_lib",
+    hdrs = ["single.h"],
     deps = [
-        ":trace_context_lib",
         "//source/common/singleton:const_singleton",
         "//source/common/tracing:trace_context_lib",
     ],

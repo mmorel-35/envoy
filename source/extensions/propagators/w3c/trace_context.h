@@ -1,7 +1,12 @@
 #pragma once
 
-#include <cstddef>
+#include <string>
 #include <cstdint>
+
+#include "envoy/http/header_map.h"
+
+#include "source/common/singleton/const_singleton.h"
+#include "source/common/tracing/trace_context_impl.h"
 
 #include "absl/strings/string_view.h"
 
@@ -9,8 +14,8 @@ namespace Envoy {
 namespace Extensions {
 namespace Propagators {
 namespace W3c {
-
 namespace TraceContext {
+
 /**
  * W3C Trace Context specification constants.
  * See https://www.w3.org/TR/trace-context/
@@ -33,52 +38,20 @@ constexpr absl::string_view kCurrentVersion = "00";
 // Trace flags
 constexpr uint8_t kSampledFlag = 0x01;
 } // namespace Constants
-} // namespace TraceContext
 
-namespace Baggage {
 /**
- * W3C Baggage specification constants.
- * See https://www.w3.org/TR/baggage/
+ * W3C Trace Context constants for header names as defined in:
+ * https://www.w3.org/TR/trace-context/
  */
-namespace Constants {
-// Header names as defined in W3C specification
-constexpr absl::string_view kBaggageHeader = "baggage";
+class TraceContextConstantValues {
+public:
+  const Tracing::TraceContextHandler TRACE_PARENT{std::string(Constants::kTraceparentHeader)};
+  const Tracing::TraceContextHandler TRACE_STATE{std::string(Constants::kTracestateHeader)};
+};
 
-// W3C Baggage specification limits
-constexpr size_t kMaxBaggageSize = 8192;   // 8KB total size limit
-constexpr size_t kMaxBaggageMembers = 180; // Practical limit to prevent abuse
-constexpr size_t kMaxKeyLength = 256;
-constexpr size_t kMaxValueLength = 4096;
-} // namespace Constants
-} // namespace Baggage
+using TraceContextConstants = ConstSingleton<TraceContextConstantValues>;
 
-// Legacy namespace for backward compatibility
-namespace Constants {
-// W3C traceparent header format: version-trace-id-parent-id-trace-flags
-constexpr int kTraceparentHeaderSize = TraceContext::Constants::kTraceparentHeaderSize;
-constexpr int kVersionSize = TraceContext::Constants::kVersionSize;
-constexpr int kTraceIdSize = TraceContext::Constants::kTraceIdSize;
-constexpr int kParentIdSize = TraceContext::Constants::kParentIdSize;
-constexpr int kTraceFlagsSize = TraceContext::Constants::kTraceFlagsSize;
-
-// Header names as defined in W3C specification
-constexpr absl::string_view kTraceparentHeader = TraceContext::Constants::kTraceparentHeader;
-constexpr absl::string_view kTracestateHeader = TraceContext::Constants::kTracestateHeader;
-constexpr absl::string_view kBaggageHeader = Baggage::Constants::kBaggageHeader;
-
-// Current version
-constexpr absl::string_view kCurrentVersion = TraceContext::Constants::kCurrentVersion;
-
-// Trace flags
-constexpr uint8_t kSampledFlag = TraceContext::Constants::kSampledFlag;
-
-// W3C Baggage specification limits
-constexpr size_t kMaxBaggageSize = Baggage::Constants::kMaxBaggageSize;
-constexpr size_t kMaxBaggageMembers = Baggage::Constants::kMaxBaggageMembers;
-constexpr size_t kMaxKeyLength = Baggage::Constants::kMaxKeyLength;
-constexpr size_t kMaxValueLength = Baggage::Constants::kMaxValueLength;
-} // namespace Constants
-
+} // namespace TraceContext
 } // namespace W3c
 } // namespace Propagators
 } // namespace Extensions

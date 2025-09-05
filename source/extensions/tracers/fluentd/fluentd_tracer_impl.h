@@ -12,7 +12,7 @@
 #include "source/common/http/header_map_impl.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/extensions/common/fluentd/fluentd_base.h"
-#include "source/extensions/propagators/w3c/propagator.h"
+#include "source/extensions/propagators/w3c/trace_context.h"
 #include "source/extensions/tracers/common/factory_base.h"
 
 #include "absl/strings/string_view.h"
