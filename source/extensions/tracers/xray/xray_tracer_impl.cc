@@ -3,7 +3,7 @@
 #include "source/common/common/macros.h"
 #include "source/common/common/utility.h"
 #include "source/common/http/headers.h"
-#include "source/extensions/propagators/xray/propagator.h"
+#include "source/extensions/propagators/xray/trace_context.h"
 #include "source/extensions/tracers/xray/localized_sampling.h"
 #include "source/extensions/tracers/xray/tracer.h"
 #include "source/extensions/tracers/xray/xray_configuration.h"

@@ -16,13 +16,3 @@ envoy_cc_library(
         "//source/common/tracing:trace_context_lib",
     ],
 )
-
-envoy_cc_library(
-    name = "propagator_lib",
-    hdrs = ["propagator.h"],
-    deps = [
-        ":trace_context_lib",
-        "//source/common/singleton:const_singleton",
-        "//source/common/tracing:trace_context_lib",
-    ],
-)
