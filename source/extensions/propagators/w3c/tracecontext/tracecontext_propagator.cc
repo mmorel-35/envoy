@@ -24,6 +24,22 @@ bool isAllZeros(absl::string_view input) {
   return std::all_of(input.begin(), input.end(), [](const char& c) { return c == '0'; });
 }
 
+// Validate traceparent component sizes according to W3C specification
+bool hasValidComponentSizes(absl::string_view version, absl::string_view trace_id,
+                           absl::string_view span_id, absl::string_view trace_flags) {
+  return version.size() == Constants::kVersionSize && 
+         trace_id.size() == Constants::kTraceIdSize &&
+         span_id.size() == Constants::kParentIdSize && 
+         trace_flags.size() == Constants::kTraceFlagsSize;
+}
+
+// Validate that all components are valid hexadecimal
+bool hasValidHexComponents(absl::string_view version, absl::string_view trace_id,
+                          absl::string_view span_id, absl::string_view trace_flags) {
+  return isValidHex(version) && isValidHex(trace_id) && 
+         isValidHex(span_id) && isValidHex(trace_flags);
+}
+
 } // namespace
 
 TraceContextPropagator::TraceContextPropagator() = default;
@@ -47,7 +63,9 @@ absl::StatusOr<TraceParentInfo> TraceContextPropagator::parseTraceParent(
     absl::string_view traceparent_value) const {
   
   if (traceparent_value.size() != Constants::kTraceparentHeaderSize) {
-    return absl::InvalidArgumentError("Invalid traceparent header length");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid traceparent header length: expected ", 
+                     Constants::kTraceparentHeaderSize, ", got ", traceparent_value.size()));
   }
 
   // Split into components: version-trace-id-parent-id-trace-flags
@@ -55,7 +73,9 @@ absl::StatusOr<TraceParentInfo> TraceContextPropagator::parseTraceParent(
       absl::StrSplit(traceparent_value, '-', absl::SkipEmpty());
   
   if (components.size() != 4) {
-    return absl::InvalidArgumentError("Invalid traceparent hyphenation");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid traceparent format: expected 4 hyphen-separated components, got ", 
+                     components.size()));
   }
 
   absl::string_view version = components[0];
@@ -64,25 +84,24 @@ absl::StatusOr<TraceParentInfo> TraceContextPropagator::parseTraceParent(
   absl::string_view trace_flags = components[3];
 
   // Validate field sizes
-  if (version.size() != Constants::kVersionSize || 
-      trace_id.size() != Constants::kTraceIdSize ||
-      span_id.size() != Constants::kParentIdSize || 
-      trace_flags.size() != Constants::kTraceFlagsSize) {
-    return absl::InvalidArgumentError("Invalid traceparent field sizes");
+  if (!hasValidComponentSizes(version, trace_id, span_id, trace_flags)) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid traceparent field sizes: version=", version.size(),
+                     ", trace_id=", trace_id.size(), ", span_id=", span_id.size(),
+                     ", trace_flags=", trace_flags.size()));
   }
 
   // Validate hex encoding
-  if (!isValidHex(version) || !isValidHex(trace_id) || 
-      !isValidHex(span_id) || !isValidHex(trace_flags)) {
-    return absl::InvalidArgumentError("Invalid header hex");
+  if (!hasValidHexComponents(version, trace_id, span_id, trace_flags)) {
+    return absl::InvalidArgumentError("Invalid traceparent hex encoding");
   }
 
   // Validate IDs are not all zeros (per W3C spec)
   if (isAllZeros(trace_id)) {
-    return absl::InvalidArgumentError("Invalid trace id - cannot be all zeros");
+    return absl::InvalidArgumentError("Invalid trace_id: cannot be all zeros per W3C specification");
   }
   if (isAllZeros(span_id)) {
-    return absl::InvalidArgumentError("Invalid span id - cannot be all zeros");
+    return absl::InvalidArgumentError("Invalid span_id: cannot be all zeros per W3C specification");
   }
 
   // Parse trace flags for sampled bit
@@ -104,6 +123,17 @@ void TraceContextPropagator::injectTraceParent(
     absl::string_view span_id,
     bool sampled) const {
   
+  // Input validation
+  if (version.size() != Constants::kVersionSize || !isValidHex(version)) {
+    return; // Silently ignore invalid input
+  }
+  if (trace_id.size() != Constants::kTraceIdSize || !isValidHex(trace_id) || isAllZeros(trace_id)) {
+    return; // Silently ignore invalid input
+  }
+  if (span_id.size() != Constants::kParentIdSize || !isValidHex(span_id) || isAllZeros(span_id)) {
+    return; // Silently ignore invalid input
+  }
+
   std::vector<uint8_t> trace_flags_vec{sampled ? Constants::kSampledFlag : uint8_t(0)};
   std::string trace_flags_hex = Hex::encode(trace_flags_vec);
   

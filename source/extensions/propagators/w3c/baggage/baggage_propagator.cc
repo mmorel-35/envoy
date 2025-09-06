@@ -16,25 +16,29 @@ namespace Baggage {
 namespace {
 
 // Baggage validation helpers
+bool isValidKeyCharacter(char c) {
+  // Per W3C spec: key should be printable ASCII excluding special characters
+  return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*';
+}
+
+bool isValidValueCharacter(char c) {
+  // Value should be URL-encoded safe characters
+  return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*' || 
+         c == '%' || c == '!' || c == '~' || c == '\'' || c == '(' || c == ')';
+}
+
 bool isValidKey(absl::string_view key) {
   if (key.empty() || key.size() > Constants::kMaxKeyLength) {
     return false;
   }
-  // Key should not contain special characters per W3C spec
-  return std::all_of(key.begin(), key.end(), [](char c) {
-    return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*';
-  });
+  return std::all_of(key.begin(), key.end(), isValidKeyCharacter);
 }
 
 bool isValidValue(absl::string_view value) {
   if (value.size() > Constants::kMaxValueLength) {
     return false;
   }
-  // Value should be URL-encoded safe characters
-  return std::all_of(value.begin(), value.end(), [](char c) {
-    return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*' || 
-           c == '%' || c == '!' || c == '~' || c == '\'' || c == '(' || c == ')';
-  });
+  return std::all_of(value.begin(), value.end(), isValidValueCharacter);
 }
 
 // Parse a single baggage member: key=value;property1;property2
@@ -48,17 +52,22 @@ absl::StatusOr<BaggageMember> parseBaggageMember(absl::string_view member_str) {
   // Parse key=value
   std::vector<absl::string_view> key_value = absl::StrSplit(parts[0], '=', absl::SkipEmpty());
   if (key_value.size() != 2) {
-    return absl::InvalidArgumentError("Invalid baggage key=value format");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid baggage member format: expected 'key=value', got '", parts[0], "'"));
   }
 
   absl::string_view key = absl::StripAsciiWhitespace(key_value[0]);
   absl::string_view value = absl::StripAsciiWhitespace(key_value[1]);
 
   if (!isValidKey(key)) {
-    return absl::InvalidArgumentError("Invalid baggage key");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid baggage key '", key, "': must be non-empty, max ", 
+                     Constants::kMaxKeyLength, " chars, and contain only alphanumeric, '_', '-', '.', '*'"));
   }
   if (!isValidValue(value)) {
-    return absl::InvalidArgumentError("Invalid baggage value");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Invalid baggage value for key '", key, "': max ", 
+                     Constants::kMaxValueLength, " chars and contain only URL-safe characters"));
   }
 
   BaggageMember member;
@@ -100,14 +109,18 @@ absl::StatusOr<BaggageMap> BaggagePropagator::parseBaggage(
 
   // Check total size limit
   if (baggage_value.size() > Constants::kMaxBaggageSize) {
-    return absl::InvalidArgumentError("Baggage exceeds maximum size limit");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Baggage exceeds maximum size limit: ", baggage_value.size(), 
+                     " bytes > ", Constants::kMaxBaggageSize, " bytes"));
   }
 
   // Split on comma to get individual members
   std::vector<absl::string_view> members = absl::StrSplit(baggage_value, ',');
   
   if (members.size() > Constants::kMaxBaggageMembers) {
-    return absl::InvalidArgumentError("Baggage exceeds maximum member count");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Baggage exceeds maximum member count: ", members.size(), 
+                     " members > ", Constants::kMaxBaggageMembers, " members"));
   }
 
   for (absl::string_view member_str : members) {
