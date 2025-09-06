@@ -4,7 +4,6 @@
 
 #include "source/common/buffer/buffer_impl.h"
 #include "source/common/common/backoff_strategy.h"
-#include "source/common/common/hex.h"
 #include "source/common/tracing/trace_context_impl.h"
 
 #include "msgpack.hpp"
