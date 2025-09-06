@@ -22,7 +22,7 @@ namespace OpenTelemetry {
 
 using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
-using TraceContextPropagator = Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
+using TraceContextPropagator = Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 namespace {
 
@@ -84,19 +84,18 @@ void Span::finishSpan() {
 void Span::setOperation(absl::string_view operation) { span_.set_name(operation); };
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
-  // Use the W3C TraceContext propagator for proper W3C header injection
-  TraceContextPropagator propagator;
-  
+  // Use the class-level W3C TraceContext propagator for proper W3C header injection
+
   // Convert binary IDs to hex strings
   std::string trace_id_hex = absl::BytesToHexString(span_.trace_id());
   std::string span_id_hex = absl::BytesToHexString(span_.span_id());
-  
-  // Inject traceparent using the propagator
-  propagator.injectTraceParent(trace_context, "00", trace_id_hex, span_id_hex, sampled());
-  
+
+  // Inject traceparent using the class propagator
+  propagator_.injectTraceParent(trace_context, "00", trace_id_hex, span_id_hex, sampled());
+
   // Inject tracestate if present
   if (!span_.trace_state().empty()) {
-    propagator.injectTraceState(trace_context, span_.trace_state());
+    propagator_.injectTraceState(trace_context, span_.trace_state());
   }
 }
 

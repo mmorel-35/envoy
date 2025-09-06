@@ -25,6 +25,7 @@ namespace Fluentd {
 using namespace Envoy::Extensions::Common::Fluentd;
 using FluentdConfig = envoy::extensions::tracers::fluentd::v3::FluentdConfig;
 using FluentdConfigSharedPtr = std::shared_ptr<FluentdConfig>;
+using TraceContextPropagator = Propagators::W3c::TraceContext::TraceContextPropagator;
 
 // Span context definitions
 class SpanContext {
@@ -64,7 +65,7 @@ public:
 
 private:
   const Tracing::TraceContext& trace_context_;
-  Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator propagator_;
+  TraceContextPropagator propagator_;
 };
 
 // FluentdTracerImpl implements a FluentdTracer, handling tracing and buffer/connection logic

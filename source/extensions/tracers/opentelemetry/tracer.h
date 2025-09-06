@@ -10,6 +10,7 @@
 #include "envoy/tracing/trace_driver.h"
 
 #include "source/common/common/logger.h"
+#include "source/extensions/propagators/w3c/tracecontext/tracecontext_propagator.h"
 #include "source/extensions/tracers/common/factory_base.h"
 #include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
@@ -22,6 +23,8 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
+
+using TraceContextPropagator = Propagators::W3c::TraceContext::TraceContextPropagator;
 
 #define OPENTELEMETRY_TRACER_STATS(COUNTER)                                                        \
   COUNTER(spans_sent)                                                                              \
@@ -178,6 +181,7 @@ private:
   Envoy::TimeSource& time_source_;
   bool sampled_;
   const bool use_local_decision_{false};
+  TraceContextPropagator propagator_;
 };
 
 using TracerPtr = std::unique_ptr<Tracer>;

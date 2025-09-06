@@ -14,8 +14,7 @@ namespace Tracers {
 namespace Fluentd {
 
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
-using TraceContextPropagator =
-    Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
+using TraceContextPropagator = Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context)
     : trace_context_(trace_context) {}

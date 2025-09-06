@@ -14,6 +14,8 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+using TraceContextPropagator = Propagators::W3c::TraceContext::TraceContextPropagator;
+
 /**
  * This class is used to SpanContext extracted from the HTTP traceparent header
  * See https://www.w3.org/TR/trace-context/#traceparent-header.
@@ -27,7 +29,7 @@ public:
 
 private:
   const Tracing::TraceContext& trace_context_;
-  Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator propagator_;
+  TraceContextPropagator propagator_;
 };
 
 } // namespace OpenTelemetry
