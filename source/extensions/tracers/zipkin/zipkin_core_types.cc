@@ -19,6 +19,7 @@ namespace Zipkin {
 
 using B3Constants = Envoy::Extensions::Propagators::B3::B3Constants;
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
+using TraceContextPropagator = Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 Endpoint::Endpoint(const Endpoint& ep) {
   service_name_ = ep.serviceName();
@@ -251,8 +252,7 @@ SpanContext Span::spanContext() const {
 }
 
 void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
-  // Convert Zipkin span context to W3C traceparent format
-  // W3C traceparent format: 00-{trace-id}-{span-id}-{trace-flags}
+  // Use the class-level W3C TraceContext propagator for proper W3C header generation
 
   // Construct the 128-bit trace ID (32 hex chars)
   std::string trace_id_str;
@@ -265,12 +265,11 @@ void Span::injectW3CContext(Tracing::TraceContext& trace_context) {
     trace_id_str = absl::StrCat("0000000000000000", fmt::format("{:016x}", trace_id_));
   }
 
-  // Construct the traceparent header value in W3C format: version-traceid-spanid-flags
-  std::string traceparent_value =
-      fmt::format("00-{}-{:016x}-{}", trace_id_str, id_, sampled() ? "01" : "00");
+  // Format span ID as 16 hex chars
+  std::string span_id_str = fmt::format("{:016x}", id_);
 
-  // Set the W3C traceparent header
-  W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_value);
+  // Use the class propagator to inject proper W3C traceparent header
+  propagator_.injectTraceParent(trace_context, "00", trace_id_str, span_id_str, sampled());
 
   // For now, we don't set tracestate as it's optional and we don't have vendor-specific data
 }

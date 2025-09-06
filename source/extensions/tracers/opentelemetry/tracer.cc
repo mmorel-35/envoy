@@ -6,7 +6,6 @@
 #include "envoy/config/trace/v3/opentelemetry.pb.h"
 
 #include "source/common/common/empty_string.h"
-#include "source/common/common/hex.h"
 #include "source/common/tracing/common_values.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/common/version/version.h"
@@ -21,10 +20,9 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-constexpr absl::string_view kDefaultVersion = "00";
-
 using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
+using TraceContextPropagator = Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 namespace {
 
@@ -86,16 +84,19 @@ void Span::finishSpan() {
 void Span::setOperation(absl::string_view operation) { span_.set_name(operation); };
 
 void Span::injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) {
+  // Use the class-level W3C TraceContext propagator for proper W3C header injection
+
+  // Convert binary IDs to hex strings
   std::string trace_id_hex = absl::BytesToHexString(span_.trace_id());
   std::string span_id_hex = absl::BytesToHexString(span_.span_id());
-  std::vector<uint8_t> trace_flags_vec{sampled()};
-  std::string trace_flags_hex = Hex::encode(trace_flags_vec);
-  std::string traceparent_header_value =
-      absl::StrCat(kDefaultVersion, "-", trace_id_hex, "-", span_id_hex, "-", trace_flags_hex);
-  // Set the traceparent in the trace_context.
-  W3cConstants::get().TRACE_PARENT.setRefKey(trace_context, traceparent_header_value);
-  // Also set the tracestate.
-  W3cConstants::get().TRACE_STATE.setRefKey(trace_context, span_.trace_state());
+
+  // Inject traceparent using the class propagator
+  propagator_.injectTraceParent(trace_context, "00", trace_id_hex, span_id_hex, sampled());
+
+  // Inject tracestate if present
+  if (!span_.trace_state().empty()) {
+    propagator_.injectTraceState(trace_context, span_.trace_state());
+  }
 }
 
 void Span::setAttribute(absl::string_view name, const OTelAttribute& attribute_value) {

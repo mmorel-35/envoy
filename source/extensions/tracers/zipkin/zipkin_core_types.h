@@ -9,6 +9,7 @@
 #include "source/common/common/assert.h"
 #include "source/common/common/hex.h"
 #include "source/common/protobuf/utility.h"
+#include "source/extensions/propagators/w3c/tracecontext/tracecontext_propagator.h"
 #include "source/extensions/tracers/zipkin/tracer_interface.h"
 #include "source/extensions/tracers/zipkin/util.h"
 
@@ -21,6 +22,8 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace Zipkin {
+
+using TraceContextPropagator = Propagators::W3c::TraceContext::TraceContextPropagator;
 
 /**
  * Base class to be inherited by all classes that represent Zipkin-related concepts, namely:
@@ -593,6 +596,7 @@ private:
   TimeSource& time_source_;
   TracerInterface& tracer_;
   bool use_local_decision_{false};
+  TraceContextPropagator propagator_;
 };
 
 using SpanPtr = std::unique_ptr<Span>;
