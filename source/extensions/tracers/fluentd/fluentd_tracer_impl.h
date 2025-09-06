@@ -64,6 +64,7 @@ public:
 
 private:
   const Tracing::TraceContext& trace_context_;
+  Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator propagator_;
 };
 
 // FluentdTracerImpl implements a FluentdTracer, handling tracing and buffer/connection logic

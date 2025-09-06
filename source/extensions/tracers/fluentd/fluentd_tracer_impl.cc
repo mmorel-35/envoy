@@ -14,7 +14,8 @@ namespace Tracers {
 namespace Fluentd {
 
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
-using TraceContextPropagator = Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
+using TraceContextPropagator =
+    Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context)
     : trace_context_(trace_context) {}
@@ -22,32 +23,29 @@ SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context)
 SpanContextExtractor::~SpanContextExtractor() = default;
 
 bool SpanContextExtractor::propagationHeaderPresent() {
-  TraceContextPropagator propagator;
-  return propagator.hasTraceParent(trace_context_);
+  return propagator_.hasTraceParent(trace_context_);
 }
 
 absl::StatusOr<SpanContext> SpanContextExtractor::extractSpanContext() {
-  TraceContextPropagator propagator;
-  
   // Extract traceparent using the W3C propagator
-  auto traceparent = propagator.extractTraceParent(trace_context_);
+  auto traceparent = propagator_.extractTraceParent(trace_context_);
   if (!traceparent.has_value()) {
     return absl::InvalidArgumentError("No traceparent header found");
   }
 
   // Parse using the W3C propagator
-  auto parsed = propagator.parseTraceParent(traceparent.value());
+  auto parsed = propagator_.parseTraceParent(traceparent.value());
   if (!parsed.ok()) {
     return parsed.status();
   }
 
   // Extract tracestate if present
-  auto tracestate = propagator.extractTraceState(trace_context_);
+  auto tracestate = propagator_.extractTraceState(trace_context_);
   std::string tracestate_str = tracestate.value_or("");
 
   // Create SpanContext from parsed data
-  SpanContext span_context(parsed->version, parsed->trace_id, parsed->span_id, 
-                          parsed->sampled, tracestate_str);
+  SpanContext span_context(parsed->version, parsed->trace_id, parsed->span_id, parsed->sampled,
+                           tracestate_str);
   return span_context;
 }
 
@@ -176,15 +174,14 @@ void Span::finishSpan() {
 // Inject the span context into the trace context
 void Span::injectContext(Tracing::TraceContext& trace_context,
                          const Tracing::UpstreamContext& /*upstream*/) {
-  
+
   // Use the W3C TraceContext propagator for proper W3C header injection
   TraceContextPropagator propagator;
-  
+
   // Inject traceparent using the propagator
-  propagator.injectTraceParent(trace_context, span_context_.version(),
-                              span_context_.traceId(), span_context_.spanId(),
-                              span_context_.sampled());
-  
+  propagator.injectTraceParent(trace_context, span_context_.version(), span_context_.traceId(),
+                               span_context_.spanId(), span_context_.sampled());
+
   // Inject tracestate if present
   if (!span_context_.tracestate().empty()) {
     propagator.injectTraceState(trace_context, span_context_.tracestate());

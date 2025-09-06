@@ -205,21 +205,7 @@ This propagator integrates with Envoy's tracing infrastructure:
 3. **Status Handling**: Returns `absl::StatusOr` for robust error handling
 4. **Streaming**: Supports both map-based and string-based operations
 
-## Testing
-
-Comprehensive test coverage includes:
-- Valid/invalid baggage parsing
-- Size and member limit enforcement
-- Individual value get/set operations
-- Properties handling
-- Round-trip serialization
-- UTF-8 and URL encoding scenarios
-- Performance benchmarks
-
-Run tests with:
-```bash
-bazel test //test/extensions/propagators/w3c/baggage:baggage_propagator_test
-```
+For comprehensive test execution details, see the [main W3C README](../README.md#testing).
 
 ## Security Considerations
 
@@ -232,5 +218,3 @@ bazel test //test/extensions/propagators/w3c/baggage:baggage_propagator_test
 
 - [W3C Baggage Specification](https://www.w3.org/TR/baggage/)
 - [W3C Baggage GitHub Repository](https://github.com/w3c/baggage)
-- [OpenTelemetry Baggage](https://opentelemetry.io/docs/specs/otel/baggage/api/)
-- [HTTP State Management Mechanism](https://tools.ietf.org/html/rfc6265) (related concepts)

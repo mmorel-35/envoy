@@ -27,6 +27,7 @@ public:
 
 private:
   const Tracing::TraceContext& trace_context_;
+  Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator propagator_;
 };
 
 } // namespace OpenTelemetry

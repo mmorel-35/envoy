@@ -151,13 +151,9 @@ Comprehensive test coverage includes:
 - W3C specification compliance
 - Performance benchmarks
 
-Run tests with:
-```bash
-bazel test //test/extensions/propagators/w3c/tracecontext:tracecontext_propagator_test
-```
+For test execution, see the [main W3C README](../README.md#testing).
 
 ## Standards References
 
 - [W3C Trace Context Specification](https://www.w3.org/TR/trace-context/)
 - [W3C Trace Context GitHub Repository](https://github.com/w3c/trace-context)
-- [OpenTelemetry Trace Context](https://opentelemetry.io/docs/specs/otel/context/api-propagators/)

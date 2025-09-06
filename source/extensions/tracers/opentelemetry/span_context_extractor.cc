@@ -12,7 +12,8 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 using W3cConstants = Envoy::Extensions::Propagators::W3c::W3cConstants;
-using TraceContextPropagator = Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
+using TraceContextPropagator =
+    Envoy::Extensions::Propagators::W3c::TraceContext::TraceContextPropagator;
 
 SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context)
     : trace_context_(trace_context) {}
@@ -20,32 +21,29 @@ SpanContextExtractor::SpanContextExtractor(Tracing::TraceContext& trace_context)
 SpanContextExtractor::~SpanContextExtractor() = default;
 
 bool SpanContextExtractor::propagationHeaderPresent() {
-  TraceContextPropagator propagator;
-  return propagator.hasTraceParent(trace_context_);
+  return propagator_.hasTraceParent(trace_context_);
 }
 
 absl::StatusOr<SpanContext> SpanContextExtractor::extractSpanContext() {
-  TraceContextPropagator propagator;
-  
   // Extract traceparent using the W3C propagator
-  auto traceparent = propagator.extractTraceParent(trace_context_);
+  auto traceparent = propagator_.extractTraceParent(trace_context_);
   if (!traceparent.has_value()) {
     return absl::InvalidArgumentError("No traceparent header found");
   }
 
   // Parse using the W3C propagator
-  auto parsed = propagator.parseTraceParent(traceparent.value());
+  auto parsed = propagator_.parseTraceParent(traceparent.value());
   if (!parsed.ok()) {
     return parsed.status();
   }
 
   // Extract tracestate if present
-  auto tracestate = propagator.extractTraceState(trace_context_);
+  auto tracestate = propagator_.extractTraceState(trace_context_);
   std::string tracestate_str = tracestate.value_or("");
 
   // Create SpanContext from parsed data
-  SpanContext parent_context(parsed->version, parsed->trace_id, parsed->span_id, 
-                            parsed->sampled, tracestate_str);
+  SpanContext parent_context(parsed->version, parsed->trace_id, parsed->span_id, parsed->sampled,
+                             tracestate_str);
   return parent_context;
 }
 }
