@@ -133,8 +133,7 @@ public:
    * @param key the baggage key to set
    * @param value the baggage value to set
    */
-  void setBaggageValue(Tracing::TraceContext& trace_context,
-                       absl::string_view key,
+  void setBaggageValue(Tracing::TraceContext& trace_context, absl::string_view key,
                        absl::string_view value) const;
 };
 

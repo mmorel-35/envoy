@@ -36,12 +36,12 @@ propagator.injectTraceParent(outgoing_headers, "00", "4bf92f3577b34da6a3ce929d0e
                              "b7ad6b7169203331", true);
 ```
 
-    ## #Baggage Propagator
+### Baggage Propagator
 
 ```cpp
 #include "source/extensions/propagators/w3c/baggage/baggage_propagator.h"
 
-    using BaggagePropagator = Extensions::Propagators::W3c::Baggage::BaggagePropagator;
+using BaggagePropagator = Extensions::Propagators::W3c::Baggage::BaggagePropagator;
 
 // Create propagator instance
 BaggagePropagator propagator;
@@ -68,14 +68,13 @@ propagator.setBaggageValue(outgoing_headers, "userId", "alice");
 propagator.setBaggageValue(outgoing_headers, "requestId", "req-12345");
 ```
 
-    ##Tracer Integration Patterns
+## Tracer Integration Patterns
 
-    ## #Using with OpenTelemetry
+### Using with OpenTelemetry
 
 ```cpp
-    // In OpenTelemetry tracer implementation
-    void
-    injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) override {
+// In OpenTelemetry tracer implementation
+void injectContext(Tracing::TraceContext& trace_context, const Tracing::UpstreamContext&) override {
 
   // Use W3C propagators for standardized header injection
   TraceContextPropagator trace_propagator;
@@ -96,10 +95,10 @@ propagator.setBaggageValue(outgoing_headers, "requestId", "req-12345");
 }
 ```
 
-    ## #Class -
-    Level Propagator Usage
+### Class-Level Propagator Usage
 
-```cpp class CustomTracer {
+```cpp
+class CustomTracer {
 private:
   TraceContextPropagator trace_propagator_;
   BaggagePropagator baggage_propagator_;
@@ -143,11 +142,12 @@ public:
 };
 ```
 
-    ##Advanced Usage
+## Advanced Usage
 
-    ## #Baggage with Properties
+### Baggage with Properties
 
-```cpp BaggagePropagator propagator;
+```cpp
+BaggagePropagator propagator;
 
 // Create baggage with properties
 BaggageMap baggage_map;
@@ -163,9 +163,10 @@ propagator.injectBaggage(context, baggage_map);
 // Results in: "baggage: userId=alice;confidential;pii"
 ```
 
-    ## #Tracestate Management
+### Tracestate Management
 
-```cpp TraceContextPropagator propagator;
+```cpp
+TraceContextPropagator propagator;
 
 // Extract existing tracestate
 auto existing_tracestate = propagator.extractTraceState(context);
@@ -180,9 +181,10 @@ if (existing_tracestate.has_value()) {
 propagator.injectTraceState(context, new_tracestate);
 ```
 
-    ## #Error Handling
+### Error Handling
 
-```cpp TraceContextPropagator propagator;
+```cpp
+TraceContextPropagator propagator;
 
 auto traceparent = propagator.extractTraceParent(context);
 if (traceparent.has_value()) {
@@ -202,18 +204,17 @@ if (traceparent.has_value()) {
 }
 ```
 
-    ##Performance Tips
+## Performance Tips
 
-    1. *
-    *Reuse Propagator Instances** : Propagators are stateless and
-                                        can be reused as class members 2. *
-    *Check Presence First** : Use `hasTraceParent()` and `hasBaggage()` before extraction 3. *
-    *Validate Early** : Parse headers early to fail fast on invalid input 4. *
-    *Limit Baggage Size** : Be mindful of the 8KB baggage size limit
+1. **Reuse Propagator Instances**: Propagators are stateless and can be reused as class members
+2. **Check Presence First**: Use `hasTraceParent()` and `hasBaggage()` before extraction
+3. **Validate Early**: Parse headers early to fail fast on invalid input
+4. **Limit Baggage Size**: Be mindful of the 8KB baggage size limit
 
-                            ##Testing Examples
+## Testing Examples
 
-```cpp TEST(MyTracerTest, W3cPropagation) {
+```cpp
+TEST(MyTracerTest, W3cPropagation) {
   TraceContextPropagator trace_propagator;
   BaggagePropagator baggage_propagator;
 

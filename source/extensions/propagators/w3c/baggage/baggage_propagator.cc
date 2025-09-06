@@ -23,8 +23,8 @@ bool isValidKeyCharacter(char c) {
 
 bool isValidValueCharacter(char c) {
   // Value should be URL-encoded safe characters
-  return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*' || 
-         c == '%' || c == '!' || c == '~' || c == '\'' || c == '(' || c == ')';
+  return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == '*' || c == '%' || c == '!' ||
+         c == '~' || c == '\'' || c == '(' || c == ')';
 }
 
 bool isValidKey(absl::string_view key) {
@@ -60,14 +60,14 @@ absl::StatusOr<BaggageMember> parseBaggageMember(absl::string_view member_str) {
   absl::string_view value = absl::StripAsciiWhitespace(key_value[1]);
 
   if (!isValidKey(key)) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Invalid baggage key '", key, "': must be non-empty, max ", 
-                     Constants::kMaxKeyLength, " chars, and contain only alphanumeric, '_', '-', '.', '*'"));
+    return absl::InvalidArgumentError(absl::StrCat(
+        "Invalid baggage key '", key, "': must be non-empty, max ", Constants::kMaxKeyLength,
+        " chars, and contain only alphanumeric, '_', '-', '.', '*'"));
   }
   if (!isValidValue(value)) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Invalid baggage value for key '", key, "': max ", 
-                     Constants::kMaxValueLength, " chars and contain only URL-safe characters"));
+    return absl::InvalidArgumentError(absl::StrCat("Invalid baggage value for key '", key,
+                                                   "': max ", Constants::kMaxValueLength,
+                                                   " chars and contain only URL-safe characters"));
   }
 
   BaggageMember member;
@@ -89,8 +89,8 @@ absl::StatusOr<BaggageMember> parseBaggageMember(absl::string_view member_str) {
 
 BaggagePropagator::BaggagePropagator() = default;
 
-absl::optional<std::string> BaggagePropagator::extractBaggage(
-    const Tracing::TraceContext& trace_context) const {
+absl::optional<std::string>
+BaggagePropagator::extractBaggage(const Tracing::TraceContext& trace_context) const {
   auto baggage_values = BaggageConstants::get().BAGGAGE.getAll(trace_context);
   if (baggage_values.empty()) {
     return absl::nullopt;
@@ -98,11 +98,10 @@ absl::optional<std::string> BaggagePropagator::extractBaggage(
   return absl::StrJoin(baggage_values, ",");
 }
 
-absl::StatusOr<BaggageMap> BaggagePropagator::parseBaggage(
-    absl::string_view baggage_value) const {
-  
+absl::StatusOr<BaggageMap> BaggagePropagator::parseBaggage(absl::string_view baggage_value) const {
+
   BaggageMap baggage_map;
-  
+
   if (baggage_value.empty()) {
     return baggage_map;
   }
@@ -110,17 +109,17 @@ absl::StatusOr<BaggageMap> BaggagePropagator::parseBaggage(
   // Check total size limit
   if (baggage_value.size() > Constants::kMaxBaggageSize) {
     return absl::InvalidArgumentError(
-        absl::StrCat("Baggage exceeds maximum size limit: ", baggage_value.size(), 
-                     " bytes > ", Constants::kMaxBaggageSize, " bytes"));
+        absl::StrCat("Baggage exceeds maximum size limit: ", baggage_value.size(), " bytes > ",
+                     Constants::kMaxBaggageSize, " bytes"));
   }
 
   // Split on comma to get individual members
   std::vector<absl::string_view> members = absl::StrSplit(baggage_value, ',');
-  
+
   if (members.size() > Constants::kMaxBaggageMembers) {
     return absl::InvalidArgumentError(
-        absl::StrCat("Baggage exceeds maximum member count: ", members.size(), 
-                     " members > ", Constants::kMaxBaggageMembers, " members"));
+        absl::StrCat("Baggage exceeds maximum member count: ", members.size(), " members > ",
+                     Constants::kMaxBaggageMembers, " members"));
   }
 
   for (absl::string_view member_str : members) {
@@ -142,31 +141,30 @@ absl::StatusOr<BaggageMap> BaggagePropagator::parseBaggage(
 
 std::string BaggagePropagator::serializeBaggage(const BaggageMap& baggage_map) const {
   std::vector<std::string> members;
-  
+
   for (const auto& [key, member] : baggage_map) {
     std::string member_str = absl::StrCat(key, "=", member.value);
-    
+
     // Add properties if any
     for (const auto& property : member.properties) {
       absl::StrAppend(&member_str, ";", property);
     }
-    
+
     members.push_back(member_str);
   }
 
   return absl::StrJoin(members, ",");
 }
 
-void BaggagePropagator::injectBaggage(
-    Tracing::TraceContext& trace_context,
-    const BaggageMap& baggage_map) const {
-  
+void BaggagePropagator::injectBaggage(Tracing::TraceContext& trace_context,
+                                      const BaggageMap& baggage_map) const {
+
   if (baggage_map.empty()) {
     return;
   }
 
   std::string baggage_value = serializeBaggage(baggage_map);
-  
+
   // Validate size before injection
   if (baggage_value.size() > Constants::kMaxBaggageSize) {
     // Silently truncate or skip oversized baggage rather than error
@@ -176,10 +174,9 @@ void BaggagePropagator::injectBaggage(
   BaggageConstants::get().BAGGAGE.setRefKey(trace_context, baggage_value);
 }
 
-void BaggagePropagator::injectBaggage(
-    Tracing::TraceContext& trace_context,
-    absl::string_view baggage_value) const {
-  
+void BaggagePropagator::injectBaggage(Tracing::TraceContext& trace_context,
+                                      absl::string_view baggage_value) const {
+
   if (!baggage_value.empty() && baggage_value.size() <= Constants::kMaxBaggageSize) {
     BaggageConstants::get().BAGGAGE.setRefKey(trace_context, baggage_value);
   }
@@ -193,10 +190,10 @@ bool BaggagePropagator::hasBaggage(const Tracing::TraceContext& trace_context) c
   return BaggageConstants::get().BAGGAGE.get(trace_context).has_value();
 }
 
-absl::StatusOr<std::string> BaggagePropagator::getBaggageValue(
-    const Tracing::TraceContext& trace_context,
-    absl::string_view key) const {
-  
+absl::StatusOr<std::string>
+BaggagePropagator::getBaggageValue(const Tracing::TraceContext& trace_context,
+                                   absl::string_view key) const {
+
   auto baggage_str = extractBaggage(trace_context);
   if (!baggage_str.has_value()) {
     return absl::NotFoundError("No baggage found");
@@ -215,11 +212,9 @@ absl::StatusOr<std::string> BaggagePropagator::getBaggageValue(
   return it->second.value;
 }
 
-void BaggagePropagator::setBaggageValue(
-    Tracing::TraceContext& trace_context,
-    absl::string_view key,
-    absl::string_view value) const {
-  
+void BaggagePropagator::setBaggageValue(Tracing::TraceContext& trace_context, absl::string_view key,
+                                        absl::string_view value) const {
+
   if (!isValidKey(key) || !isValidValue(value)) {
     return; // Silently ignore invalid keys/values
   }
@@ -227,7 +222,7 @@ void BaggagePropagator::setBaggageValue(
   // Get existing baggage
   auto existing_baggage = extractBaggage(trace_context);
   BaggageMap baggage_map;
-  
+
   if (existing_baggage.has_value()) {
     auto parsed = parseBaggage(*existing_baggage);
     if (parsed.ok()) {

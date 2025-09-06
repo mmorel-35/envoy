@@ -99,22 +99,18 @@ public:
    * @param trace_context the trace context to inject into
    * @param version the W3C version (typically "00")
    * @param trace_id the trace ID (32 hex characters)
-   * @param span_id the span ID (16 hex characters) 
+   * @param span_id the span ID (16 hex characters)
    * @param sampled whether the trace is sampled
    */
-  void injectTraceParent(Tracing::TraceContext& trace_context,
-                        absl::string_view version,
-                        absl::string_view trace_id,
-                        absl::string_view span_id,
-                        bool sampled) const;
+  void injectTraceParent(Tracing::TraceContext& trace_context, absl::string_view version,
+                         absl::string_view trace_id, absl::string_view span_id, bool sampled) const;
 
   /**
    * Inject tracestate header into trace context.
    * @param trace_context the trace context to inject into
    * @param tracestate the tracestate value to inject
    */
-  void injectTraceState(Tracing::TraceContext& trace_context,
-                       absl::string_view tracestate) const;
+  void injectTraceState(Tracing::TraceContext& trace_context, absl::string_view tracestate) const;
 
   /**
    * Remove traceparent header from trace context.

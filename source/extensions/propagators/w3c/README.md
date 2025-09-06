@@ -51,7 +51,7 @@ baggage_propagator.setBaggageValue(trace_context, "userId", "alice");
 ## Testing
 
 ```bash
-#Run all W3C propagator tests
+# Run all W3C propagator tests
 bazel test //test/extensions/propagators/w3c/...
 ```
 
