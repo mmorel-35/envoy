@@ -20,7 +20,8 @@ envoy_cc_library(
         "//envoy/thread_local:thread_local_interface",
         "//source/common/config:utility_lib",
         "//source/common/grpc:typed_async_client_lib",
-        "//source/common/opentelemetry:opentelemetry_common_lib",
+        "//source/common/opentelemetry/logs:logs_lib",
+        "//source/common/opentelemetry/proto:proto_lib",
         "//source/common/protobuf",
         "//source/extensions/access_loggers/common:grpc_access_logger",
         "//source/extensions/access_loggers/common:grpc_access_logger_clients_lib",
@@ -57,7 +58,7 @@ envoy_cc_library(
     hdrs = ["access_log_proto_descriptors.h"],
     deps = [
         "//source/common/common:assert_lib",
-        "//source/common/opentelemetry:protocol_constants_lib",
+        "//source/common/opentelemetry/logs:constants_lib",
         "//source/common/protobuf",
     ],
 )
