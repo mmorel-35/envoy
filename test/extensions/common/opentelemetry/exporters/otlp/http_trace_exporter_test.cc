@@ -2,7 +2,7 @@
 
 #include "source/common/buffer/zero_copy_input_stream_impl.h"
 #include "source/common/version/version.h"
-#include "source/extensions/tracers/opentelemetry/http_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h"
 
 #include "test/mocks/common.h"
 #include "test/mocks/grpc/mocks.h"

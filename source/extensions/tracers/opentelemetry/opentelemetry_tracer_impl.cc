@@ -9,14 +9,14 @@
 #include "source/common/common/logger.h"
 #include "source/common/config/utility.h"
 #include "source/common/tracing/http_tracer_impl.h"
-#include "source/extensions/tracers/opentelemetry/grpc_trace_exporter.h"
-#include "source/extensions/tracers/opentelemetry/http_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/grpc_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_provider.h"
 #include "source/extensions/tracers/opentelemetry/samplers/sampler.h"
 #include "source/extensions/tracers/opentelemetry/span_context.h"
 #include "source/extensions/tracers/opentelemetry/span_context_extractor.h"
-#include "source/extensions/tracers/opentelemetry/trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/tracer.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
@@ -47,7 +47,8 @@ tryCreateSamper(const envoy::config::trace::v3::OpenTelemetryConfig& opentelemet
   return sampler;
 }
 
-OTelSpanKind getSpanKind(const Tracing::Config& config) {
+Envoy::Extensions::Common::OpenTelemetry::Sdk::Trace::OTelSpanKind
+getSpanKind(const Tracing::Config& config) {
   // If this is downstream span that be created by 'startSpan' for downstream request, then
   // set the span type based on the spawnUpstreamSpan flag and traffic direction:
   // * If separate tracing span will be created for upstream request, then set span type to
