@@ -10,7 +10,8 @@
 #include "envoy/server/tracer_config.h"
 #include "envoy/tracing/trace_context.h"
 
-#include "source/extensions/tracers/opentelemetry/otlp_utils.h"
+#include "source/extensions/opentelemetry/sdk/common/types.h"
+#include "source/extensions/opentelemetry/sdk/trace/types.h"
 
 #include "absl/types/optional.h"
 
@@ -35,7 +36,7 @@ struct SamplingResult {
   /// @see Decision
   Decision decision;
   // A set of span Attributes that will also be added to the Span. Can be nullptr.
-  std::unique_ptr<const OtelAttributes> attributes;
+  std::unique_ptr<const OTelAttributes> attributes;
   // A Tracestate that will be associated with the Span. If the sampler
   // returns an empty Tracestate here, the Tracestate will be cleared, so samplers SHOULD normally
   // return the passed-in Tracestate if they do not intend to change it

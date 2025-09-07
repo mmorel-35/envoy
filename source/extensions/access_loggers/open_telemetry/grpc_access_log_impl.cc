@@ -8,8 +8,9 @@
 #include "source/common/config/utility.h"
 #include "source/common/grpc/typed_async_client.h"
 #include "source/extensions/access_loggers/common/grpc_access_logger_clients.h"
+#include "source/extensions/opentelemetry/sdk/logs/constants.h"
+#include "source/extensions/opentelemetry/sdk/logs/types.h"
 
-#include "opentelemetry/proto/collector/logs/v1/logs_service.pb.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
 #include "opentelemetry/proto/logs/v1/logs.pb.h"
 #include "opentelemetry/proto/resource/v1/resource.pb.h"
@@ -22,8 +23,9 @@ namespace AccessLoggers {
 namespace OpenTelemetry {
 
 namespace {
-using opentelemetry::proto::collector::logs::v1::ExportLogsServiceRequest;
-using opentelemetry::proto::collector::logs::v1::ExportLogsServiceResponse;
+// Use centralized type definitions
+using ExportLogsServiceRequest = ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportRequest;
+using ExportLogsServiceResponse = ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportResponse;
 
 opentelemetry::proto::common::v1::KeyValue getStringKeyValue(const std::string& key,
                                                              const std::string& value) {
@@ -46,7 +48,8 @@ GrpcAccessLoggerImpl::GrpcAccessLoggerImpl(
                                                             ExportLogsServiceResponse>>(
               client,
               *Protobuf::DescriptorPool::generated_pool()->FindMethodByName(
-                  "opentelemetry.proto.collector.logs.v1.LogsService.Export"),
+                  std::string(Envoy::Extensions::OpenTelemetry::Sdk::Logs::Constants::
+                                  LOGS_SERVICE_EXPORT_METHOD)),
               GrpcCommon::optionalRetryPolicy(config.common_config()), genOTelCallbacksFactory())),
       stats_({ALL_GRPC_ACCESS_LOGGER_STATS(
           POOL_COUNTER_PREFIX(scope, absl::StrCat(GRPC_LOG_STATS_PREFIX, config.stat_prefix())))}) {

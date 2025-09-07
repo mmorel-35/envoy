@@ -10,7 +10,7 @@
 #include "source/common/tracing/common_values.h"
 #include "source/common/tracing/trace_context_impl.h"
 #include "source/common/version/version.h"
-#include "source/extensions/tracers/opentelemetry/otlp_utils.h"
+#include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 #include "opentelemetry/proto/trace/v1/trace.pb.h"
