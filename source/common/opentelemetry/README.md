@@ -13,106 +13,160 @@ For detailed background and implementation strategy, see [OPENTELEMETRY_MUTUALIZ
 
 ## Directory Structure
 
-This directory uses a flat structure with clear, descriptive filenames that indicate their purpose:
+This directory is now organized by OpenTelemetry signal to provide clear separation and easier navigation:
 
-- **`protocol_constants.h`** - OTLP protocol constants (service methods, endpoints)
-- **`types.h`** - Common type aliases for all OpenTelemetry protocols
-- **`otlp_utils.h/cc`** - Shared utility functions for OTLP operations
-- **`README.md`** - This overview and usage documentation
-- **`OPENTELEMETRY_MUTUALIZATION_PLAN.md`** - Detailed implementation plan and background
-- **`BUILD`** - Bazel build configuration
+### Signal-Specific Directories
 
-### Organization Rationale
+- **[`traces/`](traces/)** - Trace-specific constants, types, and utilities
+  - Span types and attributes (`OTelSpanKind`, `OTelAttribute`)
+  - Trace export request/response types
+  - Trace service constants and endpoints
 
-A flat structure was chosen for this initial phase because:
-- **Small Scale**: Only 6 files currently, easy to navigate
-- **Clear Naming**: File names clearly indicate their purpose and scope
-- **Logical Grouping**: Related functionality is grouped by file type (constants, types, utilities)
-- **Future Extensibility**: Structure can evolve to subdirectories if needed as the codebase grows
+- **[`metrics/`](metrics/)** - Metrics-specific constants, types, and utilities  
+  - Metrics export request/response types
+  - Aggregation temporality enums
+  - Metrics service constants and endpoints
 
-Future phases may introduce subdirectories for:
-- `constants/` - Protocol values, limits, default configurations
-- `helpers/` - Utility functions, parsing helpers, conversion utilities
-- `types/` - Shared types, data structures, type aliases
-- `adapters/` - SDK/Envoy interop, compatibility layers
+- **[`logs/`](logs/)** - Logs-specific constants, types, and utilities
+  - Log export request/response types
+  - Log service constants and endpoints
 
-## Components
+- **[`collector/`](collector/)** - Shared OTLP utilities across all signals
+  - Common OTLP protocol functions
+  - User-Agent header standardization
+  - Attribute conversion utilities
 
-### Protocol Constants (`protocol_constants.h`)
-Centralizes OTLP service method strings to eliminate duplication:
-- `TRACE_SERVICE_EXPORT_METHOD` - for gRPC trace exports
-- `METRICS_SERVICE_EXPORT_METHOD` - for gRPC metrics exports
-- `LOGS_SERVICE_EXPORT_METHOD` - for gRPC logs exports
-- Default OTLP endpoint paths
+### Legacy Files (Deprecated)
 
-### Common Types (`types.h`)
-Provides unified type aliases for all OpenTelemetry protocols:
-- `OTelSpanKind`, `OTelAttribute`, `OTelAttributes` - span and attribute types
-- `KeyValue`, `AggregationTemporality` - common protocol types
-- Export request/response types for all signals with smart pointer aliases
-- Ensures consistency across all telemetry signal implementations
+For backward compatibility, the following files remain in the root directory but are deprecated:
 
-### OTLP Utilities (`otlp_utils.h/cc`)
-Shared utility functions for OTLP protocol operations:
-- `getOtlpUserAgentHeader()` - standardized User-Agent for all OTLP exporters
-- `populateAnyValue()` - converts OpenTelemetry attributes to protobuf AnyValue
+- **`protocol_constants.h`** - Mixed signal constants (DEPRECATED)
+- **`types.h`** - Mixed signal types (DEPRECATED)  
+- **`otlp_utils.h/cc`** - Shared utilities (DEPRECATED, moved to `collector/`)
+
+**Migration Path**: Use signal-specific headers instead:
+```cpp
+// Old (deprecated)
+#include "source/common/opentelemetry/types.h"
+#include "source/common/opentelemetry/protocol_constants.h"
+
+// New (recommended)
+#include "source/common/opentelemetry/traces/types.h"
+#include "source/common/opentelemetry/traces/constants.h"
+#include "source/common/opentelemetry/collector/otlp_utils.h"
+```
+
+## Organization Benefits
+
+The signal-based organization provides:
+
+- **Clear Signal Separation**: Each signal has its own dedicated namespace and files
+- **Easier Navigation**: Developers can quickly find signal-specific functionality
+- **Reduced Complexity**: Smaller, focused files instead of large mixed-signal files
+- **Better Maintainability**: Changes to one signal don't affect others
+- **Standard Compliance**: Follows OpenTelemetry C++ library organization patterns
+
+## Components by Signal
+
+### Traces (`traces/`)
+- **Types**: `OTelSpanKind`, `OTelAttribute`, `TraceExportRequest`
+- **Constants**: `TRACE_SERVICE_EXPORT_METHOD`, trace endpoints
+- **Usage**: Span creation, trace export, trace context handling
+
+### Metrics (`metrics/`)
+- **Types**: `AggregationTemporality`, `MetricsExportRequest` 
+- **Constants**: `METRICS_SERVICE_EXPORT_METHOD`, metrics endpoints
+- **Usage**: Metrics collection, metrics export, stat sink implementations
+
+### Logs (`logs/`)
+- **Types**: `LogsExportRequest`, log-specific key-value types
+- **Constants**: `LOGS_SERVICE_EXPORT_METHOD`, logs endpoints  
+- **Usage**: Log export, access logger implementations
+
+### Collector (`collector/`)
+- **Utilities**: `getOtlpUserAgentHeader()`, `populateAnyValue()`
+- **Cross-Signal**: Functions used by all telemetry signals
+- **Usage**: OTLP protocol operations, attribute handling
 
 ## Usage
 
-Extensions should include the appropriate headers:
+### Signal-Specific Usage
+
+Include only the signal you need:
 
 ```cpp
-// For protocol constants
-#include "source/common/opentelemetry/protocol_constants.h"
+// For traces only
+#include "source/common/opentelemetry/traces/types.h"
+#include "source/common/opentelemetry/traces/constants.h"
 
-// For common types
-#include "source/common/opentelemetry/types.h"
+// For metrics only  
+#include "source/common/opentelemetry/metrics/types.h"
+#include "source/common/opentelemetry/metrics/constants.h"
 
-// For OTLP utilities
-#include "source/common/opentelemetry/otlp_utils.h"
+// For cross-signal utilities
+#include "source/common/opentelemetry/collector/otlp_utils.h"
 ```
 
-## BUILD Dependencies
+### BUILD Dependencies
 
-Add to your BUILD file:
+Use signal-specific dependencies:
+
 ```bazel
 deps = [
+    # For traces
+    "//source/common/opentelemetry/traces:traces_lib",
+    
+    # For metrics
+    "//source/common/opentelemetry/metrics:metrics_lib",
+    
+    # For logs
+    "//source/common/opentelemetry/logs:logs_lib",
+    
+    # For shared utilities
+    "//source/common/opentelemetry/collector:collector_lib",
+    
+    # Or everything (includes backward compatibility)
     "//source/common/opentelemetry:opentelemetry_common_lib",
-    # ... other deps
 ]
 ```
 
 ## Backward Compatibility
 
-Existing extensions maintain backward compatibility through compatibility shims in their original locations. The original headers now forward to the centralized implementations.
+Existing extensions maintain backward compatibility through the deprecated files in the root directory. These files now forward to the new signal-specific implementations where possible.
+
+**Timeline**: 
+- **Current**: Both old and new APIs are available
+- **Next Release**: Deprecation warnings for old APIs
+- **Future Release**: Removal of deprecated files
 
 ## Benefits
 
-- **Reduced Code Duplication**: Single source of truth for OTLP constants and utilities
-- **Improved Consistency**: Standardized behavior across all telemetry signals
-- **Easier Maintenance**: Changes only need to be made in one location
-- **Faster Development**: Shared infrastructure accelerates new OpenTelemetry features
+- **Reduced Code Duplication**: Signal-specific organization eliminates cross-signal contamination
+- **Improved Consistency**: Each signal follows consistent patterns within its domain
+- **Easier Maintenance**: Changes are scoped to specific signals
+- **Faster Development**: Clear structure accelerates new OpenTelemetry features
+- **Better Documentation**: Signal-specific documentation is more focused and useful
 
 ## Migration Strategy
 
-This is the first phase of a larger OpenTelemetry code mutualization effort. Future phases will further consolidate shared functionality while maintaining backward compatibility.
+This refactoring maintains full backward compatibility while introducing the new signal-based organization. Extensions can migrate at their own pace using the new structure.
 
 ### Implementation Progress
 
-✅ **Phase 1 (Current)** - Centralized Constants and Types
-- OTLP service method strings unified across all extensions
-- Common type aliases for traces, metrics, and logs
-- Shared OTLP utilities moved from tracers to common location
-- Backward compatibility maintained through compatibility shims
+✅ **Phase 1 (Current)** - Signal-Based Directory Structure
+- Trace-specific constants and types in `traces/`
+- Metrics-specific constants and types in `metrics/`
+- Logs-specific constants and types in `logs/`
+- Shared utilities in `collector/`
+- Backward compatibility maintained through root-level files
 
-🔄 **Phase 2 (Planned)** - Shared Validation and Configuration
-- Common protocol validation functions
-- Unified configuration patterns
-- Shared error handling utilities
+🔄 **Phase 2 (Next)** - Extension Migration
+- Update extension includes to use signal-specific headers
+- Add deprecation warnings to old APIs
+- Update documentation and examples
 
-🔄 **Phase 3 (Future)** - Advanced Features
-- Environment variable support (`OTEL_SERVICE_NAME`, `OTEL_PROPAGATORS`, etc.)
-- Enhanced resource detection capabilities
-- Additional protocol support and optimizations
+🔄 **Phase 3 (Future)** - Cleanup
+- Remove deprecated root-level files
+- Complete migration to signal-based organization
 
 See [OPENTELEMETRY_MUTUALIZATION_PLAN.md](./OPENTELEMETRY_MUTUALIZATION_PLAN.md) for complete details and implementation timeline.
