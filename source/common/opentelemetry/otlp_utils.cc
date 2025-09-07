@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/otlp_utils.h"
+#include "source/common/opentelemetry/otlp_utils.h"
 
 #include <cstdint>
 #include <string>
@@ -8,8 +8,7 @@
 #include "source/common/version/version.h"
 
 namespace Envoy {
-namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
 
 const std::string& OtlpUtils::getOtlpUserAgentHeader() {
@@ -52,6 +51,5 @@ void OtlpUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& val
 }
 
 } // namespace OpenTelemetry
-} // namespace Tracers
-} // namespace Extensions
+} // namespace Common
 } // namespace Envoy
