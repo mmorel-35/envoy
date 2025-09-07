@@ -217,6 +217,10 @@ removed_config_or_runtime:
     Removed runtime guard ``envoy.reloadable_features.proxy_104`` and legacy code paths.
 
 new_features:
+- area: tracing
+  change: |
+    Centralized OpenTelemetry constants and helpers under source/extensions/opentelemetry/
+    for shared reuse across tracing and propagation extensions.
 - area: stats
   change: |
     Added support to remove unused metrics from memory for extensions that
