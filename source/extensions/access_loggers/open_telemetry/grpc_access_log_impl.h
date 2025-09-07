@@ -9,10 +9,10 @@
 #include "envoy/local_info/local_info.h"
 #include "envoy/thread_local/thread_local.h"
 
+#include "source/common/opentelemetry/types.h"
 #include "source/common/protobuf/protobuf.h"
 #include "source/extensions/access_loggers/common/grpc_access_logger.h"
 
-#include "opentelemetry/proto/collector/logs/v1/logs_service.pb.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
 #include "opentelemetry/proto/logs/v1/logs.pb.h"
 #include "opentelemetry/proto/resource/v1/resource.pb.h"
@@ -33,8 +33,8 @@ class GrpcAccessLoggerImpl
           // OpenTelemetry logging uses LogRecord for both HTTP and TCP, so protobuf::Empty is used
           // as an empty placeholder for the non-used addEntry method.
           // TODO(itamarkam): Don't cache OpenTelemetry loggers by type (HTTP/TCP).
-          Protobuf::Empty, opentelemetry::proto::collector::logs::v1::ExportLogsServiceRequest,
-          opentelemetry::proto::collector::logs::v1::ExportLogsServiceResponse> {
+          Protobuf::Empty, ::Envoy::Common::OpenTelemetry::LogsExportRequest,
+          ::Envoy::Common::OpenTelemetry::LogsExportResponse> {
 public:
   GrpcAccessLoggerImpl(
       const Grpc::RawAsyncClientSharedPtr& client,
@@ -45,7 +45,7 @@ public:
 private:
   class OTelLogRequestCallbacks
       : public Grpc::AsyncRequestCallbacks<
-            opentelemetry::proto::collector::logs::v1::ExportLogsServiceResponse> {
+            ::Envoy::Common::OpenTelemetry::LogsExportResponse> {
   public:
     OTelLogRequestCallbacks(Common::GrpcAccessLoggerStats& stats, uint32_t sending_log_entries,
                             std::function<void(OTelLogRequestCallbacks*)> deletion)

@@ -2,6 +2,7 @@
 
 #include "source/common/common/logger.h"
 #include "source/common/grpc/status.h"
+#include "source/common/opentelemetry/protocol_constants.h"
 #include "source/extensions/tracers/opentelemetry/otlp_utils.h"
 
 namespace Envoy {
@@ -13,7 +14,7 @@ OpenTelemetryGrpcTraceExporter::OpenTelemetryGrpcTraceExporter(
     const Grpc::RawAsyncClientSharedPtr& client)
     : client_(client),
       service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(
-          "opentelemetry.proto.collector.trace.v1.TraceService.Export")) {}
+          std::string(Envoy::Common::OpenTelemetry::ProtocolConstants::TRACE_SERVICE_EXPORT_METHOD))) {}
 
 void OpenTelemetryGrpcTraceExporter::onCreateInitialMetadata(Http::RequestHeaderMap& metadata) {
   metadata.setReferenceUserAgent(OtlpUtils::getOtlpUserAgentHeader());
