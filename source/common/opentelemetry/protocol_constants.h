@@ -16,14 +16,14 @@ namespace OpenTelemetry {
 class ProtocolConstants {
 public:
   // OTLP service method names for gRPC exporters
-  static constexpr absl::string_view TRACE_SERVICE_EXPORT_METHOD = 
-    "opentelemetry.proto.collector.trace.v1.TraceService.Export";
-  
-  static constexpr absl::string_view METRICS_SERVICE_EXPORT_METHOD = 
-    "opentelemetry.proto.collector.metrics.v1.MetricsService.Export";
-  
-  static constexpr absl::string_view LOGS_SERVICE_EXPORT_METHOD = 
-    "opentelemetry.proto.collector.logs.v1.LogsService.Export";
+  static constexpr absl::string_view TRACE_SERVICE_EXPORT_METHOD =
+      "opentelemetry.proto.collector.trace.v1.TraceService.Export";
+
+  static constexpr absl::string_view METRICS_SERVICE_EXPORT_METHOD =
+      "opentelemetry.proto.collector.metrics.v1.MetricsService.Export";
+
+  static constexpr absl::string_view LOGS_SERVICE_EXPORT_METHOD =
+      "opentelemetry.proto.collector.logs.v1.LogsService.Export";
 
   // Default OTLP endpoints
   static constexpr absl::string_view DEFAULT_OTLP_TRACES_ENDPOINT = "/v1/traces";

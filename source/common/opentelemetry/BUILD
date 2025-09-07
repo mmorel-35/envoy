@@ -52,7 +52,7 @@ envoy_cc_library(
     name = "opentelemetry_common_lib",
     deps = [
         ":otlp_utils_lib",
-        ":protocol_constants_lib", 
+        ":protocol_constants_lib",
         ":types_lib",
     ],
 )

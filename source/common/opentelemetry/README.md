@@ -9,6 +9,33 @@ The `source/common/opentelemetry/` directory centralizes OpenTelemetry functiona
 - `source/extensions/stat_sinks/open_telemetry/`
 - `source/extensions/access_loggers/open_telemetry/`
 
+For detailed background and implementation strategy, see [OPENTELEMETRY_MUTUALIZATION_PLAN.md](./OPENTELEMETRY_MUTUALIZATION_PLAN.md).
+
+## Directory Structure
+
+This directory uses a flat structure with clear, descriptive filenames that indicate their purpose:
+
+- **`protocol_constants.h`** - OTLP protocol constants (service methods, endpoints)
+- **`types.h`** - Common type aliases for all OpenTelemetry protocols
+- **`otlp_utils.h/cc`** - Shared utility functions for OTLP operations
+- **`README.md`** - This overview and usage documentation
+- **`OPENTELEMETRY_MUTUALIZATION_PLAN.md`** - Detailed implementation plan and background
+- **`BUILD`** - Bazel build configuration
+
+### Organization Rationale
+
+A flat structure was chosen for this initial phase because:
+- **Small Scale**: Only 6 files currently, easy to navigate
+- **Clear Naming**: File names clearly indicate their purpose and scope
+- **Logical Grouping**: Related functionality is grouped by file type (constants, types, utilities)
+- **Future Extensibility**: Structure can evolve to subdirectories if needed as the codebase grows
+
+Future phases may introduce subdirectories for:
+- `constants/` - Protocol values, limits, default configurations
+- `helpers/` - Utility functions, parsing helpers, conversion utilities  
+- `types/` - Shared types, data structures, type aliases
+- `adapters/` - SDK/Envoy interop, compatibility layers
+
 ## Components
 
 ### Protocol Constants (`protocol_constants.h`)
@@ -69,3 +96,23 @@ Existing extensions maintain backward compatibility through compatibility shims 
 ## Migration Strategy
 
 This is the first phase of a larger OpenTelemetry code mutualization effort. Future phases will further consolidate shared functionality while maintaining backward compatibility.
+
+### Implementation Progress
+
+✅ **Phase 1 (Current)** - Centralized Constants and Types
+- OTLP service method strings unified across all extensions  
+- Common type aliases for traces, metrics, and logs
+- Shared OTLP utilities moved from tracers to common location
+- Backward compatibility maintained through compatibility shims
+
+🔄 **Phase 2 (Planned)** - Shared Validation and Configuration  
+- Common protocol validation functions
+- Unified configuration patterns
+- Shared error handling utilities
+
+🔄 **Phase 3 (Future)** - Advanced Features
+- Environment variable support (`OTEL_SERVICE_NAME`, `OTEL_PROPAGATORS`, etc.)
+- Enhanced resource detection capabilities
+- Additional protocol support and optimizations
+
+See [OPENTELEMETRY_MUTUALIZATION_PLAN.md](./OPENTELEMETRY_MUTUALIZATION_PLAN.md) for complete details and implementation timeline.
