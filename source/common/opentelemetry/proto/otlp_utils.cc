@@ -1,4 +1,4 @@
-#include "source/common/opentelemetry/collector/otlp_utils.h"
+#include "source/common/opentelemetry/proto/otlp_utils.h"
 
 #include <cstdint>
 #include <string>
@@ -10,7 +10,7 @@
 namespace Envoy {
 namespace Common {
 namespace OpenTelemetry {
-namespace Collector {
+namespace Proto {
 
 const std::string& OtlpUtils::getOtlpUserAgentHeader() {
   CONSTRUCT_ON_FIRST_USE(std::string,
@@ -21,7 +21,7 @@ void OtlpUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& val
                                  const Traces::OTelAttribute& attribute_value) {
   switch (attribute_value.index()) {
   case opentelemetry::common::AttributeType::kTypeBool:
-    value_proto.set_bool_value(opentelemetry::nostd::get<bool>(attribute_value) ? true : false);
+    value_proto.set_bool_value(opentelemetry::nostd::get<bool>(attribute_value));
     break;
   case opentelemetry::common::AttributeType::kTypeInt:
     value_proto.set_int_value(opentelemetry::nostd::get<int32_t>(attribute_value));
@@ -51,7 +51,7 @@ void OtlpUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& val
   }
 }
 
-} // namespace Collector
+} // namespace Proto
 } // namespace OpenTelemetry
 } // namespace Common
 } // namespace Envoy

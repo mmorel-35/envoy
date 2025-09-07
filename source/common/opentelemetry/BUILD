@@ -31,10 +31,18 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
+    name = "proto_lib",
+    deps = [
+        "//source/common/opentelemetry/proto:proto_lib",
+    ],
+)
+
+envoy_cc_library(
     name = "collector_lib",
     deps = [
         "//source/common/opentelemetry/collector:collector_lib",
     ],
+    deprecation = "Use //source/common/opentelemetry/proto:proto_lib instead",
 )
 
 # Backward compatibility libraries - DEPRECATED
@@ -80,18 +88,19 @@ envoy_cc_library(
         "//source/common/version:version_lib",
         "@opentelemetry_proto//:common_proto_cc",
     ],
-    deprecation = "Use //source/common/opentelemetry/collector:otlp_utils_lib instead",
+    deprecation = "Use //source/common/opentelemetry/proto:otlp_utils_lib instead",
 )
 
 # Main library aggregating all OpenTelemetry functionality
 envoy_cc_library(
     name = "opentelemetry_common_lib",
     deps = [
-        ":collector_lib",
+        ":proto_lib",
         ":logs_lib",
         ":metrics_lib",
         ":traces_lib",
         # Backward compatibility - these will be removed in a future release
+        ":collector_lib",
         ":otlp_utils_lib",
         ":protocol_constants_lib",
         ":types_lib",

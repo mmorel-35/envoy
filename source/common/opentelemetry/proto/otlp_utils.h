@@ -9,7 +9,7 @@
 namespace Envoy {
 namespace Common {
 namespace OpenTelemetry {
-namespace Collector {
+namespace Proto {
 
 /**
  * Contains utility functions for OpenTelemetry OTLP protocol operations.
@@ -36,7 +36,7 @@ public:
                                const Traces::OTelAttribute& attribute_value);
 };
 
-} // namespace Collector
+} // namespace Proto
 } // namespace OpenTelemetry
 } // namespace Common
 } // namespace Envoy

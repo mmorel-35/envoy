@@ -10,20 +10,10 @@ envoy_package()
 
 envoy_cc_library(
     name = "otlp_utils_lib",
-    srcs = ["otlp_utils.cc"],
-    hdrs = ["otlp_utils.h"],
-    copts = [
-        # Make sure that headers included from opentelemetry-api use Abseil from Envoy
-        # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.14.0/api/BUILD#L32
-        "-DHAVE_ABSEIL",
-    ],
     deps = [
-        "//source/common/opentelemetry/traces:types_lib",
-        "//source/common/common:fmt_lib",
-        "//source/common/common:macros",
-        "//source/common/version:version_lib",
-        "@opentelemetry_proto//:common_proto_cc",
+        "//source/common/opentelemetry/proto:otlp_utils_lib",
     ],
+    deprecation = "Use //source/common/opentelemetry/proto:otlp_utils_lib instead",
 )
 
 envoy_cc_library(
@@ -31,4 +21,5 @@ envoy_cc_library(
     deps = [
         ":otlp_utils_lib",
     ],
+    deprecation = "Use //source/common/opentelemetry/proto:proto_lib instead",
 )

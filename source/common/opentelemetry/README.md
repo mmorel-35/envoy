@@ -31,7 +31,7 @@ This directory is now organized by OpenTelemetry signal to provide clear separat
   - Log export request/response types
   - Log service constants and endpoints
 
-- **[`collector/`](collector/)** - Shared OTLP utilities across all signals
+- **[`proto/`](proto/)** - Shared OTLP protocol utilities across all signals
   - Common OTLP protocol functions
   - User-Agent header standardization
   - Attribute conversion utilities
@@ -42,7 +42,7 @@ For backward compatibility, the following files remain in the root directory but
 
 - **`protocol_constants.h`** - Mixed signal constants (DEPRECATED)
 - **`types.h`** - Mixed signal types (DEPRECATED)  
-- **`otlp_utils.h/cc`** - Shared utilities (DEPRECATED, moved to `collector/`)
+- **`otlp_utils.h/cc`** - Shared utilities (DEPRECATED, moved to `proto/`)
 
 **Migration Path**: Use signal-specific headers instead:
 ```cpp
@@ -53,7 +53,7 @@ For backward compatibility, the following files remain in the root directory but
 // New (recommended)
 #include "source/common/opentelemetry/traces/types.h"
 #include "source/common/opentelemetry/traces/constants.h"
-#include "source/common/opentelemetry/collector/otlp_utils.h"
+#include "source/common/opentelemetry/proto/otlp_utils.h"
 ```
 
 ## Organization Benefits
@@ -83,7 +83,7 @@ The signal-based organization provides:
 - **Constants**: `LOGS_SERVICE_EXPORT_METHOD`, logs endpoints  
 - **Usage**: Log export, access logger implementations
 
-### Collector (`collector/`)
+### Proto (`proto/`)
 - **Utilities**: `getOtlpUserAgentHeader()`, `populateAnyValue()`
 - **Cross-Signal**: Functions used by all telemetry signals
 - **Usage**: OTLP protocol operations, attribute handling
@@ -104,7 +104,7 @@ Include only the signal you need:
 #include "source/common/opentelemetry/metrics/constants.h"
 
 // For cross-signal utilities
-#include "source/common/opentelemetry/collector/otlp_utils.h"
+#include "source/common/opentelemetry/proto/otlp_utils.h"
 ```
 
 ### BUILD Dependencies
@@ -123,7 +123,7 @@ deps = [
     "//source/common/opentelemetry/logs:logs_lib",
     
     # For shared utilities
-    "//source/common/opentelemetry/collector:collector_lib",
+    "//source/common/opentelemetry/proto:proto_lib",
     
     # Or everything (includes backward compatibility)
     "//source/common/opentelemetry:opentelemetry_common_lib",
@@ -157,7 +157,7 @@ This refactoring maintains full backward compatibility while introducing the new
 - Trace-specific constants and types in `traces/`
 - Metrics-specific constants and types in `metrics/`
 - Logs-specific constants and types in `logs/`
-- Shared utilities in `collector/`
+- Shared utilities in `proto/`
 - Backward compatibility maintained through root-level files
 
 🔄 **Phase 2 (Next)** - Extension Migration
