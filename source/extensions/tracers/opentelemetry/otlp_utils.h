@@ -3,8 +3,8 @@
 // This header is deprecated. Use source/common/opentelemetry/ instead.
 // Compatibility shim for existing code.
 
-#include "source/common/opentelemetry/otlp_utils.h"
-#include "source/common/opentelemetry/types.h"
+#include "source/common/opentelemetry/collector/otlp_utils.h"
+#include "source/common/opentelemetry/traces/types.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -12,12 +12,12 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 // Type aliases for backward compatibility
-using OTelSpanKind = ::Envoy::Common::OpenTelemetry::OTelSpanKind;
-using OTelAttribute = ::Envoy::Common::OpenTelemetry::OTelAttribute;
-using OtelAttributes = ::Envoy::Common::OpenTelemetry::OTelAttributes;
+using OTelSpanKind = ::Envoy::Common::OpenTelemetry::Traces::OTelSpanKind;
+using OTelAttribute = ::Envoy::Common::OpenTelemetry::Traces::OTelAttribute;
+using OtelAttributes = ::Envoy::Common::OpenTelemetry::Traces::OTelAttributes;
 
 // Utility class for backward compatibility
-using OtlpUtils = ::Envoy::Common::OpenTelemetry::OtlpUtils;
+using OtlpUtils = ::Envoy::Common::OpenTelemetry::Collector::OtlpUtils;
 
 } // namespace OpenTelemetry
 } // namespace Tracers

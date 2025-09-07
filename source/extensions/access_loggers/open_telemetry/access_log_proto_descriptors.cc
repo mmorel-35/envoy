@@ -2,7 +2,7 @@
 
 #include "source/common/common/assert.h"
 #include "source/common/common/fmt.h"
-#include "source/common/opentelemetry/protocol_constants.h"
+#include "source/common/opentelemetry/logs/constants.h"
 #include "source/common/protobuf/protobuf.h"
 
 namespace Envoy {
@@ -12,7 +12,7 @@ namespace OpenTelemetry {
 
 void validateProtoDescriptors() {
   const auto method =
-      std::string(Envoy::Common::OpenTelemetry::ProtocolConstants::LOGS_SERVICE_EXPORT_METHOD);
+      std::string(Envoy::Common::OpenTelemetry::Logs::Constants::LOGS_SERVICE_EXPORT_METHOD);
 
   RELEASE_ASSERT(Protobuf::DescriptorPool::generated_pool()->FindMethodByName(method) != nullptr,
                  "");
