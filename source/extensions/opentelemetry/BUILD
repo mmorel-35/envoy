@@ -1,0 +1,17 @@
+load(
+    "//bazel:envoy_build_system.bzl",
+    "envoy_cc_library",
+    "envoy_package",
+)
+
+licenses(["notice"])  # Apache 2
+
+envoy_package()
+
+envoy_cc_library(
+    name = "opentelemetry_lib",
+    deps = [
+        "//source/extensions/opentelemetry/exporters:exporters_lib",
+        "//source/extensions/opentelemetry/sdk:sdk_lib",
+    ],
+)
