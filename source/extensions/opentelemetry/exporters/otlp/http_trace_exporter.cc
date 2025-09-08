@@ -1,4 +1,4 @@
-#include "source/extensions/tracers/opentelemetry/http_trace_exporter.h"
+#include "source/extensions/opentelemetry/exporters/otlp/http_trace_exporter.h"
 
 #include <chrono>
 #include <memory>
@@ -8,12 +8,14 @@
 #include "source/common/common/enum_to_int.h"
 #include "source/common/common/logger.h"
 #include "source/common/protobuf/protobuf.h"
-#include "source/extensions/tracers/opentelemetry/otlp_utils.h"
+#include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
+#include "source/extensions/opentelemetry/sdk/version/version.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 OpenTelemetryHttpTraceExporter::OpenTelemetryHttpTraceExporter(
     Upstream::ClusterManager& cluster_manager,
@@ -53,7 +55,7 @@ bool OpenTelemetryHttpTraceExporter::log(const ExportTraceServiceRequest& reques
 
   // User-Agent header follows the OTLP specification:
   // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.30.0/specification/protocol/exporter.md#user-agent
-  message->headers().setReferenceUserAgent(OtlpUtils::getOtlpUserAgentHeader());
+  message->headers().setReferenceUserAgent(Envoy::Extensions::OpenTelemetry::Sdk::Version::VersionUtils::getOtlpUserAgentHeader());
 
   // Add all custom headers to the request.
   for (const auto& header_pair : parsed_headers_to_add_) {
@@ -98,7 +100,8 @@ void OpenTelemetryHttpTraceExporter::onFailure(const Http::AsyncClient::Request&
   ENVOY_LOG(debug, "The OTLP export request failed. Reason {}", enumToInt(reason));
 }
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

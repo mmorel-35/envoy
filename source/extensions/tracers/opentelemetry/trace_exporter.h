@@ -1,51 +1,20 @@
 #pragma once
 
-#include "source/common/common/logger.h"
-#include "source/common/opentelemetry/types.h"
+// Compatibility header that forwards to the new OpenTelemetry SDK structure
+// This allows existing tracer code to continue working with minimal changes
+
+#include "source/extensions/opentelemetry/exporters/otlp/trace_exporter.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-// Type aliases for backward compatibility
-using ExportTraceServiceRequest = ::Envoy::Common::OpenTelemetry::TraceExportRequest;
-using ExportTraceServiceResponse = ::Envoy::Common::OpenTelemetry::TraceExportResponse;
-
-/**
- * @brief Base class for all OpenTelemetry Protocol (OTLP) exporters.
- * @see
- * https://github.com/open-telemetry/opentelemetry-proto/blob/v1.0.0/docs/specification.md#otlphttp
- */
-class OpenTelemetryTraceExporter : public Logger::Loggable<Logger::Id::tracing> {
-public:
-  virtual ~OpenTelemetryTraceExporter() = default;
-
-  /**
-   * @brief Exports the trace request to the configured OTLP service.
-   *
-   * @param request The protobuf-encoded OTLP trace request.
-   * @return true When the request was sent.
-   * @return false When sending the request failed.
-   */
-  virtual bool log(const ExportTraceServiceRequest& request) = 0;
-
-  /**
-   * @brief Logs as debug the number of exported spans.
-   *
-   * @param request The protobuf-encoded OTLP trace request.
-   */
-  void logExportedSpans(const ExportTraceServiceRequest& request) {
-    if (request.resource_spans(0).has_resource()) {
-      if (request.resource_spans(0).scope_spans(0).has_scope()) {
-        ENVOY_LOG(debug, "Number of exported spans: {}",
-                  request.resource_spans(0).scope_spans(0).spans_size());
-      }
-    }
-  }
-};
-
-using OpenTelemetryTraceExporterPtr = std::unique_ptr<OpenTelemetryTraceExporter>;
+// Forward the new implementations to the old namespace for compatibility
+using OpenTelemetryTraceExporter = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OpenTelemetryTraceExporter;
+using OpenTelemetryTraceExporterPtr = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OpenTelemetryTraceExporterPtr;
+using ExportTraceServiceRequest = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::ExportTraceServiceRequest;
+using ExportTraceServiceResponse = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::ExportTraceServiceResponse;
 
 } // namespace OpenTelemetry
 } // namespace Tracers

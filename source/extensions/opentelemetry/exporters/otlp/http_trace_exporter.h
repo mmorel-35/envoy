@@ -9,14 +9,15 @@
 #include "source/common/http/headers.h"
 #include "source/common/http/message_impl.h"
 #include "source/common/http/utility.h"
-#include "source/extensions/tracers/opentelemetry/trace_exporter.h"
+#include "source/extensions/opentelemetry/exporters/otlp/trace_exporter.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 /**
  * Exporter for OTLP traces over HTTP.
@@ -42,7 +43,8 @@ private:
   std::vector<std::pair<const Http::LowerCaseString, const std::string>> parsed_headers_to_add_;
 };
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
