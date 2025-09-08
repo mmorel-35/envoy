@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "source/common/opentelemetry/types.h"
+#include "source/extensions/opentelemetry/sdk/common/types.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"
 
@@ -10,6 +10,9 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
+
+// Import common types from SDK
+using namespace Envoy::Extensions::OpenTelemetry::Sdk::Common;
 
 /**
  * Contains utility functions for OpenTelemetry OTLP protocol operations.

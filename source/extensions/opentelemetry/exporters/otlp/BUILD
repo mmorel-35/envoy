@@ -29,7 +29,7 @@ envoy_cc_library(
         "//source/common/http:header_map_lib",
         "//source/common/http:message_lib",
         "//source/common/http:utility_lib",
-        "//source/common/opentelemetry:opentelemetry_common_lib",
+        "//source/extensions/opentelemetry/sdk/common:protocol_constants_lib",
         "//source/common/protobuf",
         "//source/common/tracing:trace_context_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
@@ -44,7 +44,7 @@ envoy_cc_library(
     srcs = ["otlp_utils.cc"],
     hdrs = ["otlp_utils.h"],
     deps = [
-        "//source/common/opentelemetry:opentelemetry_common_lib",
+        "//source/extensions/opentelemetry/sdk/common:types_lib",
         "@opentelemetry_proto//:common_proto_cc",
     ],
 )
