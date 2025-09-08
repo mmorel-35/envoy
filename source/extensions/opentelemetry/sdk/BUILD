@@ -13,7 +13,7 @@ envoy_cc_library(
     deps = [
         "//source/extensions/opentelemetry/sdk/common:sdk_common_lib",
         "//source/extensions/opentelemetry/sdk/trace:sdk_trace_lib",
-        "//source/extensions/opentelemetry/sdk/metrics:sdk_metrics_lib", 
+        "//source/extensions/opentelemetry/sdk/metrics:sdk_metrics_lib",
         "//source/extensions/opentelemetry/sdk/logs:sdk_logs_lib",
         # Additional signal-specific libraries will be added here as they are implemented
         # "//source/extensions/opentelemetry/sdk/resource:sdk_resource_lib",

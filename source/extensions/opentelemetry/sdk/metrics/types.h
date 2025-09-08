@@ -13,7 +13,7 @@ namespace Metrics {
 
 /**
  * OpenTelemetry metrics signal type aliases.
- * 
+ *
  * Origin: All types are derived from official OpenTelemetry C++ SDK and protocol definitions
  * Reference: https://github.com/open-telemetry/opentelemetry-cpp
  */

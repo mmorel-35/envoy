@@ -12,7 +12,7 @@ namespace Logs {
 
 /**
  * OpenTelemetry logs signal type aliases.
- * 
+ *
  * Origin: All types are derived from official OpenTelemetry protocol definitions
  * Reference: https://github.com/open-telemetry/opentelemetry-cpp
  */

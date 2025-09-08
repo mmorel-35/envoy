@@ -15,19 +15,20 @@ namespace Common {
 /**
  * Shared OpenTelemetry type aliases used across all telemetry signals.
  * These types are truly shared across trace, metrics, and logs signals.
- * 
+ *
  * Origin: All types are derived from official OpenTelemetry C++ SDK and protocol definitions
  * Reference: https://github.com/open-telemetry/opentelemetry-cpp
- * 
+ *
  * Note: Signal-specific types are located in their respective signal directories:
  * - Trace types: source/extensions/opentelemetry/sdk/trace/types.h
- * - Metrics types: source/extensions/opentelemetry/sdk/metrics/types.h  
+ * - Metrics types: source/extensions/opentelemetry/sdk/metrics/types.h
  * - Logs types: source/extensions/opentelemetry/sdk/logs/types.h
  */
 
 /**
  * @brief Open-telemetry Attribute (from OpenTelemetry C++ SDK)
- * @see https://github.com/open-telemetry/opentelemetry-cpp/blob/main/api/include/opentelemetry/common/attribute_value.h
+ * @see
+ * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/api/include/opentelemetry/common/attribute_value.h
  */
 using OTelAttribute = ::opentelemetry::common::AttributeValue;
 

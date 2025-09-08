@@ -11,7 +11,7 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-// Import common types from SDK  
+// Import common types from SDK
 using namespace Envoy::Extensions::OpenTelemetry::Sdk::Common;
 
 /**

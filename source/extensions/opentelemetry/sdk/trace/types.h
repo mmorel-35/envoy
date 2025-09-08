@@ -13,14 +13,15 @@ namespace Trace {
 
 /**
  * OpenTelemetry trace signal type aliases.
- * 
+ *
  * Origin: All types are derived from official OpenTelemetry C++ SDK and protocol definitions
  * Reference: https://github.com/open-telemetry/opentelemetry-cpp
  */
 
 /**
  * @brief The type of the span (from OpenTelemetry specification)
- * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind
+ * @see
+ * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind
  */
 using OTelSpanKind = ::opentelemetry::proto::trace::v1::Span::SpanKind;
 

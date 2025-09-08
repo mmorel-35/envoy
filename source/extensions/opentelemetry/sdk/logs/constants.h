@@ -13,16 +13,17 @@ namespace Logs {
 /**
  * Constants for OpenTelemetry OTLP logs signal.
  * These constants ensure consistency across logs exporters and access loggers.
- * 
+ *
  * Origin: All constants are derived from official OpenTelemetry Protocol (OTLP) specification
- * Reference: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md
+ * Reference:
+ * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md
  */
 class Constants {
 public:
   // gRPC service method for logs exports (from OTLP spec)
   static constexpr absl::string_view LOGS_SERVICE_EXPORT_METHOD =
       "opentelemetry.proto.collector.logs.v1.LogsService.Export";
-  
+
   // HTTP endpoint for logs exports (from OTLP spec)
   static constexpr absl::string_view DEFAULT_OTLP_LOGS_ENDPOINT = "/v1/logs";
 };
