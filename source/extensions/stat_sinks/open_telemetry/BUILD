@@ -17,6 +17,7 @@ envoy_cc_library(
         "//envoy/grpc:async_client_interface",
         "//envoy/singleton:instance_interface",
         "//source/common/grpc:async_client_lib",
+        "//source/extensions/opentelemetry/sdk/metrics:sdk_metrics_lib",
         "//source/extensions/opentelemetry/sdk/common:sdk_common_lib",
         "//source/extensions/tracers/opentelemetry/resource_detectors:resource_detector_lib",
         "@envoy_api//envoy/extensions/stat_sinks/open_telemetry/v3:pkg_cc_proto",
@@ -31,7 +32,7 @@ envoy_cc_library(
     hdrs = ["open_telemetry_proto_descriptors.h"],
     deps = [
         "//source/common/common:assert_lib",
-        "//source/extensions/opentelemetry/sdk/common:protocol_constants_lib",
+        "//source/extensions/opentelemetry/sdk/metrics:constants_lib",
         "//source/common/protobuf",
     ],
 )

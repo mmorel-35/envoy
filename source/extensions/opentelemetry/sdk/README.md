@@ -4,7 +4,7 @@ This directory contains the OpenTelemetry SDK implementation for Envoy, organize
 
 ## Overview
 
-The `source/extensions/opentelemetry/sdk/` directory provides SDK functionality that was previously located in `source/common/opentelemetry/`. This reorganization follows OpenTelemetry signal-based architecture and improves maintainability.
+The `source/extensions/opentelemetry/sdk/` directory provides SDK functionality organized by signal type (trace, metrics, logs), following OpenTelemetry signal-based architecture and improving maintainability.
 
 **Reference**: Inspired by [opentelemetry-cpp/sdk/src](https://github.com/open-telemetry/opentelemetry-cpp/tree/main/sdk/src)
 
@@ -14,53 +14,70 @@ The SDK is organized by OpenTelemetry signals and components, following official
 
 ```
 source/extensions/opentelemetry/sdk/
-├── common/          # Shared types and constants used across all signals
+├── common/          # Shared types used across all signals
+├── trace/           # Trace signal SDK types and constants
+├── metrics/         # Metrics signal SDK types and constants
+├── logs/            # Logs signal SDK types and constants
 ├── configuration/   # SDK configuration and initialization (planned)
-├── logs/           # Logs signal SDK implementation (planned)
-├── metrics/        # Metrics signal SDK implementation (planned) 
-├── resource/       # Resource detection and management (planned)
-├── trace/          # Trace signal SDK implementation (planned)
-├── version/        # Version information and utilities (planned)
+├── resource/        # Resource detection and management (planned)
+├── version/         # Version information and utilities (planned)
 ├── BUILD           # Main SDK build configuration
 └── README.md       # This documentation
 ```
 
-### Current Implementation
+### Signal-Specific Implementation
+
+#### `trace/` - Trace Signal SDK
+
+Contains trace-specific types and constants:
+
+- **`constants.h`** - OTLP protocol constants for trace signal
+  - gRPC service method: `TRACE_SERVICE_EXPORT_METHOD`
+  - HTTP endpoint: `DEFAULT_OTLP_TRACES_ENDPOINT`
+  - All constants derived from official OTLP specification
+
+- **`types.h`** - Trace signal type aliases
+  - SpanKind: `OTelSpanKind` (from OpenTelemetry specification)
+  - Export request/response types: `ExportRequest`, `ExportResponse` (from OTLP spec)
+  - Smart pointer convenience aliases: `ExportRequestPtr`, `ExportRequestSharedPtr` (Envoy extensions)
+
+#### `metrics/` - Metrics Signal SDK
+
+Contains metrics-specific types and constants:
+
+- **`constants.h`** - OTLP protocol constants for metrics signal
+  - gRPC service method: `METRICS_SERVICE_EXPORT_METHOD`
+  - HTTP endpoint: `DEFAULT_OTLP_METRICS_ENDPOINT`
+  - All constants derived from official OTLP specification
+
+- **`types.h`** - Metrics signal type aliases
+  - Aggregation temporality: `AggregationTemporality` (from OpenTelemetry specification)
+  - Export request/response types: `ExportRequest`, `ExportResponse` (from OTLP spec)
+  - Smart pointer convenience aliases: `ExportRequestPtr`, `ExportRequestSharedPtr` (Envoy extensions)
+
+#### `logs/` - Logs Signal SDK
+
+Contains logs-specific types and constants:
+
+- **`constants.h`** - OTLP protocol constants for logs signal
+  - gRPC service method: `LOGS_SERVICE_EXPORT_METHOD`
+  - HTTP endpoint: `DEFAULT_OTLP_LOGS_ENDPOINT`
+  - All constants derived from official OTLP specification
+
+- **`types.h`** - Logs signal type aliases
+  - Export request/response types: `ExportRequest`, `ExportResponse` (from OTLP spec)
+  - Smart pointer convenience aliases: `ExportRequestPtr`, `ExportRequestSharedPtr` (Envoy extensions)
 
 #### `common/` - Shared SDK Components
 
-Contains core types and constants used across all telemetry signals:
+Contains only truly shared types used across all telemetry signals:
 
-- **`protocol_constants.h`** - OTLP protocol constants organized by signal
-  - Trace signal: gRPC service methods and HTTP endpoints
-  - Metrics signal: gRPC service methods and HTTP endpoints  
-  - Logs signal: gRPC service methods and HTTP endpoints
-  - All constants derived from official OTLP specification
-
-- **`types.h`** - Common type aliases organized by signal
-  - Common types: Attributes, KeyValue pairs (from OpenTelemetry C++ SDK)
-  - Trace signal: SpanKind, export request/response types (from OTLP spec)
-  - Metrics signal: AggregationTemporality, export request/response types (from OTLP spec)
-  - Logs signal: Export request/response types (from OTLP spec)
-  - Smart pointer convenience aliases (Envoy extensions)
-
-- **`BUILD`** - Build configuration with proper dependencies
+- **`types.h`** - Common type aliases used across all signals
+  - Attribute types: `OTelAttribute`, `OTelAttributes` (from OpenTelemetry C++ SDK)
+  - Key-value pairs: `KeyValue` (from OTLP spec)
+  - **Note**: Signal-specific types have been moved to their respective signal directories
 
 ### Future Implementation (Planned)
-
-#### `trace/` - Trace Signal SDK
-- Span processors and exporters
-- Trace-specific configuration
-- Sampling strategies
-
-#### `metrics/` - Metrics Signal SDK  
-- Metric readers and exporters
-- Aggregation strategies
-- Metrics-specific configuration
-
-#### `logs/` - Logs Signal SDK
-- Log record processors and exporters
-- Logs-specific configuration
 
 #### `resource/` - Resource Detection
 - Resource detectors (environment, process, host)
@@ -81,9 +98,10 @@ Contains core types and constants used across all telemetry signals:
 
 ### Signal Organization
 All code is organized by OpenTelemetry signal type:
-- **Trace**: Distributed tracing functionality
-- **Metrics**: Application and infrastructure metrics  
-- **Logs**: Structured logging with correlation
+- **Trace**: Distributed tracing functionality (`sdk/trace/`)
+- **Metrics**: Application and infrastructure metrics (`sdk/metrics/`)
+- **Logs**: Structured logging with correlation (`sdk/logs/`)
+- **Common**: Truly shared types and utilities (`sdk/common/`)
 
 ### Origin Classification
 Code is annotated by origin:
@@ -101,19 +119,33 @@ Code is annotated by origin:
 ### Including SDK Components
 
 ```cpp
-// For protocol constants
-#include "source/extensions/opentelemetry/sdk/common/protocol_constants.h"
-
-// For common types  
+// For shared common types
 #include "source/extensions/opentelemetry/sdk/common/types.h"
+
+// For trace signal components
+#include "source/extensions/opentelemetry/sdk/trace/constants.h"
+#include "source/extensions/opentelemetry/sdk/trace/types.h"
+
+// For metrics signal components
+#include "source/extensions/opentelemetry/sdk/metrics/constants.h"
+#include "source/extensions/opentelemetry/sdk/metrics/types.h"
+
+// For logs signal components
+#include "source/extensions/opentelemetry/sdk/logs/constants.h"
+#include "source/extensions/opentelemetry/sdk/logs/types.h"
 ```
 
 ### BUILD Dependencies
 
 ```bazel
 deps = [
+    # For complete SDK functionality
     "//source/extensions/opentelemetry/sdk:opentelemetry_sdk_lib",
-    # Or for specific components:
+    
+    # Or for specific signal components:
+    "//source/extensions/opentelemetry/sdk/trace:sdk_trace_lib",
+    "//source/extensions/opentelemetry/sdk/metrics:sdk_metrics_lib",
+    "//source/extensions/opentelemetry/sdk/logs:sdk_logs_lib",
     "//source/extensions/opentelemetry/sdk/common:sdk_common_lib",
 ]
 ```
@@ -121,77 +153,108 @@ deps = [
 ### Namespace Usage
 
 ```cpp
+// For shared types
 using namespace Envoy::Extensions::OpenTelemetry::Sdk::Common;
 
-// Access protocol constants
-auto trace_method = ProtocolConstants::TRACE_SERVICE_EXPORT_METHOD;
-auto trace_endpoint = ProtocolConstants::DEFAULT_OTLP_TRACES_ENDPOINT;
+// For trace signal
+using namespace Envoy::Extensions::OpenTelemetry::Sdk::Trace;
+auto trace_method = Constants::TRACE_SERVICE_EXPORT_METHOD;
+ExportRequestPtr request = std::make_unique<ExportRequest>();
 
-// Use type aliases
-TraceExportRequestPtr request = std::make_unique<TraceExportRequest>();
+// For metrics signal
+using namespace Envoy::Extensions::OpenTelemetry::Sdk::Metrics;
+auto metrics_method = Constants::METRICS_SERVICE_EXPORT_METHOD;
+ExportRequestPtr metrics_request = std::make_unique<ExportRequest>();
+
+// For logs signal
+using namespace Envoy::Extensions::OpenTelemetry::Sdk::Logs;
+auto logs_method = Constants::LOGS_SERVICE_EXPORT_METHOD;
+ExportRequestPtr logs_request = std::make_unique<ExportRequest>();
+
+// Shared attributes
 OTelAttributes attributes;
 ```
 
-## Migration from Common
+## Migration from Previous Structure
 
-This SDK structure replaces `source/common/opentelemetry/` with several improvements:
+This SDK structure replaces the previous mixed organization with signal-based separation:
 
-### Before (Common)
+### Before (Mixed)
 ```
-source/common/opentelemetry/
+source/extensions/opentelemetry/sdk/common/
 ├── protocol_constants.h  # Mixed signal constants
 ├── types.h              # Mixed signal types
-├── otlp_utils.h/cc      # Mixed OTLP utilities
-└── BUILD                # Single build target
+└── BUILD                # Mixed build targets
 ```
 
-### After (SDK)
+### After (Signal-Based)
 ```
 source/extensions/opentelemetry/sdk/
 ├── common/
-│   ├── protocol_constants.h  # Signal-organized constants with annotations
-│   ├── types.h               # Signal-organized types with annotations
-│   └── BUILD                 # Focused build targets
-└── README.md                 # Comprehensive documentation
+│   ├── types.h          # Shared types only
+│   └── BUILD            # Shared build targets
+├── trace/
+│   ├── constants.h      # Trace-specific constants
+│   ├── types.h          # Trace-specific types
+│   └── BUILD            # Trace build targets
+├── metrics/
+│   ├── constants.h      # Metrics-specific constants  
+│   ├── types.h          # Metrics-specific types
+│   └── BUILD            # Metrics build targets
+├── logs/
+│   ├── constants.h      # Logs-specific constants
+│   ├── types.h          # Logs-specific types
+│   └── BUILD            # Logs build targets
+└── README.md           # Complete documentation
 ```
 
 ### Key Improvements
-1. **Signal-based organization**: Clear separation by telemetry signal
+1. **Signal-based organization**: Clear separation by telemetry signal following OpenTelemetry conventions
 2. **Origin annotations**: Code clearly marked by specification origin
-3. **SDK conventions**: Follows official OpenTelemetry C++ SDK structure
-4. **Enhanced documentation**: Comprehensive usage and reference documentation
-5. **Modular build**: Granular build targets for better dependency management
+3. **SDK conventions**: Follows official OpenTelemetry C++ SDK structure exactly
+4. **Modular build**: Granular build targets for better dependency management
+5. **Focused common**: Only truly shared code remains in `common/`
 
 ## Relationship to Exporters
 
 OTLP exporter functionality is kept separate in `source/extensions/opentelemetry/exporters/otlp/`:
 
-- **SDK (this directory)**: Core OpenTelemetry types, constants, and SDK functionality
-- **Exporters**: Protocol-specific export implementations (gRPC, HTTP)
+- **SDK (this directory)**: Core OpenTelemetry types, constants, and SDK functionality organized by signal
+- **Exporters**: Protocol-specific export implementations (gRPC, HTTP) that depend on SDK signal-specific libraries
 
 This separation follows OpenTelemetry architecture where SDK provides core functionality and exporters provide protocol-specific implementations.
 
 ## Limited Scope
 
-This implementation focuses on essential SDK components used by existing Envoy OpenTelemetry integrations. Future expansions will add additional SDK functionality as needed while maintaining this signal-based organization.
+This implementation focuses on essential SDK components used by existing Envoy OpenTelemetry integrations. The signal-based organization provides a clean foundation for future SDK expansions while maintaining compatibility with existing code.
 
 ## Backward Compatibility
 
-Existing code using `source/common/opentelemetry/` should be updated to use the new SDK structure. The namespace has changed from:
+Existing code using the previous structure has been updated to use the new signal-based SDK structure. Key changes:
 
+### Namespace Changes
 ```cpp
-// Old namespace
-Envoy::Common::OpenTelemetry
+// Old mixed namespace
+Envoy::Extensions::OpenTelemetry::Sdk::Common::ProtocolConstants::TRACE_SERVICE_EXPORT_METHOD
 
-// New namespace  
-Envoy::Extensions::OpenTelemetry::Sdk::Common
+// New signal-specific namespace  
+Envoy::Extensions::OpenTelemetry::Sdk::Trace::Constants::TRACE_SERVICE_EXPORT_METHOD
 ```
 
-Build targets have changed from:
+### BUILD Target Changes
 ```bazel
-# Old target
-"//source/common/opentelemetry:opentelemetry_common_lib"
+# Old mixed target
+"//source/extensions/opentelemetry/sdk/common:protocol_constants_lib"
 
-# New target
-"//source/extensions/opentelemetry/sdk:opentelemetry_sdk_lib"
+# New signal-specific target
+"//source/extensions/opentelemetry/sdk/trace:constants_lib"
+```
+
+### Type Alias Changes
+```cpp
+// Old mixed types
+TraceExportRequest, MetricsExportRequest, LogsExportRequest
+
+// New signal-specific types (more consistent)
+Trace::ExportRequest, Metrics::ExportRequest, Logs::ExportRequest
 ```

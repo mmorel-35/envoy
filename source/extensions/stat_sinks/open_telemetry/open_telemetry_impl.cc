@@ -1,6 +1,6 @@
 #include "source/extensions/stat_sinks/open_telemetry/open_telemetry_impl.h"
 
-#include "source/extensions/opentelemetry/sdk/common/protocol_constants.h"
+#include "source/extensions/opentelemetry/sdk/metrics/constants.h"
 #include "source/common/tracing/null_span_impl.h"
 
 namespace Envoy {
@@ -34,7 +34,7 @@ OpenTelemetryGrpcMetricsExporterImpl::OpenTelemetryGrpcMetricsExporterImpl(
     const OtlpOptionsSharedPtr config, Grpc::RawAsyncClientSharedPtr raw_async_client)
     : config_(config), client_(raw_async_client),
       service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(std::string(
-          Envoy::Extensions::OpenTelemetry::Sdk::Common::ProtocolConstants::METRICS_SERVICE_EXPORT_METHOD))) {}
+          Envoy::Extensions::OpenTelemetry::Sdk::Metrics::Constants::METRICS_SERVICE_EXPORT_METHOD))) {}
 
 void OpenTelemetryGrpcMetricsExporterImpl::send(MetricsExportRequestPtr&& export_request) {
   client_->send(service_method_, *export_request, *this, Tracing::NullSpan::instance(),

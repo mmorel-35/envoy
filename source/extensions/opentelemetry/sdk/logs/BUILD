@@ -9,17 +9,25 @@ licenses(["notice"])  # Apache 2
 envoy_package()
 
 envoy_cc_library(
-    name = "types_lib",
-    hdrs = ["types.h"],
+    name = "constants_lib",
+    hdrs = ["constants.h"],
     deps = [
-        "@io_opentelemetry_cpp//api",
-        "@opentelemetry_proto//:common_proto_cc",
+        "@com_google_absl//absl/strings",
     ],
 )
 
 envoy_cc_library(
-    name = "sdk_common_lib",
+    name = "types_lib",
+    hdrs = ["types.h"],
     deps = [
+        "@opentelemetry_proto//:logs_service_proto_cc",
+    ],
+)
+
+envoy_cc_library(
+    name = "sdk_logs_lib",
+    deps = [
+        ":constants_lib",
         ":types_lib",
     ],
 )

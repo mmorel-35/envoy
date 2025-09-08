@@ -2,7 +2,7 @@
 
 #include "source/common/common/logger.h"
 #include "source/common/grpc/status.h"
-#include "source/extensions/opentelemetry/sdk/common/protocol_constants.h"
+#include "source/extensions/opentelemetry/sdk/trace/constants.h"
 #include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
 #include "source/extensions/opentelemetry/exporters/otlp/user_agent.h"
 
@@ -15,7 +15,7 @@ OpenTelemetryGrpcTraceExporter::OpenTelemetryGrpcTraceExporter(
     const Grpc::RawAsyncClientSharedPtr& client)
     : client_(client),
       service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(std::string(
-          Envoy::Extensions::OpenTelemetry::Sdk::Common::ProtocolConstants::TRACE_SERVICE_EXPORT_METHOD))) {}
+          Envoy::Extensions::OpenTelemetry::Sdk::Trace::Constants::TRACE_SERVICE_EXPORT_METHOD))) {}
 
 void OpenTelemetryGrpcTraceExporter::onCreateInitialMetadata(Http::RequestHeaderMap& metadata) {
   metadata.setReferenceUserAgent(OtlpUserAgent::getUserAgentHeader());

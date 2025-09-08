@@ -1,19 +1,19 @@
 #pragma once
 
 #include "source/common/common/logger.h"
-#include "source/extensions/opentelemetry/sdk/common/types.h"
+#include "source/extensions/opentelemetry/sdk/trace/types.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
-// Import common types from SDK
-using namespace Envoy::Extensions::OpenTelemetry::Sdk::Common;
+// Import trace types from SDK
+using namespace Envoy::Extensions::OpenTelemetry::Sdk::Trace;
 
 // Type aliases for backward compatibility
-using ExportTraceServiceRequest = TraceExportRequest;
-using ExportTraceServiceResponse = TraceExportResponse;
+using ExportTraceServiceRequest = ExportRequest;
+using ExportTraceServiceResponse = ExportResponse;
 
 /**
  * @brief Base class for all OpenTelemetry Protocol (OTLP) exporters.
