@@ -34,8 +34,8 @@ class GrpcAccessLoggerImpl
           // OpenTelemetry logging uses LogRecord for both HTTP and TCP, so protobuf::Empty is used
           // as an empty placeholder for the non-used addEntry method.
           // TODO(itamarkam): Don't cache OpenTelemetry loggers by type (HTTP/TCP).
-          Protobuf::Empty, ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportRequest,
-          ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportResponse> {
+          Protobuf::Empty, ::Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::ExportRequest,
+          ::Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::ExportResponse> {
 public:
   GrpcAccessLoggerImpl(
       const Grpc::RawAsyncClientSharedPtr& client,
@@ -46,7 +46,7 @@ public:
 private:
   class OTelLogRequestCallbacks
       : public Grpc::AsyncRequestCallbacks<
-            ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportResponse> {
+            ::Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::ExportResponse> {
   public:
     OTelLogRequestCallbacks(Common::GrpcAccessLoggerStats& stats, uint32_t sending_log_entries,
                             std::function<void(OTelLogRequestCallbacks*)> deletion)

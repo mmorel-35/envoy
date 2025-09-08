@@ -12,7 +12,7 @@ namespace OpenTelemetry {
 
 void validateProtoDescriptors() {
   const auto method = std::string(
-      Envoy::Extensions::OpenTelemetry::Sdk::Logs::Constants::LOGS_SERVICE_EXPORT_METHOD);
+      Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::Constants::LOGS_SERVICE_EXPORT_METHOD);
 
   RELEASE_ASSERT(Protobuf::DescriptorPool::generated_pool()->FindMethodByName(method) != nullptr,
                  "");

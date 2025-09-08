@@ -24,8 +24,10 @@ namespace OpenTelemetry {
 
 namespace {
 // Use centralized type definitions
-using ExportLogsServiceRequest = ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportRequest;
-using ExportLogsServiceResponse = ::Envoy::Extensions::OpenTelemetry::Sdk::Logs::ExportResponse;
+using ExportLogsServiceRequest =
+    ::Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::ExportRequest;
+using ExportLogsServiceResponse =
+    ::Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::ExportResponse;
 
 opentelemetry::proto::common::v1::KeyValue getStringKeyValue(const std::string& key,
                                                              const std::string& value) {
@@ -48,7 +50,7 @@ GrpcAccessLoggerImpl::GrpcAccessLoggerImpl(
                                                             ExportLogsServiceResponse>>(
               client,
               *Protobuf::DescriptorPool::generated_pool()->FindMethodByName(
-                  std::string(Envoy::Extensions::OpenTelemetry::Sdk::Logs::Constants::
+                  std::string(Envoy::Extensions::Common::OpenTelemetry::Sdk::Logs::Constants::
                                   LOGS_SERVICE_EXPORT_METHOD)),
               GrpcCommon::optionalRetryPolicy(config.common_config()), genOTelCallbacksFactory())),
       stats_({ALL_GRPC_ACCESS_LOGGER_STATS(
