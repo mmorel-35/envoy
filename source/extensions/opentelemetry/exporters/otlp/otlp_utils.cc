@@ -1,15 +1,18 @@
 #include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
 
 #include <cstdint>
+#include <string>
+
+#include "source/common/common/fmt.h"
+#include "source/common/common/macros.h"
 
 namespace Envoy {
 namespace Extensions {
+namespace Tracers {
 namespace OpenTelemetry {
-namespace Exporters {
-namespace Otlp {
 
 void OtlpUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& value_proto,
-                                 const Sdk::Common::OTelAttribute& attribute_value) {
+                                 const OTelAttribute& attribute_value) {
   switch (attribute_value.index()) {
   case opentelemetry::common::AttributeType::kTypeBool:
     value_proto.set_bool_value(opentelemetry::nostd::get<bool>(attribute_value) ? true : false);
@@ -42,8 +45,7 @@ void OtlpUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& val
   }
 }
 
-} // namespace Otlp
-} // namespace Exporters
 } // namespace OpenTelemetry
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy

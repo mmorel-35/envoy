@@ -9,25 +9,9 @@ licenses(["notice"])  # Apache 2
 envoy_package()
 
 envoy_cc_library(
-    name = "otlp_utils_lib",
-    srcs = ["otlp_utils.cc"],
-    hdrs = ["otlp_utils.h"],
-    copts = [
-        # Make sure that headers included from opentelemetry-api use Abseil from Envoy
-        # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.14.0/api/BUILD#L32
-        "-DHAVE_ABSEIL",
-    ],
-    deps = [
-        "//source/extensions/opentelemetry/sdk/common:types_lib",
-        "@com_google_absl//absl/strings",
-        "@opentelemetry_proto//:common_proto_cc",
-    ],
-)
-
-envoy_cc_library(
     name = "trace_exporter_lib",
     srcs = [
-        "grpc_trace_exporter.cc", 
+        "grpc_trace_exporter.cc",
         "http_trace_exporter.cc",
     ],
     hdrs = [
@@ -37,6 +21,7 @@ envoy_cc_library(
     ],
     deps = [
         ":otlp_utils_lib",
+        ":user_agent_lib",
         "//envoy/grpc:async_client_manager_interface",
         "//envoy/upstream:cluster_manager_interface",
         "//source/common/grpc:typed_async_client_lib",
@@ -44,13 +29,32 @@ envoy_cc_library(
         "//source/common/http:header_map_lib",
         "//source/common/http:message_lib",
         "//source/common/http:utility_lib",
+        "//source/common/opentelemetry:opentelemetry_common_lib",
         "//source/common/protobuf",
         "//source/common/tracing:trace_context_lib",
-        "//source/extensions/opentelemetry/sdk/common:types_lib",
-        "//source/extensions/opentelemetry/sdk/version:version_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@io_opentelemetry_cpp//api",
         "@opentelemetry_proto//:trace_proto_cc",
         "@opentelemetry_proto//:trace_service_proto_cc",
+    ],
+)
+
+envoy_cc_library(
+    name = "otlp_utils_lib",
+    srcs = ["otlp_utils.cc"],
+    hdrs = ["otlp_utils.h"],
+    deps = [
+        "//source/common/opentelemetry:opentelemetry_common_lib",
+        "@opentelemetry_proto//:common_proto_cc",
+    ],
+)
+
+envoy_cc_library(
+    name = "user_agent_lib",
+    srcs = ["user_agent.cc"],
+    hdrs = ["user_agent.h"],
+    deps = [
+        "//source/common/common:macros",
+        "//source/common/version:version_lib",
     ],
 )

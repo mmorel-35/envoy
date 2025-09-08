@@ -1,17 +1,16 @@
 #pragma once
 
 #include "source/common/common/logger.h"
-#include "source/extensions/opentelemetry/sdk/common/types.h"
+#include "source/common/opentelemetry/types.h"
 
 namespace Envoy {
 namespace Extensions {
+namespace Tracers {
 namespace OpenTelemetry {
-namespace Exporters {
-namespace Otlp {
 
 // Type aliases for backward compatibility
-using ExportTraceServiceRequest = ::Envoy::Extensions::OpenTelemetry::Sdk::Common::TraceExportRequest;
-using ExportTraceServiceResponse = ::Envoy::Extensions::OpenTelemetry::Sdk::Common::TraceExportResponse;
+using ExportTraceServiceRequest = ::Envoy::Common::OpenTelemetry::TraceExportRequest;
+using ExportTraceServiceResponse = ::Envoy::Common::OpenTelemetry::TraceExportResponse;
 
 /**
  * @brief Base class for all OpenTelemetry Protocol (OTLP) exporters.
@@ -48,8 +47,7 @@ public:
 
 using OpenTelemetryTraceExporterPtr = std::unique_ptr<OpenTelemetryTraceExporter>;
 
-} // namespace Otlp
-} // namespace Exporters
 } // namespace OpenTelemetry
+} // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
