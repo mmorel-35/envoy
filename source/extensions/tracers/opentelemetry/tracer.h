@@ -23,6 +23,10 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+// Import common types from SDK
+using Envoy::Extensions::OpenTelemetry::Sdk::Common::OTelAttribute;
+using Envoy::Extensions::OpenTelemetry::Sdk::Trace::OTelSpanKind;
+
 #define OPENTELEMETRY_TRACER_STATS(COUNTER)                                                        \
   COUNTER(spans_sent)                                                                              \
   COUNTER(timer_flushed)                                                                           \

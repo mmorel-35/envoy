@@ -20,6 +20,11 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+// Import common types from SDK
+using Envoy::Extensions::OpenTelemetry::Sdk::Common::OTelAttribute;
+using Envoy::Extensions::OpenTelemetry::Sdk::Common::OTelAttributes;
+using Envoy::Extensions::OpenTelemetry::Sdk::Trace::OTelSpanKind;
+
 class SpanContext;
 
 enum class Decision {
