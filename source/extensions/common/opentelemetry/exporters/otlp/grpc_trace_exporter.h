@@ -1,7 +1,7 @@
 #pragma once
 
 #include "source/common/grpc/typed_async_client.h"
-#include "source/extensions/opentelemetry/exporters/otlp/trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/trace_exporter.h"
 
 namespace Envoy {
 namespace Extensions {

@@ -1,7 +1,7 @@
 #include "source/extensions/stat_sinks/open_telemetry/open_telemetry_impl.h"
 
 #include "source/common/tracing/null_span_impl.h"
-#include "source/extensions/opentelemetry/sdk/metrics/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/metrics/constants.h"
 
 namespace Envoy {
 namespace Extensions {

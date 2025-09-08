@@ -12,8 +12,8 @@
 #include "envoy/stats/stats.h"
 
 #include "source/common/grpc/typed_async_client.h"
-#include "source/extensions/opentelemetry/sdk/common/types.h"
-#include "source/extensions/opentelemetry/sdk/metrics/types.h"
+#include "source/extensions/common/opentelemetry/sdk/common/types.h"
+#include "source/extensions/common/opentelemetry/sdk/metrics/types.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"

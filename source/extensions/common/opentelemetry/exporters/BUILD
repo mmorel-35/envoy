@@ -11,6 +11,6 @@ envoy_extension_package()
 envoy_cc_library(
     name = "exporters_lib",
     deps = [
-        "//source/extensions/opentelemetry/exporters/otlp:trace_exporter_lib",
+        "//source/extensions/common/opentelemetry/exporters/otlp:trace_exporter_lib",
     ],
 )

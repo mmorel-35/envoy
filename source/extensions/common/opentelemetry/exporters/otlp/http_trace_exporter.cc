@@ -1,4 +1,4 @@
-#include "source/extensions/opentelemetry/exporters/otlp/http_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h"
 
 #include <chrono>
 #include <memory>
@@ -8,8 +8,8 @@
 #include "source/common/common/enum_to_int.h"
 #include "source/common/common/logger.h"
 #include "source/common/protobuf/protobuf.h"
-#include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
-#include "source/extensions/opentelemetry/exporters/otlp/user_agent.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/user_agent.h"
 
 namespace Envoy {
 namespace Extensions {

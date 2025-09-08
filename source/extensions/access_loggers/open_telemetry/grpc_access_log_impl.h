@@ -11,8 +11,8 @@
 
 #include "source/common/protobuf/protobuf.h"
 #include "source/extensions/access_loggers/common/grpc_access_logger.h"
-#include "source/extensions/opentelemetry/sdk/common/types.h"
-#include "source/extensions/opentelemetry/sdk/logs/types.h"
+#include "source/extensions/common/opentelemetry/sdk/common/types.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/types.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"
 #include "opentelemetry/proto/logs/v1/logs.pb.h"

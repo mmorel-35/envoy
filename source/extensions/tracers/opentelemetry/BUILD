@@ -44,7 +44,7 @@ envoy_cc_library(
         "//envoy/thread_local:thread_local_interface",
         "//source/common/config:utility_lib",
         "//source/common/tracing:http_tracer_lib",
-        "//source/extensions/opentelemetry/exporters/otlp:trace_exporter_lib",
+        "//source/extensions/common/opentelemetry/exporters/otlp:trace_exporter_lib",
         "//source/extensions/tracers/common:factory_base_lib",
         "//source/extensions/tracers/opentelemetry/resource_detectors:resource_detector_lib",
         "//source/extensions/tracers/opentelemetry/samplers:sampler_lib",

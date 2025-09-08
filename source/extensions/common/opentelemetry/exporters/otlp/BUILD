@@ -31,7 +31,7 @@ envoy_cc_library(
         "//source/common/http:utility_lib",
         "//source/common/protobuf",
         "//source/common/tracing:trace_context_lib",
-        "//source/extensions/opentelemetry/sdk/trace:sdk_trace_lib",
+        "//source/extensions/common/opentelemetry/sdk/trace:sdk_trace_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@io_opentelemetry_cpp//api",
         "@opentelemetry_proto//:trace_proto_cc",
@@ -46,7 +46,7 @@ envoy_cc_library(
     deps = [
         "//source/common/common:fmt_lib",
         "//source/common/common:macros",
-        "//source/extensions/opentelemetry/sdk/common:types_lib",
+        "//source/extensions/common/opentelemetry/sdk/common:types_lib",
         "@opentelemetry_proto//:common_proto_cc",
     ],
 )

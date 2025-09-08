@@ -10,7 +10,7 @@
 #include "envoy/tracing/trace_driver.h"
 
 #include "source/common/common/logger.h"
-#include "source/extensions/opentelemetry/exporters/otlp/grpc_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/grpc_trace_exporter.h"
 #include "source/extensions/tracers/common/factory_base.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 #include "source/extensions/tracers/opentelemetry/samplers/sampler.h"
@@ -22,10 +22,6 @@ namespace Envoy {
 namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
-
-// Import common types from SDK
-using Envoy::Extensions::OpenTelemetry::Sdk::Common::OTelAttribute;
-using Envoy::Extensions::OpenTelemetry::Sdk::Trace::OTelSpanKind;
 
 #define OPENTELEMETRY_TRACER_STATS(COUNTER)                                                        \
   COUNTER(spans_sent)                                                                              \
@@ -52,13 +48,15 @@ public:
                              const StreamInfo::StreamInfo& stream_info, SystemTime start_time,
                              Tracing::Decision tracing_decision,
                              OptRef<const Tracing::TraceContext> trace_context,
-                             OTelSpanKind span_kind);
+                             Envoy::Extensions::OpenTelemetry::Sdk::Trace::Envoy::Extensions::
+                                 OpenTelemetry::Sdk::Trace::OTelSpanKind span_kind);
 
   Tracing::SpanPtr startSpan(const std::string& operation_name,
                              const StreamInfo::StreamInfo& stream_info, SystemTime start_time,
                              const SpanContext& previous_span_context,
                              OptRef<const Tracing::TraceContext> trace_context,
-                             OTelSpanKind span_kind);
+                             Envoy::Extensions::OpenTelemetry::Sdk::Trace::Envoy::Extensions::
+                                 OpenTelemetry::Sdk::Trace::OTelSpanKind span_kind);
 
 private:
   /**
@@ -89,7 +87,8 @@ private:
 class Span : Logger::Loggable<Logger::Id::tracing>, public Tracing::Span {
 public:
   Span(const std::string& name, const StreamInfo::StreamInfo& stream_info, SystemTime start_time,
-       Envoy::TimeSource& time_source, Tracer& parent_tracer, OTelSpanKind span_kind,
+       Envoy::TimeSource& time_source, Tracer& parent_tracer,
+       Envoy::Extensions::OpenTelemetry::Sdk::Trace::OTelSpanKind span_kind,
        bool use_local_decision = false);
 
   // Tracing::Span functions
@@ -133,7 +132,9 @@ public:
 
   std::string getSpanId() const override { return absl::BytesToHexString(span_.span_id()); };
 
-  OTelSpanKind spankind() const { return span_.kind(); }
+  Envoy::Extensions::OpenTelemetry::Sdk::Trace::OTelSpanKind spankind() const {
+    return span_.kind();
+  }
 
   /**
    * @return the operation name set on the span
@@ -168,7 +169,9 @@ public:
   /**
    * Sets a span attribute.
    */
-  void setAttribute(absl::string_view name, const OTelAttribute& value);
+  void setAttribute(absl::string_view name,
+                    const Envoy::Extensions::OpenTelemetry::Sdk::Common::Envoy::Extensions::
+                        OpenTelemetry::Sdk::Common::OTelAttribute& value);
 
   /**
    * Method to access the span for testing.

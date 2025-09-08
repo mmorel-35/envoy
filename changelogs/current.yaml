@@ -219,8 +219,9 @@ removed_config_or_runtime:
 new_features:
 - area: tracing
   change: |
-    Centralized OpenTelemetry constants and helpers under source/extensions/opentelemetry/
-    for shared reuse across tracing and propagation extensions.
+    Moved all OpenTelemetry extension source and tests to source/extensions/common/opentelemetry/
+    and test/extensions/common/opentelemetry/ for better reuse and organization across different
+    extension types (tracers, access loggers, stat sinks).
 - area: stats
   change: |
     Added support to remove unused metrics from memory for extensions that

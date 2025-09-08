@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "source/extensions/opentelemetry/sdk/common/types.h"
+#include "source/extensions/common/opentelemetry/sdk/common/types.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"
 

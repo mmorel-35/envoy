@@ -1,4 +1,4 @@
-#include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/otlp_utils.h"
 
 #include <cstdint>
 #include <string>

@@ -4,7 +4,7 @@ This directory contains the OpenTelemetry SDK implementation for Envoy, organize
 
 ## Overview
 
-The `source/extensions/opentelemetry/sdk/` directory provides SDK functionality organized by signal type (trace, metrics, logs), following OpenTelemetry signal-based architecture and improving maintainability.
+The `source/extensions/common/opentelemetry/sdk/` directory provides SDK functionality organized by signal type (trace, metrics, logs), following OpenTelemetry signal-based architecture and improving maintainability.
 
 **Reference**: Inspired by [opentelemetry-cpp/sdk/src](https://github.com/open-telemetry/opentelemetry-cpp/tree/main/sdk/src)
 
@@ -13,7 +13,7 @@ The `source/extensions/opentelemetry/sdk/` directory provides SDK functionality 
 The SDK is organized by OpenTelemetry signals and components, following official SDK conventions:
 
 ```
-source/extensions/opentelemetry/sdk/
+source/extensions/common/opentelemetry/sdk/
 ├── common/          # Shared types used across all signals
 ├── trace/           # Trace signal SDK types and constants
 ├── metrics/         # Metrics signal SDK types and constants
@@ -120,19 +120,19 @@ Code is annotated by origin:
 
 ```cpp
 // For shared common types
-#include "source/extensions/opentelemetry/sdk/common/types.h"
+#include "source/extensions/common/opentelemetry/sdk/common/types.h"
 
 // For trace signal components
-#include "source/extensions/opentelemetry/sdk/trace/constants.h"
-#include "source/extensions/opentelemetry/sdk/trace/types.h"
+#include "source/extensions/common/opentelemetry/sdk/trace/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/trace/types.h"
 
 // For metrics signal components
-#include "source/extensions/opentelemetry/sdk/metrics/constants.h"
-#include "source/extensions/opentelemetry/sdk/metrics/types.h"
+#include "source/extensions/common/opentelemetry/sdk/metrics/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/metrics/types.h"
 
 // For logs signal components
-#include "source/extensions/opentelemetry/sdk/logs/constants.h"
-#include "source/extensions/opentelemetry/sdk/logs/types.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/types.h"
 ```
 
 ### BUILD Dependencies
@@ -140,12 +140,12 @@ Code is annotated by origin:
 ```bazel
 deps = [
     # For complete SDK functionality
-    "//source/extensions/opentelemetry/sdk:opentelemetry_sdk_lib",
+    "//source/extensions/common/opentelemetry/sdk:opentelemetry_sdk_lib",
     # Or for specific signal components:
-    "//source/extensions/opentelemetry/sdk/trace:sdk_trace_lib",
-    "//source/extensions/opentelemetry/sdk/metrics:sdk_metrics_lib",
-    "//source/extensions/opentelemetry/sdk/logs:sdk_logs_lib",
-    "//source/extensions/opentelemetry/sdk/common:sdk_common_lib",
+    "//source/extensions/common/opentelemetry/sdk/trace:sdk_trace_lib",
+    "//source/extensions/common/opentelemetry/sdk/metrics:sdk_metrics_lib",
+    "//source/extensions/common/opentelemetry/sdk/logs:sdk_logs_lib",
+    "//source/extensions/common/opentelemetry/sdk/common:sdk_common_lib",
 ]
 ```
 
@@ -176,7 +176,7 @@ OTelAttributes attributes;
 
 ## Relationship to Exporters
 
-OTLP exporter functionality is kept separate in `source/extensions/opentelemetry/exporters/otlp/`:
+OTLP exporter functionality is kept separate in `source/extensions/common/opentelemetry/exporters/otlp/`:
 
 - **SDK (this directory)**: Core OpenTelemetry types, constants, and SDK functionality organized by signal
 - **Exporters**: Protocol-specific export implementations (gRPC, HTTP) that depend on SDK signal-specific libraries

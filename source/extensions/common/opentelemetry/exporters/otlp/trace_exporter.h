@@ -1,7 +1,7 @@
 #pragma once
 
 #include "source/common/common/logger.h"
-#include "source/extensions/opentelemetry/sdk/trace/types.h"
+#include "source/extensions/common/opentelemetry/sdk/trace/types.h"
 
 namespace Envoy {
 namespace Extensions {

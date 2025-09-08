@@ -1,10 +1,10 @@
-#include "source/extensions/opentelemetry/exporters/otlp/grpc_trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/grpc_trace_exporter.h"
 
 #include "source/common/common/logger.h"
 #include "source/common/grpc/status.h"
-#include "source/extensions/opentelemetry/exporters/otlp/otlp_utils.h"
-#include "source/extensions/opentelemetry/exporters/otlp/user_agent.h"
-#include "source/extensions/opentelemetry/sdk/trace/constants.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/user_agent.h"
+#include "source/extensions/common/opentelemetry/sdk/trace/constants.h"
 
 namespace Envoy {
 namespace Extensions {

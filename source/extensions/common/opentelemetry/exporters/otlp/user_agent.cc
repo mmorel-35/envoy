@@ -1,4 +1,4 @@
-#include "source/extensions/opentelemetry/exporters/otlp/user_agent.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/user_agent.h"
 
 #include "source/common/common/fmt.h"
 #include "source/common/common/macros.h"

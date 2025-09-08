@@ -3,7 +3,7 @@
 #include "source/common/common/assert.h"
 #include "source/common/common/fmt.h"
 #include "source/common/protobuf/protobuf.h"
-#include "source/extensions/opentelemetry/sdk/logs/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/constants.h"
 
 namespace Envoy {
 namespace Extensions {

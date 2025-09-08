@@ -8,8 +8,8 @@
 #include "source/common/config/utility.h"
 #include "source/common/grpc/typed_async_client.h"
 #include "source/extensions/access_loggers/common/grpc_access_logger_clients.h"
-#include "source/extensions/opentelemetry/sdk/logs/constants.h"
-#include "source/extensions/opentelemetry/sdk/logs/types.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/constants.h"
+#include "source/extensions/common/opentelemetry/sdk/logs/types.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"
 #include "opentelemetry/proto/logs/v1/logs.pb.h"

@@ -20,9 +20,9 @@ namespace Common {
  * Reference: https://github.com/open-telemetry/opentelemetry-cpp
  *
  * Note: Signal-specific types are located in their respective signal directories:
- * - Trace types: source/extensions/opentelemetry/sdk/trace/types.h
- * - Metrics types: source/extensions/opentelemetry/sdk/metrics/types.h
- * - Logs types: source/extensions/opentelemetry/sdk/logs/types.h
+ * - Trace types: source/extensions/common/opentelemetry/sdk/trace/types.h
+ * - Metrics types: source/extensions/common/opentelemetry/sdk/metrics/types.h
+ * - Logs types: source/extensions/common/opentelemetry/sdk/logs/types.h
  */
 
 /**

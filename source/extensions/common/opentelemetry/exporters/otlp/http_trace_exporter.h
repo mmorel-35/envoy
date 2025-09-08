@@ -9,7 +9,7 @@
 #include "source/common/http/headers.h"
 #include "source/common/http/message_impl.h"
 #include "source/common/http/utility.h"
-#include "source/extensions/opentelemetry/exporters/otlp/trace_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/trace_exporter.h"
 
 #include "opentelemetry/proto/collector/trace/v1/trace_service.pb.h"
 
