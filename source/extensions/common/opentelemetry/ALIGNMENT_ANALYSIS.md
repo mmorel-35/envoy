@@ -6,10 +6,11 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 
 ## Key Findings
 
-- **Easy Mappings**: 40% of files have direct correspondence with upstream
-- **Needs Clarification**: 35% of files aggregate multiple upstream concepts or have significant customization  
+- **Easy Mappings**: 38% of files have direct correspondence with upstream
+- **Needs Clarification**: 37% of files aggregate multiple upstream concepts or have significant customization  
 - **Envoy-specific**: 25% of files are unique to Envoy or heavily customized
-- **Missing in Envoy**: Several upstream features are not yet implemented (separate propagators, metrics exporters, baggage propagation, some resource detectors)
+- **Active Implementation**: Envoy has working OTLP exporters for logs and metrics, implementing significant portions of the OpenTelemetry specification
+- **Missing in Envoy**: Several upstream features are not yet implemented (separate propagators, file exporters, baggage propagation, some resource detectors)
 
 ## Complete File Mapping
 
@@ -122,6 +123,27 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 | `envoy/tracing/trace_reason.h` | No equivalent | Envoy-specific | Envoy-specific trace reasons |
 | `envoy/tracing/custom_tag.h` | No equivalent | Envoy-specific | Custom tag interface |
 | `envoy/server/tracer_config.h` | No equivalent | Envoy-specific | Server-level tracer configuration |
+| **Access Logger (Logs Export)** | | | |
+| `source/extensions/access_loggers/open_telemetry/access_log_impl.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h` | Needs Clarification | Envoy access log integration with OTel logs |
+| `source/extensions/access_loggers/open_telemetry/access_log_impl.cc` | `exporters/otlp/src/otlp_grpc_log_record_exporter.cc` | Needs Clarification | Implementation with Envoy-specific formatting |
+| `source/extensions/access_loggers/open_telemetry/grpc_access_log_impl.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h` | Easy | gRPC log exporter interface |
+| `source/extensions/access_loggers/open_telemetry/grpc_access_log_impl.cc` | `exporters/otlp/src/otlp_grpc_log_record_exporter.cc` | Easy | gRPC log exporter implementation |
+| `source/extensions/access_loggers/open_telemetry/substitution_formatter.h` | No equivalent | Envoy-specific | Envoy log format substitution for OTel |
+| `source/extensions/access_loggers/open_telemetry/substitution_formatter.cc` | No equivalent | Envoy-specific | Implementation |
+| `source/extensions/access_loggers/open_telemetry/access_log_proto_descriptors.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_log_recordable.h` | Needs Clarification | Proto descriptor management |
+| `source/extensions/access_loggers/open_telemetry/access_log_proto_descriptors.cc` | `exporters/otlp/src/otlp_log_recordable.cc` | Needs Clarification | Implementation |
+| `source/extensions/access_loggers/open_telemetry/config.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter_factory.h` | Easy | Log exporter factory |
+| `source/extensions/access_loggers/open_telemetry/config.cc` | `exporters/otlp/src/otlp_grpc_log_record_exporter_factory.cc` | Easy | Factory implementation |
+| **Stat Sink (Metrics Export)** | | | |
+| `source/extensions/stat_sinks/open_telemetry/open_telemetry_impl.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_metric_exporter.h` | Needs Clarification | Envoy stats integration with OTel metrics |
+| `source/extensions/stat_sinks/open_telemetry/open_telemetry_impl.cc` | `exporters/otlp/src/otlp_grpc_metric_exporter.cc` | Needs Clarification | Implementation with Envoy stats conversion |
+| `source/extensions/stat_sinks/open_telemetry/open_telemetry_proto_descriptors.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_metric_utils.h` | Easy | Metrics proto utilities |
+| `source/extensions/stat_sinks/open_telemetry/open_telemetry_proto_descriptors.cc` | `exporters/otlp/src/otlp_metric_utils.cc` | Easy | Implementation |
+| `source/extensions/stat_sinks/open_telemetry/config.h` | `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_metric_exporter_factory.h` | Easy | Metrics exporter factory |
+| `source/extensions/stat_sinks/open_telemetry/config.cc` | `exporters/otlp/src/otlp_grpc_metric_exporter_factory.cc` | Easy | Factory implementation |
+| **API Definitions for Logs and Metrics** | | | |
+| `api/envoy/extensions/access_loggers/open_telemetry/v3/logs_service.proto` | No equivalent | Envoy-specific | Envoy-specific logs service configuration |
+| `api/envoy/extensions/stat_sinks/open_telemetry/v3/open_telemetry.proto` | No equivalent | Envoy-specific | Envoy-specific metrics sink configuration |
 
 ## Areas Requiring Clarification
 
@@ -152,6 +174,22 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 
 **Recommendation**: Maintain adapter pattern but ensure clear separation of concerns.
 
+### 4. Metrics and Logs Integration
+**Issue**: Envoy implements OTLP exporters for metrics and logs but integrates them through Envoy-specific interfaces.
+
+**Upstream Structure**:
+- `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h` - gRPC logs exporter
+- `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_metric_exporter.h` - gRPC metrics exporter
+- `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h` - HTTP logs exporter
+- `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_metric_exporter.h` - HTTP metrics exporter
+
+**Envoy Implementation**:
+- `source/extensions/access_loggers/open_telemetry/` - Logs export through access logger interface
+- `source/extensions/stat_sinks/open_telemetry/` - Metrics export through stats sink interface
+- Uses Envoy-specific formatting and conversion logic
+
+**Recommendation**: Maintain current Envoy integration patterns while ensuring compatibility with upstream exporter interfaces.
+
 ### 3. Resource Detection Extensibility
 **Issue**: Envoy has vendor-specific resource detectors not present upstream.
 
@@ -176,13 +214,14 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 - **Random ID Generator**: `sdk/include/opentelemetry/sdk/trace/random_id_generator.h`
 - **Custom ID Generator Interface**: `sdk/include/opentelemetry/sdk/trace/id_generator.h`
 
-### 4. Metrics Support (Partial Implementation)
-- Envoy has type definitions but no actual metrics exporters
-- Upstream has full metrics SDK: `sdk/include/opentelemetry/sdk/metrics/`
+### 4. HTTP Exporters (Not Implemented)
+- **HTTP Log Record Exporter**: `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h`
+- **HTTP Metrics Exporter**: `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_metric_exporter.h`
 
-### 5. Logs Support (Type Definitions Only)
-- Envoy has type definitions but no log exporters
-- Upstream has log SDK: `sdk/include/opentelemetry/sdk/logs/`
+### 5. File Exporters (Not Implemented)
+- **File Log Record Exporter**: `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_file_log_record_exporter.h`
+- **File Metrics Exporter**: `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_file_metric_exporter.h`
+- **File Span Exporter**: `exporters/otlp/include/opentelemetry/exporters/otlp/otlp_file_exporter.h`
 
 ## Recommended Folder Structure
 
@@ -241,6 +280,12 @@ source/extensions/common/opentelemetry/
     └── trace_context_bridge.h       # Bridge Envoy and OTel contexts
 ```
 
+### Note on Access Loggers and Stat Sinks
+The following components implement OpenTelemetry logs and metrics export but remain in their current locations to preserve Envoy's modular architecture:
+
+- `source/extensions/access_loggers/open_telemetry/` - OTLP logs export through Envoy's access logger interface
+- `source/extensions/stat_sinks/open_telemetry/` - OTLP metrics export through Envoy's stats sink interface
+
 ## Integration Points with Envoy Infrastructure
 
 ### Current Integration Points
@@ -248,11 +293,15 @@ source/extensions/common/opentelemetry/
 2. **HTTP Header Extraction**: Custom integration with Envoy's HTTP header APIs
 3. **Stats Integration**: Envoy-specific metrics and statistics
 4. **Configuration**: Proto-based configuration through Envoy's extension framework
+5. **Access Logging**: OpenTelemetry logs export through `source/extensions/access_loggers/open_telemetry/`
+6. **Metrics Export**: OpenTelemetry metrics export through `source/extensions/stat_sinks/open_telemetry/`
 
 ### Recommended Separation
 1. **Pure OTel Components**: Move to `source/extensions/common/opentelemetry/`
 2. **Envoy Adapters**: Keep in `source/extensions/tracers/opentelemetry/`
 3. **Configuration**: Maintain current proto structure for Envoy-specific config
+4. **Logs Export**: Keep `source/extensions/access_loggers/open_telemetry/` for access logging integration
+5. **Metrics Export**: Keep `source/extensions/stat_sinks/open_telemetry/` for stats sink integration
 
 ## Future Alignment Opportunities
 
@@ -268,9 +317,10 @@ source/extensions/common/opentelemetry/
 - Extract generic resource detection patterns for contribution to upstream
 - Maintain vendor-specific detectors in Envoy
 
-### 4. Metrics and Logs Integration
-- Complete metrics SDK implementation
-- Add log exporter support following upstream patterns
+### 4. HTTP and File Exporters
+- Implement HTTP exporters for traces, logs, and metrics following upstream patterns
+- Add file exporters for offline processing and debugging
+- Enable configuration flexibility between gRPC, HTTP, and file export options
 
 ## Open Questions for Maintainers
 
@@ -290,6 +340,6 @@ source/extensions/common/opentelemetry/
 
 ## Conclusion
 
-This analysis reveals that while Envoy has comprehensive OpenTelemetry support, there are significant opportunities for better alignment with upstream structure and patterns. The recommended reorganization would improve maintainability, facilitate upstream contributions, and enable easier adoption of new OpenTelemetry features while preserving Envoy-specific customizations where necessary.
+This analysis reveals that Envoy has extensive OpenTelemetry support with working implementations for all three telemetry signals (traces, logs, metrics). While there are significant opportunities for better alignment with upstream structure and patterns, Envoy successfully implements core OTLP export functionality through its gRPC exporters. The recommended reorganization would improve maintainability, facilitate upstream contributions, and enable easier adoption of new OpenTelemetry features while preserving Envoy-specific customizations where necessary.
 
 The key to successful alignment is maintaining clear separation between pure OpenTelemetry components that can closely follow upstream patterns and Envoy-specific adapters that bridge the integration points with Envoy's infrastructure.
