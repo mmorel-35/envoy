@@ -18,6 +18,12 @@ behavior_changes:
 
 minor_behavior_changes:
 # *Changes that may cause incompatibilities for some users, but should not for most*
+- area: opentelemetry 
+  change: |
+    Updated C++ namespaces for OTLP exporter and all dependent code from 
+    ``Envoy::Extensions::Tracers::OpenTelemetry`` to 
+    ``Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP`` 
+    to reflect correct directory organization after refactoring.
 - area: tap
   change: |
     Previously, streamed trace buffered data was only flushed when it reached the configured size.
