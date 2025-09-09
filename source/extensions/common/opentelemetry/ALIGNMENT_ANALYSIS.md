@@ -10,7 +10,9 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 - **Needs Clarification**: 37% of files aggregate multiple upstream concepts or have significant customization  
 - **Envoy-specific**: 25% of files are unique to Envoy or heavily customized
 - **Active Implementation**: Envoy has working OTLP exporters for logs and metrics, implementing significant portions of the OpenTelemetry specification
-- **Missing in Envoy**: Several upstream features are not yet implemented (separate propagators, file exporters, baggage propagation, some resource detectors)
+- **Ongoing Reorganization**: Movement from `source/extensions/tracers/opentelemetry/` to `source/extensions/common/opentelemetry/` has begun (commit 258e22c), with centralized constants and utilities already moved
+- **Planned Propagator Support**: Isolated propagator handling is being developed in `source/extensions/propagators/` (PR #40989) to provide separate propagation components
+- **Missing in Envoy**: Several upstream features are not yet implemented (file exporters, baggage propagation, some resource detectors)
 
 ## Complete File Mapping
 
@@ -148,18 +150,23 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 ## Areas Requiring Clarification
 
 ### 1. Propagation Handling
-**Issue**: Envoy integrates propagation directly into the tracer implementation rather than using separate propagator classes.
+**Current Status**: Envoy is transitioning from embedded propagation to isolated propagator components.
 
 **Upstream Structure**:
 - `api/include/opentelemetry/trace/propagation/http_trace_context.h` - W3C Trace Context
 - `api/include/opentelemetry/trace/propagation/b3_propagator.h` - B3 propagation
 - `api/include/opentelemetry/trace/propagation/jaeger.h` - Jaeger propagation
 
-**Envoy Implementation**:
+**Current Envoy Implementation**:
 - Propagation logic embedded in `source/extensions/tracers/opentelemetry/tracer.cc`
 - Span context extraction in `source/extensions/tracers/opentelemetry/span_context_extractor.cc`
 
-**Recommendation**: Consider extracting propagation logic into separate components aligned with upstream structure.
+**Planned Changes**:
+- **New Structure**: `source/extensions/propagators/` (PR #40989) for isolated propagator handling
+- **Adapter Pattern**: Text map propagators can be implemented according to OpenTelemetry specification with adapters bridging to Envoy's existing infrastructure
+- **Compatibility**: Existing tracer integration points maintained while adding standards-compliant propagators
+
+**Recommendation**: This planned reorganization aligns well with upstream patterns and will enable better code reuse and standards compliance.
 
 ### 2. Tracer Adapter Pattern
 **Issue**: Envoy uses an adapter pattern to integrate with its existing tracing infrastructure, while upstream provides direct SDK usage.
@@ -201,10 +208,12 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 
 ## Missing OpenTelemetry Features in Envoy
 
-### 1. Propagators (Not Implemented)
-- **B3 Propagator**: `api/include/opentelemetry/trace/propagation/b3_propagator.h`
-- **Jaeger Propagator**: `api/include/opentelemetry/trace/propagation/jaeger.h`
-- **Baggage Propagation**: `api/include/opentelemetry/baggage/`
+### 1. Propagators (In Development)
+- **Status**: Isolated propagator support being developed in `source/extensions/propagators/` (PR #40989)
+- **B3 Propagator**: Will align with `api/include/opentelemetry/trace/propagation/b3_propagator.h`
+- **Jaeger Propagator**: Will align with `api/include/opentelemetry/trace/propagation/jaeger.h`
+- **W3C Trace Context**: Current embedded implementation to be complemented with standards-compliant propagators
+- **Baggage Propagation**: `api/include/opentelemetry/baggage/` - Not yet implemented
 
 ### 2. Span Processors (Partially Implemented)
 - **Batch Span Processor**: `sdk/include/opentelemetry/sdk/trace/batch_span_processor.h`
@@ -225,63 +234,80 @@ This document provides a comprehensive analysis of all OpenTelemetry-related fil
 
 ## Recommended Folder Structure
 
-To improve alignment with upstream and facilitate future synchronization, the following structure is recommended for `source/extensions/common/opentelemetry/`:
+Based on ongoing reorganization efforts (commit 258e22c) and planned propagator development (PR #40989), the following structure builds on current progress for `source/extensions/common/opentelemetry/`:
 
 ```
-source/extensions/common/opentelemetry/
-├── api/                              # API-level utilities
+source/extensions/common/opentelemetry/        # Current centralization target
+├── api/                                       # API-level utilities
 │   ├── trace/
-│   │   ├── span_context.h           # From current tracer implementation
-│   │   └── propagation/             # Future propagators
-│   │       ├── b3_propagator.h
-│   │       ├── w3c_propagator.h
-│   │       └── jaeger_propagator.h
+│   │   └── span_context.h                    # From current tracer implementation
 │   └── context/
-│       └── context_utils.h          # Context management utilities
-├── sdk/                             # SDK implementations (current)
+│       └── context_utils.h                   # Context management utilities
+├── sdk/                                      # SDK implementations (ALREADY MOVED)
 │   ├── common/
-│   │   ├── types.h
-│   │   └── constants.h
+│   │   ├── types.h                          # ✓ Already centralized
+│   │   └── constants.h                      # ✓ Already centralized
 │   ├── trace/
-│   │   ├── types.h
-│   │   ├── constants.h
-│   │   ├── samplers/                # Align with upstream sampler structure
+│   │   ├── types.h                          # ✓ Already centralized
+│   │   ├── constants.h                      # ✓ Already centralized
+│   │   ├── samplers/                        # MOVE FROM tracers/opentelemetry/
 │   │   │   ├── sampler.h
 │   │   │   ├── always_on/
 │   │   │   ├── parent_based/
 │   │   │   ├── trace_id_ratio_based/
-│   │   │   └── dynatrace/           # Vendor-specific
-│   │   ├── exporters/               # Move from current location
-│   │   │   └── otlp/
-│   │   └── resource_detectors/      # Move from tracer extension
+│   │   │   └── dynatrace/                   # Vendor-specific
+│   │   └── resource_detectors/              # MOVE FROM tracers/opentelemetry/
 │   │       ├── resource_detector.h
 │   │       ├── environment/
 │   │       ├── static/
 │   │       └── dynatrace/
 │   ├── logs/
-│   │   ├── types.h
-│   │   └── constants.h
+│   │   ├── types.h                          # ✓ Already centralized  
+│   │   └── constants.h                      # ✓ Already centralized
 │   └── metrics/
-│       ├── types.h
-│       └── constants.h
-├── exporters/                       # Reorganized from current structure
+│       ├── types.h                          # ✓ Already centralized
+│       └── constants.h                      # ✓ Already centralized
+├── exporters/                               # ALREADY MOVED
 │   └── otlp/
-│       ├── trace_exporter.h
-│       ├── grpc_trace_exporter.h
-│       ├── grpc_trace_exporter.cc
-│       ├── http_trace_exporter.h
-│       ├── http_trace_exporter.cc
-│       ├── otlp_utils.h
-│       ├── otlp_utils.cc
-│       ├── user_agent.h
-│       └── user_agent.cc
-└── util/                            # Envoy-specific utilities
-    ├── envoy_tracer_adapter.h       # Adapter pattern implementation
-    └── trace_context_bridge.h       # Bridge Envoy and OTel contexts
+│       ├── trace_exporter.h                 # ✓ Already centralized
+│       ├── grpc_trace_exporter.h            # ✓ Already centralized
+│       ├── grpc_trace_exporter.cc           # ✓ Already centralized
+│       ├── http_trace_exporter.h            # ✓ Already centralized
+│       ├── http_trace_exporter.cc           # ✓ Already centralized
+│       ├── otlp_utils.h                     # ✓ Already centralized
+│       ├── otlp_utils.cc                    # ✓ Already centralized
+│       ├── user_agent.h                     # ✓ Already centralized
+│       └── user_agent.cc                    # ✓ Already centralized
+└── util/                                    # Future Envoy-specific utilities
+    ├── envoy_tracer_adapter.h               # Adapter pattern implementation
+    └── trace_context_bridge.h               # Bridge Envoy and OTel contexts
+
+source/extensions/propagators/               # NEW ISOLATED PROPAGATORS (PR #40989)
+├── text_map/
+│   ├── propagator.h                         # Base text map propagator interface
+│   ├── w3c_trace_context/
+│   │   ├── config.h
+│   │   ├── config.cc
+│   │   └── w3c_propagator.h
+│   ├── b3/
+│   │   ├── config.h
+│   │   ├── config.cc
+│   │   └── b3_propagator.h
+│   └── jaeger/
+│       ├── config.h
+│       ├── config.cc
+│       └── jaeger_propagator.h
+└── adapters/                                # Adapters for Envoy integration
+    ├── text_map_adapter.h                   # Bridge propagators to Envoy infrastructure
+    └── trace_context_adapter.h             # Adapt OTel context to Envoy context
 ```
 
-### Note on Access Loggers and Stat Sinks
-The following components implement OpenTelemetry logs and metrics export but remain in their current locations to preserve Envoy's modular architecture:
+### Note on Current Reorganization
+**Ongoing Changes**: Commit 258e22c has already begun centralizing OpenTelemetry components by moving constants, types, and exporters from `source/extensions/tracers/opentelemetry/` to `source/extensions/common/opentelemetry/`. This aligns with the recommended structure above.
+
+**Remaining Work**: Samplers and resource detectors from the tracers directory can be moved to complete the centralization, while maintaining the tracer adapter in the tracers directory for Envoy integration.
+
+**Access Loggers and Stat Sinks**: The following components implement OpenTelemetry logs and metrics export but remain in their current locations to preserve Envoy's modular architecture:
 
 - `source/extensions/access_loggers/open_telemetry/` - OTLP logs export through Envoy's access logger interface
 - `source/extensions/stat_sinks/open_telemetry/` - OTLP metrics export through Envoy's stats sink interface
@@ -305,41 +331,56 @@ The following components implement OpenTelemetry logs and metrics export but rem
 
 ## Future Alignment Opportunities
 
-### 1. Propagator Standardization
-- Implement upstream-compatible propagators in `source/extensions/common/opentelemetry/api/trace/propagation/`
-- Replace embedded propagation logic with standard propagator usage
+### 1. Propagator Standardization (In Progress)
+- **Status**: Isolated propagator implementation in development (PR #40989)
+- Implement upstream-compatible propagators in `source/extensions/propagators/`
+- **Adapter Integration**: Propagators will use adapter pattern to integrate with Envoy's existing trace context infrastructure
+- **Standards Compliance**: Enable W3C Trace Context, B3, and Jaeger propagation according to OpenTelemetry specification
+- Replace embedded propagation logic with standardized propagator usage
 
-### 2. Span Processor Implementation
+### 2. Complete Centralization (Ongoing)
+- **Status**: Centralization started with commit 258e22c moving constants, types, and exporters
+- Move remaining samplers from `source/extensions/tracers/opentelemetry/samplers/` to `source/extensions/common/opentelemetry/sdk/trace/samplers/`
+- Move resource detectors from `source/extensions/tracers/opentelemetry/resource_detectors/` to `source/extensions/common/opentelemetry/sdk/trace/resource_detectors/`
+- Maintain tracer adapter components in `source/extensions/tracers/opentelemetry/` for Envoy integration
 - Implement batch and simple span processors following upstream patterns
 - Enable configuration of span processing strategies
 
-### 3. Resource Detector Contribution
+### 3. Span Processor Implementation
+- Implement batch and simple span processors following upstream patterns
+- Enable configuration of span processing strategies
+
+### 4. Resource Detector Contribution
 - Extract generic resource detection patterns for contribution to upstream
 - Maintain vendor-specific detectors in Envoy
 
-### 4. HTTP and File Exporters
+### 5. HTTP and File Exporters
 - Implement HTTP exporters for traces, logs, and metrics following upstream patterns
 - Add file exporters for offline processing and debugging
 - Enable configuration flexibility between gRPC, HTTP, and file export options
 
 ## Open Questions for Maintainers
 
-1. **Propagation Strategy**: Should Envoy adopt upstream propagator pattern or maintain current embedded approach for performance reasons?
+1. **Propagation Strategy**: With the planned `source/extensions/propagators/` structure, how should the adapter pattern integrate propagators with Envoy's existing trace context infrastructure?
 
-2. **Vendor Extensions**: What's the policy for vendor-specific extensions (like Dynatrace samplers)? Should they remain Envoy-specific or be contributed upstream?
+2. **Centralization Progress**: Should the remaining samplers and resource detectors be moved from `source/extensions/tracers/opentelemetry/` to complete the centralization started in commit 258e22c?
 
-3. **Configuration Migration**: Should we maintain current proto-based configuration or move toward upstream configuration patterns?
+3. **Vendor Extensions**: What's the policy for vendor-specific extensions (like Dynatrace samplers)? Should they remain Envoy-specific or be contributed upstream?
 
-4. **Performance Considerations**: Are there performance implications of adopting upstream patterns that conflict with Envoy's requirements?
+4. **Configuration Migration**: Should we maintain current proto-based configuration or move toward upstream configuration patterns?
 
-5. **API Compatibility**: How do we balance alignment with upstream against Envoy's existing tracer interface stability?
+5. **Performance Considerations**: Are there performance implications of adopting upstream patterns that conflict with Envoy's requirements?
 
-6. **Resource Detector Strategy**: Should environment-based resource detection be moved to use upstream resource detectors?
+6. **API Compatibility**: How do we balance alignment with upstream against Envoy's existing tracer interface stability?
 
-7. **Testing Strategy**: How should we ensure compatibility between Envoy's adaptations and upstream OTel behavior?
+7. **Resource Detector Strategy**: Should environment-based resource detection be moved to use upstream resource detectors?
+
+8. **Testing Strategy**: How should we ensure compatibility between Envoy's adaptations and upstream OTel behavior?
 
 ## Conclusion
 
-This analysis reveals that Envoy has extensive OpenTelemetry support with working implementations for all three telemetry signals (traces, logs, metrics). While there are significant opportunities for better alignment with upstream structure and patterns, Envoy successfully implements core OTLP export functionality through its gRPC exporters. The recommended reorganization would improve maintainability, facilitate upstream contributions, and enable easier adoption of new OpenTelemetry features while preserving Envoy-specific customizations where necessary.
+This analysis reveals that Envoy has extensive OpenTelemetry support with working implementations for all three telemetry signals (traces, logs, metrics). Ongoing reorganization efforts (commit 258e22c) have begun centralizing components in `source/extensions/common/opentelemetry/`, and planned propagator development (PR #40989) will address one of the key missing standards-compliant features.
 
-The key to successful alignment is maintaining clear separation between pure OpenTelemetry components that can closely follow upstream patterns and Envoy-specific adapters that bridge the integration points with Envoy's infrastructure.
+While there are significant opportunities for better alignment with upstream structure and patterns, Envoy successfully implements core OTLP export functionality through its gRPC exporters. The recommended reorganization builds on current progress and would further improve maintainability, facilitate upstream contributions, and enable easier adoption of new OpenTelemetry features while preserving Envoy-specific customizations where necessary.
+
+The key to successful alignment is maintaining clear separation between pure OpenTelemetry components that can closely follow upstream patterns and Envoy-specific adapters that bridge the integration points with Envoy's infrastructure. The planned propagator structure demonstrates this approach well, providing standards-compliant propagators with adapter integration for Envoy's existing trace context infrastructure.
