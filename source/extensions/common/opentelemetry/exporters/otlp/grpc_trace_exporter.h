@@ -5,8 +5,10 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 /**
  * Exporter client for OTLP Traces. Provides abstraction on top of gRPC stream.
@@ -31,7 +33,9 @@ public:
   const Protobuf::MethodDescriptor& service_method_;
 };
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy

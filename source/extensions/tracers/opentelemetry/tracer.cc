@@ -20,6 +20,9 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+// Import OTLP utilities from new namespace
+using OtlpUtils = ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OtlpUtils;
+
 constexpr absl::string_view kDefaultVersion = "00";
 
 using opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest;

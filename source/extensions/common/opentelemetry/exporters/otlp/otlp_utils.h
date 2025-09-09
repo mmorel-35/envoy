@@ -8,8 +8,10 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 // Import common types from SDK
 using namespace Envoy::Extensions::Common::OpenTelemetry::Sdk::Common;
@@ -30,7 +32,9 @@ public:
                                const OTelAttribute& attribute_value);
 };
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy

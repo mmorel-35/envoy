@@ -27,6 +27,16 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+// Import OTLP exporter types from new namespace
+using OpenTelemetryTraceExporter =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryTraceExporter;
+using OpenTelemetryTraceExporterPtr =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryTraceExporterPtr;
+using OpenTelemetryGrpcTraceExporter =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryGrpcTraceExporter;
+using OpenTelemetryHttpTraceExporter =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryHttpTraceExporter;
+
 namespace {
 
 // Default max cache size for OpenTelemetry tracer

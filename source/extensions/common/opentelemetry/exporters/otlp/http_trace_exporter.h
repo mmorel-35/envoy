@@ -15,8 +15,10 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 /**
  * Exporter for OTLP traces over HTTP.
@@ -42,7 +44,9 @@ private:
   std::vector<std::pair<const Http::LowerCaseString, const std::string>> parsed_headers_to_add_;
 };
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy

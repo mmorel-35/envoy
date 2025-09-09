@@ -13,8 +13,10 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 OpenTelemetryHttpTraceExporter::OpenTelemetryHttpTraceExporter(
     Upstream::ClusterManager& cluster_manager,
@@ -99,7 +101,9 @@ void OpenTelemetryHttpTraceExporter::onFailure(const Http::AsyncClient::Request&
   ENVOY_LOG(debug, "The OTLP export request failed. Reason {}", enumToInt(reason));
 }
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy

@@ -6,15 +6,19 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 const std::string& OtlpUserAgent::getUserAgentHeader() {
   CONSTRUCT_ON_FIRST_USE(std::string,
                          fmt::format("OTel-OTLP-Exporter-Envoy/{}", Envoy::VersionInfo::version()));
 }
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy

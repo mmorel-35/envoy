@@ -23,6 +23,12 @@ namespace Extensions {
 namespace Tracers {
 namespace OpenTelemetry {
 
+// Import OTLP exporter types from new namespace
+using OpenTelemetryTraceExporter =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryTraceExporter;
+using OpenTelemetryTraceExporterPtr =
+    ::Envoy::Extensions::Common::OpenTelemetry::Exporters::OTLP::OpenTelemetryTraceExporterPtr;
+
 #define OPENTELEMETRY_TRACER_STATS(COUNTER)                                                        \
   COUNTER(spans_sent)                                                                              \
   COUNTER(timer_flushed)                                                                           \

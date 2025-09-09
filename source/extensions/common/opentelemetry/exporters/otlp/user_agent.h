@@ -4,8 +4,10 @@
 
 namespace Envoy {
 namespace Extensions {
-namespace Tracers {
+namespace Common {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace OTLP {
 
 /**
  * Utility class for OTLP user-agent functionality.
@@ -22,7 +24,9 @@ public:
   static const std::string& getUserAgentHeader();
 };
 
+} // namespace OTLP
+} // namespace Exporters
 } // namespace OpenTelemetry
-} // namespace Tracers
+} // namespace Common
 } // namespace Extensions
 } // namespace Envoy
