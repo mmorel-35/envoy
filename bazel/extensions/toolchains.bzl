@@ -23,10 +23,15 @@ def _toolchains_impl(module_ctx):
 
     # Main dependency imports setup
     grcov_repository()
-    rules_fuzzing_dependencies(
-        oss_fuzz = True,
-        honggfuzz = False,
-    )
+    setup_sanitizer_libs()
+    
+    # Try to conditionally call rules_fuzzing_dependencies only if needed
+    if not native.existing_rule("rules_fuzzing_oss_fuzz"):
+        rules_fuzzing_dependencies(
+            oss_fuzz = True,
+            honggfuzz = False,
+        )
+    
     parser_deps()
     
     # Repository metadata setup
