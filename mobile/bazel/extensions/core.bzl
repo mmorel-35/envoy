@@ -6,20 +6,19 @@ This extension provides:
 - Core mobile functionality
 """
 
-load("//bazel:envoy_mobile_dependencies.bzl", "envoy_mobile_dependencies")
 load("//bazel:envoy_mobile_repositories.bzl", "envoy_mobile_repositories")
 
 def _core_impl(module_ctx):
     """Implementation for core extension.
 
     This extension provides mobile dependencies and repository setup
-    for Envoy Mobile applications.
+    for Envoy Mobile applications. In bzlmod mode, we only call
+    repository setup functions, not dependency initialization functions
+    since those are handled by MODULE.bazel declarations.
     """
 
-    # Call the mobile dependencies function
-    envoy_mobile_dependencies()
-
-    # Call the mobile repositories function
+    # Call the mobile repositories function to create repositories
+    # that are not available in BCR
     envoy_mobile_repositories()
 
 # Module extension for mobile core functionality

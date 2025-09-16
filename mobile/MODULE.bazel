@@ -134,6 +134,7 @@ use_repo(
     "DrString",
     "SwiftLint",
     "com_github_buildbuddy_io_rules_xcodeproj",
+    "google_bazel_common",
     "kotlin_formatter",
     "robolectric",
     "rules_java",
