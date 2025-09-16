@@ -46,20 +46,20 @@ local_path_override(
 # These commit hashes are synchronized with the main MODULE.bazel to ensure consistency
 # and prevent git_override strip_prefix issues.
 
-bazel_dep(name = "envoy_examples", version = "0.0.0-dev")
-git_override(
-    module_name = "envoy_examples",
-    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",  # Synchronized with main MODULE.bazel
-    remote = "https://github.com/envoyproxy/examples.git",
-)
+# bazel_dep(name = "envoy_examples", version = "0.0.0-dev")
+# git_override(
+#     module_name = "envoy_examples",
+#     commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",  # Synchronized with main MODULE.bazel
+#     remote = "https://github.com/envoyproxy/examples.git",
+# )
 
-bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
-git_override(
-    module_name = "envoy-example-wasmcc",
-    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",  # Synchronized with main MODULE.bazel
-    remote = "https://github.com/envoyproxy/examples.git",
-    strip_prefix = "wasm-cc/",
-)
+# bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
+# git_override(
+#     module_name = "envoy-example-wasmcc",
+#     commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",  # Synchronized with main MODULE.bazel
+#     remote = "https://github.com/envoyproxy/examples.git",
+#     strip_prefix = "wasm-cc/",
+# )
 
 bazel_dep(name = "envoy_toolshed", version = "0.3.3")
 git_override(
@@ -108,7 +108,7 @@ switched_rules.use_languages(
     grpc = True,
     python = True,
 )
-use_repo(switched_rules, "com_google_googleapis_imports")
+# use_repo(switched_rules, "com_google_googleapis_imports")
 
 # Envoy dependencies extensions - using consolidated extensions from parent envoy module
 envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")
@@ -121,7 +121,7 @@ use_repo(
 envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains")
 
 # API extensions from API module
-envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "api_dependencies")
+envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "envoy_api_deps")
 
 # Envoy Mobile extensions - streamlined design following bzlmod best practices
 # This architecture mirrors the main envoy module for consistency
@@ -140,18 +140,18 @@ use_repo(
 
 # Native Android SDK configuration using rules_android extension
 # This replaces custom Android SDK setup with native bzlmod extension support
-android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
-android_sdk_repository_extension.configure(
-    api_level = 30,  # Target Android API level
-    build_tools_version = "30.0.2",  # Android build tools version
-)
+# android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
+# android_sdk_repository_extension.configure(
+#     api_level = 30,  # Target Android API level
+#     build_tools_version = "30.0.2",  # Android build tools version
+# )
 
 # Native Android NDK configuration using rules_android_ndk extension
 # This provides native C++ compilation support for Android targets
-android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
-android_ndk_repository_extension.configure(
-    api_level = 23,  # Minimum Android API level for NDK
-)
+# android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
+# android_ndk_repository_extension.configure(
+#     api_level = 23,  # Minimum Android API level for NDK
+# )
 
 # Mobile toolchains extension (remaining custom setup)
 envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
