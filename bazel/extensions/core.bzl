@@ -27,6 +27,9 @@ def _core_impl(module_ctx, python_version = PYTHON_VERSION, ignore_root_user_err
     # Core dependencies setup (from dependencies.bzl)
     envoy_dependencies()
 
+    # Rust crate dependencies
+    raze_fetch_remote_crates()
+
     if not native.existing_rule("proto_bazel_features"):
         proto_bazel_features(name = "proto_bazel_features")
 

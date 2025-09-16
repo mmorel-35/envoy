@@ -1,6 +1,6 @@
 # This should match the schema defined in external_deps.bzl.
 
-PROTOBUF_VERSION = "29.3"
+PROTOBUF_VERSION = "30.0"
 
 REPOSITORY_LOCATIONS_SPEC = dict(
     bazel_skylib = dict(
