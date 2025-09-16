@@ -107,11 +107,11 @@ local_path_override(
     path = "mobile/envoy_build_config",
 )
 
-bazel_dep(name = "envoy_mobile", version = "0.0.0-dev")
-local_path_override(
-    module_name = "envoy_mobile",
-    path = "mobile",
-)
+# bazel_dep(name = "envoy_mobile", version = "0.0.0-dev")
+# local_path_override(
+#     module_name = "envoy_mobile",
+#     path = "mobile",
+# )
 
 switched_rules = use_extension("@com_google_googleapis//:extensions.bzl", "switched_rules")
 switched_rules.use_languages(
