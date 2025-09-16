@@ -9,10 +9,10 @@ local_path_override(
     path = "../..",
 )
 
-# bazel_dep(name = "envoy_mobile", version = "0.0.0-dev")
-# local_path_override(
-#     module_name = "envoy_mobile",
-#     path = "..",
-# )
+bazel_dep(name = "envoy_mobile", version = "0.0.0-dev")
+local_path_override(
+    module_name = "envoy_mobile",
+    path = "..",
+)
 
 bazel_dep(name = "platforms", version = "1.0.0")

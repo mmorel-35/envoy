@@ -108,7 +108,7 @@ switched_rules.use_languages(
     grpc = True,
     python = True,
 )
-# use_repo(switched_rules, "com_google_googleapis_imports")
+use_repo(switched_rules, "com_google_googleapis_imports")
 
 # Envoy dependencies extensions - using consolidated extensions from parent envoy module
 envoy_core = use_extension("@envoy//bazel/extensions:core.bzl", "core")

@@ -23,6 +23,7 @@ bazel_dep(name = "re2", version = "2024-07-02.bcr.1", repo_name = "com_googlesou
 bazel_dep(name = "rules_buf", version = "0.5.1")
 bazel_dep(name = "rules_cc", version = "0.2.8")
 bazel_dep(name = "rules_go", version = "0.57.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_java", version = "7.11.1")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_python", version = "1.4.1")
 bazel_dep(name = "zipkin-api", version = "1.0.0", repo_name = "com_github_openzipkin_zipkinapi")
@@ -34,7 +35,7 @@ switched_rules.use_languages(
     grpc = True,
     python = True,
 )
-# use_repo(switched_rules, "com_google_googleapis_imports")
+use_repo(switched_rules, "com_google_googleapis_imports")
 
 # API dependencies extension - using local module
 envoy_api_deps = use_extension("//bazel/extensions:api_dependencies.bzl", "envoy_api_deps")
