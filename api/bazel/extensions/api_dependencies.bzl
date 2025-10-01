@@ -1,12 +1,19 @@
-"""Extension for Envoy API dependencies."""
+"""Extension for Envoy API dependencies (bzlmod-only).
+
+This extension is for BZLMOD mode only and should never be called from WORKSPACE.
+It creates API-specific repositories that are not available in Bazel Central Registry.
+
+For WORKSPACE mode, use the functions in //bazel:repositories.bzl instead.
+"""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def _api_dependencies_impl(module_ctx):
-    """Implementation for api_dependencies extension.
+    """Implementation for api_dependencies extension (bzlmod-only).
 
     This extension provides API-specific dependencies that are not available
-    in BCR or need custom BUILD files.
+    in BCR or need custom BUILD files. This is bzlmod-only - do not call
+    from WORKSPACE files.
     """
 
     # CNCF XDS repository with proper template substitution
@@ -48,14 +55,14 @@ go_proto_library(
 )
 """
 
-# Module extension for api_dependencies
+# Module extension for api_dependencies (bzlmod-only)
 envoy_api_deps = module_extension(
     implementation = _api_dependencies_impl,
     doc = """
-    Extension for Envoy API dependencies.
+    Extension for Envoy API dependencies (bzlmod-only).
     
-    This extension wraps the api_dependencies() function to make it
-    available as a bzlmod module extension, handling API-specific
-    repository definitions.
+    This extension creates API-specific repositories not in BCR.
+    For WORKSPACE mode, use //bazel:repositories.bzl functions instead.
+    This extension should never be called from WORKSPACE files.
     """,
 )
