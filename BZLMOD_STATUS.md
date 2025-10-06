@@ -1,21 +1,20 @@
 # Envoy Bzlmod Migration Status
 
-## Current Status: ✅ bzlmod Mode Functional, WORKSPACE Mode Deprecated
+## Current Status: ✅ bzlmod Mode Production-Ready
 
 **Last Updated:** 2025-01-10
 
 ### Quick Start
 
-Envoy now uses bzlmod (MODULE.bazel) for dependency management with Bazel 7.6.1+.
+Envoy uses bzlmod (MODULE.bazel) for dependency management with Bazel 8.4.2+.
+
+**WORKSPACE mode is deprecated and will be removed.**
 
 ```bash
-# ✅ bzlmod mode (default in Bazel 7.6.1+)
+# ✅ bzlmod mode (required)
 bazel build --enable_bzlmod @envoy_api//...
 bazel build --enable_bzlmod //source/...
 bazel query --enable_bzlmod "@envoy_mobile//..."
-
-# ❌ WORKSPACE mode (deprecated, not maintained)
-# DO NOT USE: bazel build --noenable_bzlmod //...
 ```
 
 ## Module Functionality Status
@@ -37,9 +36,9 @@ bazel query --enable_bzlmod "@envoy_mobile//..."
 - **Query:** `bazel query --enable_bzlmod "@envoy_mobile//library/..."`
 - **Note:** Some Android/iOS toolchain targets may need additional configuration
 
-## Testing Both Modes (During Migration)
+## Testing bzlmod Mode
 
-### Testing bzlmod Mode (Recommended)
+**Note:** Build validation is performed in CI/CD pipelines, not local scripts.
 
 ```bash
 # Test core modules
@@ -197,4 +196,4 @@ For questions about bzlmod migration:
 
 ---
 
-**Note:** This migration is production-ready for bzlmod mode. WORKSPACE mode support is not maintained and will be removed in a future release.
+**Note:** This migration is production-ready for bzlmod mode. WORKSPACE mode is deprecated and will be removed. Build validation is performed in CI/CD pipelines.

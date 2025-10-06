@@ -5,11 +5,12 @@
 - **BAZEL8_UPGRADE.md** - Details on Bazel 8 upgrade (why it matters)
 - **BZLMOD_STATUS.md** - Quick reference commands and current status
 - **EXTENSION_REFACTORING.md** - Technical extension architecture (for contributors)
-- **validate_dual_mode.sh** - Automated testing script
 
 ---
 
 This guide provides everything you need to understand and use Envoy's bzlmod migration with Bazel 8.4.2.
+
+**Note:** WORKSPACE mode is deprecated. Envoy is fully migrating to bzlmod. Once bzlmod is enabled on all targets, WORKSPACE support will be removed.
 
 ## Quick Start (5 minutes)
 
@@ -29,18 +30,18 @@ bazel build --enable_bzlmod @envoy_api//envoy/config/core/v3:pkg
 bazel query --enable_bzlmod "@envoy_mobile//library/..."
 ```
 
-### Build with WORKSPACE (Legacy)
+### Build with WORKSPACE (Deprecated)
 ```bash
-# Still supported during migration
-bazel build --noenable_bzlmod //source/common/common:assert_lib
+# WORKSPACE mode is deprecated and will be removed
+# Use bzlmod mode (above) for all new development
 ```
 
 ## Architecture Overview
 
-### Dual-Mode Support
-With Bazel 8.4.2, both build systems work independently:
+### Bzlmod Mode
+With Bazel 8.4.2, Envoy uses bzlmod for dependency management:
 - **bzlmod mode**: Modern dependency management via MODULE.bazel
-- **WORKSPACE mode**: Legacy system for gradual migration
+- **WORKSPACE mode**: Deprecated and will be removed once bzlmod is enabled on all targets
 
 ### Bazel 8 Benefits
 
@@ -95,55 +96,36 @@ bazel mod graph --enable_bzlmod
 
 ### Core Module
 ```bash
-# bzlmod mode
 bazel build --enable_bzlmod //source/common/common:assert_lib
-
-# WORKSPACE mode
-bazel build --noenable_bzlmod //source/common/common:assert_lib
 ```
 
 ### API Module
 ```bash
-# bzlmod mode
 bazel build --enable_bzlmod @envoy_api//envoy/config/core/v3:pkg
 bazel query --enable_bzlmod "@envoy_api//..."
-
-# WORKSPACE mode
-bazel build --noenable_bzlmod @envoy_api//envoy/config/core/v3:pkg
 ```
 
 ### Mobile Module
 ```bash
-# bzlmod mode
 bazel query --enable_bzlmod "@envoy_mobile//library/..."
-
-# WORKSPACE mode
-bazel query --noenable_bzlmod "@envoy_mobile//library/..."
 ```
+
+**Note:** Validation of bzlmod builds should be performed in CI/CD pipelines, not via local scripts.
 
 ## Migration Strategy
 
-### Phase 1: Dual-Mode Publishing (Current)
-Both modes work simultaneously. Teams can choose:
+### Current State: Bzlmod-Only
+Envoy has fully migrated to bzlmod:
 ```bash
-# Modern path (recommended)
+# Use bzlmod mode for all builds
 bazel build --enable_bzlmod //...
-
-# Legacy path (supported)
-bazel build --noenable_bzlmod //...
 ```
 
-### Phase 2: Gradual Adoption
-- Publish releases supporting both modes
-- Teams migrate at their own pace
-- Monitor bzlmod adoption metrics
-- Provide migration tooling and support
-
-### Phase 3: WORKSPACE Deprecation (Future)
-- Announce deprecation timeline (e.g., 6-12 months)
-- Ensure 80%+ ecosystem adoption
-- Provide final migration deadline
-- Remove WORKSPACE support
+### WORKSPACE Deprecation
+- **Status**: WORKSPACE mode is deprecated
+- **Timeline**: Will be removed once bzlmod is enabled on all targets
+- **Action Required**: All development should use bzlmod mode
+- **CI/CD**: Build validation is performed in CI/CD pipelines
 
 ## Troubleshooting
 
@@ -165,12 +147,9 @@ bazel build --noenable_bzlmod //...
 2. Verify BCR access: `curl https://bcr.bazel.build/modules/zlib/metadata.json`
 3. Check extension errors in bazel output
 4. Consult EXTENSION_REFACTORING.md for architecture details
+5. Ensure CI/CD validation passes
 
-### Build fails with `--noenable_bzlmod`
-**Debug steps:**
-1. Verify you're using Bazel 8.4.2+
-2. Check WORKSPACE file hasn't been corrupted
-3. Ensure MODULE.bazel isn't being loaded (it shouldn't in WORKSPACE mode)
+**Note:** WORKSPACE mode is deprecated and not supported for new development.
 
 ## Technical Deep Dive
 
@@ -202,5 +181,7 @@ Extensions only run in bzlmod mode:
 - **BAZEL8_UPGRADE.md** - Bazel 8.4.2 upgrade details and why it matters
 - **EXTENSION_REFACTORING.md** - Technical details on extension architecture
 - **BZLMOD_STATUS.md** - Quick reference validation commands
-- **validate_dual_mode.sh** - Automated validation script
+- **tools/bazel8_tidy.sh** - Automated MODULE.bazel maintenance
 - **Bazel bzlmod docs** - https://bazel.build/external/overview#bzlmod
+
+**Note:** CI/CD pipelines handle build validation. WORKSPACE mode is deprecated.

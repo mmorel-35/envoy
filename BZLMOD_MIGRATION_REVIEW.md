@@ -42,18 +42,16 @@ Per https://bazel.build/external/migration:
 - No use of extension tags for configuration
 - Could leverage more Bazel 8 features
 
-### ⚠️ Phase 3: WORKSPACE Compatibility (Needs Attention)
+### ⚠️ Phase 3: WORKSPACE Compatibility (Deprecated)
 
 Per guide: "During migration, both build systems should work"
 
 **Current State:**
-- WORKSPACE.bzlmod exists but is empty
-- Comments reference removed documentation files
-- No clear validation that both modes work
+- WORKSPACE mode is deprecated
+- Will be removed once bzlmod is enabled on all targets
+- CI/CD validates bzlmod builds only
 
-**Recommendation:** Either:
-1. Fully commit to bzlmod-only (document WORKSPACE deprecation)
-2. Ensure both modes are tested and documented
+**Recommendation:** Use bzlmod-only mode. WORKSPACE support is being phased out.
 
 ## Detailed Findings
 
@@ -289,15 +287,13 @@ envoy/mobile/MODULE.bazel (sub-module)
 1. ✅ Fix MODULE.bazel reference to BZLMOD_RECOMMENDATIONS.md → BZLMOD_MIGRATION_GUIDE.md
 2. ✅ Update WORKSPACE.bzlmod to reference Bazel guide instead of removed docs
 3. ✅ Remove misleading "isolate = True" comment from core.bzl
+4. ✅ Document WORKSPACE deprecation
+5. ✅ Move validation to CI/CD (removed root-level validation script)
 
 ### Important (Consider Soon)
-4. ⚠️ Clarify WORKSPACE mode status
-   - Either: Document as deprecated
-   - Or: Ensure it's tested and works
-
-5. 📝 Add validation that both modes work
-   - Currently unclear if WORKSPACE mode is supported
-   - validate_dual_mode.sh exists but results not documented
+6. 📝 Ensure CI/CD pipelines validate bzlmod builds
+   - Build validation should be in CI/CD
+   - Remove local validation scripts from repository root
 
 ### Nice to Have (Future)
 6. 💡 Consider pure bzlmod approach (no WORKSPACE function calls)
@@ -327,13 +323,14 @@ The hybrid approach (extensions calling WORKSPACE functions) is a **pragmatic ch
 - Consolidated extensions
 - Good documentation
 - Bazel 8 ready
+- Clear WORKSPACE deprecation path
 
-**Areas for Improvement:**
-- Clarify WORKSPACE mode status
-- Consider pure bzlmod long-term
-- Keep documentation references accurate
+**Current Status:**
+- Bzlmod-only mode in production
+- WORKSPACE mode deprecated
+- Build validation in CI/CD pipelines
 
-**Overall Assessment:** This is a **high-quality bzlmod migration** that successfully leverages Bazel 8 capabilities while maintaining pragmatism for a large codebase.
+**Overall Assessment:** This is a **high-quality bzlmod migration** that successfully leverages Bazel 8 capabilities while maintaining pragmatism for a large codebase. The clear deprecation of WORKSPACE mode demonstrates commitment to modern Bazel practices.
 
 ## References
 
