@@ -176,9 +176,10 @@ Extensions only run in bzlmod mode:
 - Extensions documented as bzlmod-only
 - WORKSPACE functions never called from extensions
 
-## References
+## Additional Resources
 
-- **BAZEL8_UPGRADE.md** - Bazel 8 upgrade details and benefits
-- **EXTENSION_REFACTORING.md** - Extension architecture technical details
+- **BAZEL8_UPGRADE.md** - Bazel 8.4.2 upgrade details and why it matters
+- **EXTENSION_REFACTORING.md** - Technical details on extension architecture
 - **BZLMOD_STATUS.md** - Quick reference validation commands
+- **validate_dual_mode.sh** - Automated validation script
 - **Bazel bzlmod docs** - https://bazel.build/external/overview#bzlmod

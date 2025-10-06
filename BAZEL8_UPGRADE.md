@@ -239,18 +239,17 @@ bazel build --noenable_bzlmod //...  # WORKSPACE mode
 - WORKSPACE uses versions from repository_locations.bzl
 - Both are supported and tested
 
-## Resources
+## Additional Resources
 
 - [Bazel 8 Release Notes](https://github.com/bazelbuild/bazel/releases/tag/8.4.2)
 - [bzlmod Documentation](https://bazel.build/build/bzlmod)
 - [Migration Guide](https://bazel.build/migrate/bzlmod)
-- Envoy-specific docs:
-  - `MODE_SEPARATION_ANALYSIS.md` - Architectural analysis
-  - `FINAL_STATUS.md` - Current migration status
-  - `EXTENSION_REFACTORING.md` - Extension architecture
+- **BZLMOD_MIGRATION_GUIDE.md** - Complete migration guide and best practices
+- **EXTENSION_REFACTORING.md** - Technical extension architecture details
+- **BZLMOD_STATUS.md** - Quick reference commands
 
 ## Conclusion
 
-The upgrade to Bazel 8.4.2 provides the foundation for a smooth, incremental migration to bzlmod while maintaining full WORKSPACE compatibility. This enables a publish-then-migrate strategy where users can adopt bzlmod at their own pace without disruption.
+The upgrade to Bazel 8.4.2 provides the foundation for a smooth, incremental migration to bzlmod while maintaining full WORKSPACE compatibility. This enables a dual-mode strategy where users can adopt bzlmod at their own pace without disruption.
 
 **Recommendation**: Start validating builds with both modes to ensure compatibility, then gradually adopt bzlmod for new projects while maintaining WORKSPACE for legacy systems.

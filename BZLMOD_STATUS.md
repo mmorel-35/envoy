@@ -181,17 +181,17 @@ module(name = "my_project", version = "1.0.0")
 bazel_dep(name = "envoy", version = "X.Y.Z")
 ```
 
-## Documentation References
+## Additional Resources
 
-- [MODULE.bazel](./MODULE.bazel) - Main module definition
-- [BZLMOD_MIGRATION.md](./BZLMOD_MIGRATION.md) - Detailed migration documentation
-- [BZLMOD_RECOMMENDATIONS.md](./BZLMOD_RECOMMENDATIONS.md) - Best practices and recommendations
+- **BZLMOD_MIGRATION_GUIDE.md** - Complete guide with architecture and troubleshooting
+- **BAZEL8_UPGRADE.md** - Bazel 8 upgrade details
+- **EXTENSION_REFACTORING.md** - Technical extension architecture
 - [Bazel bzlmod documentation](https://bazel.build/external/migration)
 
 ## Support and Questions
 
 For questions about bzlmod migration:
-1. Check existing [documentation](./BZLMOD_MIGRATION.md)
+1. Check [BZLMOD_MIGRATION_GUIDE.md](./BZLMOD_MIGRATION_GUIDE.md) for comprehensive guidance
 2. Review [Bazel bzlmod guide](https://bazel.build/external/migration)
 3. File issues with `[bzlmod]` prefix
 
