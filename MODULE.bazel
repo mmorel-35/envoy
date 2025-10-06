@@ -30,20 +30,20 @@ bazel_dep(name = "boringssl", version = "0.20250514.0")
 bazel_dep(name = "brotli", version = "1.1.0", repo_name = "org_brotli")
 bazel_dep(name = "cel-spec", version = "0.24.0", repo_name = "com_google_cel_spec")
 bazel_dep(name = "emsdk", version = "4.0.13")
-# bazel_dep(name = "envoy_examples", version = "0.0.0-dev")
-# git_override(
-#     module_name = "envoy_examples",
-#     commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
-#     remote = "https://github.com/envoyproxy/examples.git",
-# )
+bazel_dep(name = "envoy_examples", version = "0.0.0-dev")
+git_override(
+    module_name = "envoy_examples",
+    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
+    remote = "https://github.com/envoyproxy/examples.git",
+)
 
-# bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
-# git_override(
-#     module_name = "envoy-example-wasmcc",
-#     commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
-#     remote = "https://github.com/envoyproxy/examples.git",
-#     strip_prefix = "wasm-cc/",
-# )
+bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
+git_override(
+    module_name = "envoy-example-wasmcc",
+    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
+    remote = "https://github.com/envoyproxy/examples.git",
+    strip_prefix = "wasm-cc/",
+)
 
 bazel_dep(name = "envoy_toolshed", version = "0.3.3")
 git_override(
@@ -89,6 +89,14 @@ bazel_dep(name = "spdlog", version = "1.15.3", repo_name = "com_github_gabime_sp
 bazel_dep(name = "xxhash", version = "0.8.3", repo_name = "com_github_cyan4973_xxhash")
 bazel_dep(name = "yaml-cpp", version = "0.8.0", repo_name = "com_github_jbeder_yaml_cpp")
 bazel_dep(name = "zstd", version = "1.5.7", repo_name = "com_github_facebook_zstd")
+
+# Rules CC extensions for toolchain configuration
+cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
+use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
+
+# CC compatibility layer
+compat = use_extension("@rules_cc//cc:extensions.bzl", "compatibility_proxy")
+use_repo(compat, "cc_compatibility_proxy")
 
 # Development dependencies
 bazel_dep(name = "google_benchmark", version = "1.9.4", dev_dependency = True, repo_name = "com_github_google_benchmark")

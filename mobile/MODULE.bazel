@@ -142,18 +142,18 @@ use_repo(
 
 # Native Android SDK configuration using rules_android extension
 # This replaces custom Android SDK setup with native bzlmod extension support
-# android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
-# android_sdk_repository_extension.configure(
-#     api_level = 30,  # Target Android API level
-#     build_tools_version = "30.0.2",  # Android build tools version
-# )
+android_sdk_repository_extension = use_extension("@rules_android//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
+android_sdk_repository_extension.configure(
+    api_level = 30,  # Target Android API level
+    build_tools_version = "30.0.2",  # Android build tools version
+)
 
 # Native Android NDK configuration using rules_android_ndk extension
 # This provides native C++ compilation support for Android targets
-# android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
-# android_ndk_repository_extension.configure(
-#     api_level = 23,  # Minimum Android API level for NDK
-# )
+android_ndk_repository_extension = use_extension("@rules_android_ndk//:extension.bzl", "android_ndk_repository_extension")
+android_ndk_repository_extension.configure(
+    api_level = 23,  # Minimum Android API level for NDK
+)
 
 # Mobile toolchains extension (remaining custom setup)
 envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
