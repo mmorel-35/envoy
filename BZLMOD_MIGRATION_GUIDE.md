@@ -1,5 +1,14 @@
 # Envoy bzlmod Migration Guide
 
+**📚 Documentation Navigation:**
+- **This file (BZLMOD_MIGRATION_GUIDE.md)** - Start here! Complete guide for users
+- **BAZEL8_UPGRADE.md** - Details on Bazel 8 upgrade (why it matters)
+- **BZLMOD_STATUS.md** - Quick reference commands and current status
+- **EXTENSION_REFACTORING.md** - Technical extension architecture (for contributors)
+- **validate_dual_mode.sh** - Automated testing script
+
+---
+
 This guide provides everything you need to understand and use Envoy's bzlmod migration with Bazel 8.4.2.
 
 ## Quick Start (5 minutes)
