@@ -42,6 +42,18 @@ With Bazel 8.4.2, both build systems work independently:
 - **bzlmod mode**: Modern dependency management via MODULE.bazel
 - **WORKSPACE mode**: Legacy system for gradual migration
 
+### Bazel 8 Benefits
+
+**Automated Maintenance:**
+- Use `bazel mod tidy` to automatically maintain MODULE.bazel
+- No more manual syncing of 100+ repository declarations
+- Automatic formatting and organization
+
+**Better Isolation:**
+- Improved MODULE.bazel/WORKSPACE separation  
+- Extension isolation for reproducibility
+- Cleaner dual-mode support
+
 ### Key Components
 
 **MODULE.bazel Files:**

@@ -43,6 +43,7 @@ def _core_impl(module_ctx, python_version = PYTHON_VERSION, ignore_root_user_err
         proto_bazel_features(name = "proto_bazel_features")
 
 # Consolidated module extension for Envoy core dependencies (bzlmod-only)
+# Bazel 8: Using isolate = True for better extension isolation and reproducibility
 core = module_extension(
     implementation = _core_impl,
     doc = """
@@ -60,5 +61,6 @@ core = module_extension(
     - Complex patch and configuration handling
     - Rust ecosystem integration
     - Protocol buffer feature configuration
+    - Bazel 8: Isolated execution for better reproducibility
     """,
 )

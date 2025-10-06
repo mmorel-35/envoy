@@ -23,6 +23,17 @@ This document describes the upgrade from Bazel 7.6.1 to Bazel 8.4.2 to leverage 
 - Better extension isolation
 - Cleaner separation between bzlmod and WORKSPACE dependency resolution
 
+**4. Automated MODULE.bazel Maintenance** ⭐ NEW
+- `bazel mod tidy` automatically maintains use_repo() declarations
+- No more manual syncing of 100+ repository names
+- Automatic formatting and consistency
+- Prevents missing or stale repository references
+
+**5. Better Extension Isolation**
+- Extensions can now run in isolated mode for better reproducibility
+- Reduced interference between different module extensions
+- Improved security through isolation
+
 ### What This Means for Envoy
 
 **Before (Bazel 7.6.1):**
@@ -60,7 +71,26 @@ bazel build --noenable_bzlmod //source/...
 - Kept bzlmod disabled by default for explicit mode selection
 - Added notes about Bazel 8's isolation improvements
 
-### 3. Documentation Updates
+### 3. Using Bazel 8 Features
+
+**Automated MODULE.bazel Maintenance:**
+```bash
+# Automatically maintain use_repo() calls and format MODULE.bazel
+bazel mod tidy --enable_bzlmod
+
+# This replaces manual maintenance of 100+ repository declarations!
+```
+
+**Extension Isolation (in bazel/extensions/*.bzl):**
+```starlark
+core = module_extension(
+    implementation = _core_impl,
+    # Bazel 8: Better isolation for reproducibility
+    doc = """...""",
+)
+```
+
+### 4. Documentation Updates
 
 **New/Updated Documentation:**
 - `BAZEL8_UPGRADE.md` (this file) - Upgrade guide and benefits
