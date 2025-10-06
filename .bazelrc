@@ -13,7 +13,7 @@ startup --host_jvm_args=-Xmx3g
 
 # Enable bzlmod for modern dependency management (hybrid mode with WORKSPACE)
 # This allows gradual migration from WORKSPACE to MODULE.bazel
-common --enable_bzlmod
+# common --enable_bzlmod  # Commented out to allow WORKSPACE mode
 
 fetch --color=yes
 run --color=yes
