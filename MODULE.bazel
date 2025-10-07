@@ -33,14 +33,14 @@ bazel_dep(name = "emsdk", version = "4.0.13")
 bazel_dep(name = "envoy_examples", version = "0.0.0-dev")
 git_override(
     module_name = "envoy_examples",
-    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
+    commit = "a531e3e0031c673ad9b2e1e6c749c074e4940702",
     remote = "https://github.com/envoyproxy/examples.git",
 )
 
 bazel_dep(name = "envoy-example-wasmcc", version = "0.0.0-dev")
 git_override(
     module_name = "envoy-example-wasmcc",
-    commit = "ff286d4049b6339cf84c912f5e06f67b0061f017",
+    commit = "a531e3e0031c673ad9b2e1e6c749c074e4940702",
     remote = "https://github.com/envoyproxy/examples.git",
     strip_prefix = "wasm-cc/",
 )
