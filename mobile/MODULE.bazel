@@ -94,6 +94,7 @@ bazel_dep(name = "rules_detekt", version = "0.8.1.2")  # Kotlin linting
 # rules_foreign_cc override needed for mobile builds until upstream issue is resolved
 # TODO(yannic): Remove once https://github.com/bazelbuild/rules_foreign_cc/pull/938 is merged and released
 bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
+bazel_dep(name = "rules_java", version = "8.14.0")  # Java language support
 bazel_dep(name = "rules_jvm_external", version = "6.6")  # Maven dependency management
 bazel_dep(name = "rules_kotlin", version = "1.9.6")  # Kotlin language support
 bazel_dep(name = "rules_pkg", version = "1.1.0")  # Package building
@@ -137,7 +138,6 @@ use_repo(
     "google_bazel_common",
     "kotlin_formatter",
     "robolectric",
-    "rules_java",
 )
 
 # Native Android SDK configuration using rules_android extension
