@@ -32,7 +32,6 @@ EXTENSIONS = {
     "envoy.connection_handler.default": "//source/extensions/listener_managers/listener_manager:connection_handler_lib",
     "envoy.load_balancing_policies.round_robin": "//source/extensions/load_balancing_policies/round_robin:config",
     "envoy.load_balancing_policies.cluster_provided": "//source/extensions/load_balancing_policies/cluster_provided:config",
-    "envoy.matching.actions.format_string": "//source/extensions/matching/actions/format_string:config",
 }
 WINDOWS_EXTENSIONS = {}
 LEGACY_ALWAYSLINK = 1
