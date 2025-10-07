@@ -5,12 +5,13 @@
 - **BAZEL8_UPGRADE.md** - Details on Bazel 8 upgrade (why it matters)
 - **BZLMOD_STATUS.md** - Quick reference commands and current status
 - **EXTENSION_REFACTORING.md** - Technical extension architecture (for contributors)
+- **BZLMOD_CI_CD.md** - CI/CD validation setup and troubleshooting
 
 ---
 
 This guide provides everything you need to understand and use Envoy's bzlmod migration with Bazel 8.4.2.
 
-**Note:** WORKSPACE mode is deprecated. Envoy is fully migrating to bzlmod. Once bzlmod is enabled on all targets, WORKSPACE support will be removed.
+**Note:** WORKSPACE mode is deprecated. Envoy is fully migrating to bzlmod. Once bzlmod is enabled on all targets, WORKSPACE support will be removed. Build validation is performed in CI/CD pipelines (see BZLMOD_CI_CD.md).
 
 ## Quick Start (5 minutes)
 
@@ -181,7 +182,8 @@ Extensions only run in bzlmod mode:
 - **BAZEL8_UPGRADE.md** - Bazel 8.4.2 upgrade details and why it matters
 - **EXTENSION_REFACTORING.md** - Technical details on extension architecture
 - **BZLMOD_STATUS.md** - Quick reference validation commands
+- **BZLMOD_CI_CD.md** - CI/CD validation setup and troubleshooting
 - **tools/bazel8_tidy.sh** - Automated MODULE.bazel maintenance
 - **Bazel bzlmod docs** - https://bazel.build/external/overview#bzlmod
 
-**Note:** CI/CD pipelines handle build validation. WORKSPACE mode is deprecated.
+**Note:** CI/CD pipelines handle build validation (see BZLMOD_CI_CD.md). WORKSPACE mode is deprecated.
