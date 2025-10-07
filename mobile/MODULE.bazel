@@ -160,7 +160,10 @@ android_ndk_repository_extension.configure(
 )
 
 # Mobile toolchains extension (remaining custom setup)
-envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
+# NOTE: Commented out to avoid manual toolchain registration conflicts in bzlmod mode
+# In bzlmod mode, toolchains (rules_java, rules_kotlin, rules_detekt, rules_proto_grpc) are
+# automatically registered when declared as bazel_dep, so manual registration is not needed
+# envoy_mobile_toolchains = use_extension("//bazel/extensions:toolchains.bzl", "toolchains")
 
 # Python dependencies using upstream rules_python extensions
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
