@@ -28,9 +28,6 @@ def api_dependencies():
         patches = ["@envoy//bazel:protovalidate_cc.patch"],
     )
     external_http_archive(
-        name = "com_envoyproxy_protoc_gen_validate",
-    )
-    external_http_archive(
         name = "com_google_googleapis",
     )
     external_http_archive(

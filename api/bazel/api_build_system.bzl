@@ -37,7 +37,6 @@ _COMMON_PROTO_DEPS = [
     "@com_google_googleapis//google/api:annotations_proto",
     "@com_google_googleapis//google/rpc:status_proto",
     "@com_github_bufbuild_protovalidate//proto/protovalidate/buf/validate:validate_proto",
-    "@com_envoyproxy_protoc_gen_validate//validate:validate_proto",
 ]
 
 def _proto_mapping(dep, proto_dep_map, proto_suffix):
