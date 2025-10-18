@@ -1,5 +1,4 @@
 load("@aspect_bazel_lib//lib:repositories.bzl", "register_jq_toolchains", "register_yq_toolchains")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@base_pip3//:requirements.bzl", pip_dependencies = "install_deps")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
@@ -43,21 +42,15 @@ def envoy_dependency_imports(
     compatibility_proxy_repo()
     rules_foreign_cc_dependencies()
     
-    # Register org_golang_google_protobuf BEFORE go_rules_dependencies()
-    # with v1.36.10 to override the v1.33.0 that rules_go would register.
+    # Explicitly declare org_golang_google_protobuf with v1.36.10 BEFORE any
+    # other Go dependency setup to ensure this version takes precedence.
     # This is required for protovalidate generated code that needs MessageFieldStringOf.
-    http_archive(
+    # Declared here so it's registered before go_rules_dependencies() and gazelle_dependencies().
+    go_repository(
         name = "org_golang_google_protobuf",
-        sha256 = "7c5c835c5a9c1f1b68ccd9ebb067b1d5ae4d05c28ab07e9b9e14d70c53a70d58",
-        urls = [
-            "https://mirror.bazel.build/github.com/protocolbuffers/protobuf-go/archive/refs/tags/v1.36.10.zip",
-            "https://github.com/protocolbuffers/protobuf-go/archive/refs/tags/v1.36.10.zip",
-        ],
-        strip_prefix = "protobuf-go-1.36.10",
-        patches = [
-            "@io_bazel_rules_go//third_party:org_golang_google_protobuf-gazelle.patch",
-        ],
-        patch_args = ["-p1"],
+        importpath = "google.golang.org/protobuf",
+        sum = "h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=",
+        version = "v1.36.10",
     )
     
     go_rules_dependencies()
@@ -213,6 +206,7 @@ def envoy_dependency_imports(
         importpath = "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go",
         sum = "h1:31on4W/yPcV4nZHL4+UCiCvLPsMqe/vJcNg8Rci0scc=",
         version = "v1.36.10-20250912141014-52f32327d4b0.1",
+        build_external = "external",
     )
 
     protoc_gen_jsonschema_go_dependencies()
