@@ -13,7 +13,6 @@ load(
     "//bazel/cc_proto_descriptor_library:builddefs.bzl",
     "cc_proto_descriptor_library",
 )
-load("//bazel:envoy_internal.bzl", "envoy_linkstatic")
 
 EnvoyProtoDepsInfo = provider(fields = ["deps"])
 
@@ -68,7 +67,6 @@ def api_cc_py_proto_library(
         visibility = ["//visibility:private"],
         srcs = [],
         deps = [],
-        linkstatic = None,
         has_services = 0,
         java = True):
     relative_name = ":" + name
@@ -92,7 +90,6 @@ def api_cc_py_proto_library(
     cc_proto_library_name = name + _CC_PROTO_SUFFIX
     cc_proto_library(
         name = cc_proto_library_name,
-        linkstatic = linkstatic if linkstatic != None else envoy_linkstatic(),
         deps = [relative_name],
         visibility = ["//visibility:public"],
     )
