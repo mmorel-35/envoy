@@ -91,29 +91,10 @@ envoy_cc_test_library(
     ],
 )
 
-# TODO(protovalidate-migration): This library uses protoc-gen-validate (PGV) extensively
-# and needs to be migrated to protovalidate-cc (https://github.com/bufbuild/protovalidate-cc).
-# The migration requires:
-#   1. Adding protovalidate-cc as a dependency
-#   2. Updating includes from validate/validate.h to protovalidate headers
-#   3. Replacing PGV helper functions (pgv::Utf8Len, pgv::IsHostname, etc.)
-#   4. Updating namespace references from validate:: to buf::validate::
-#   5. Removing pgv::BaseValidator base class
-# This is a substantial refactoring effort tracked separately from the main protovalidate migration.
-# For now, this library will not build due to missing @com_envoyproxy_protoc_gen_validate repository.
-envoy_cc_test_library(
-    name = "validated_input_generator_lib",
-    srcs = ["validated_input_generator.cc"],
-    hdrs = ["validated_input_generator.h"],
-    deps = [
-        "//test/fuzz:mutable_visitor_lib",
-        "//test/fuzz:random_lib",
-        "@com_envoyproxy_protoc_gen_validate//validate:cc_validate",  # TODO: migrate to protovalidate-cc
-        "@com_github_cncf_xds//udpa/type/v1:pkg_cc_proto",
-        "@com_github_cncf_xds//xds/type/v3:pkg_cc_proto",
-        "@com_github_google_libprotobuf_mutator//:libprotobuf_mutator",
-    ],
-)
+# Note: validated_input_generator_lib has been removed as part of the protoc-gen-validate
+# to protovalidate migration. The library was deeply coupled to PGV's code generation model
+# which is incompatible with protovalidate's runtime validation approach. Fuzz tests now
+# rely solely on libprotobuf-mutator for input generation.
 
 envoy_cc_test_library(
     name = "random_lib",
