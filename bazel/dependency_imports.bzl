@@ -41,18 +41,6 @@ def envoy_dependency_imports(
         buf_version = BUF_VERSION):
     compatibility_proxy_repo()
     rules_foreign_cc_dependencies()
-    
-    # Explicitly declare org_golang_google_protobuf with v1.36.10 BEFORE any
-    # other Go dependency setup to ensure this version takes precedence.
-    # This is required for protovalidate generated code that needs MessageFieldStringOf.
-    # Declared here so it's registered before go_rules_dependencies() and gazelle_dependencies().
-    go_repository(
-        name = "org_golang_google_protobuf",
-        importpath = "google.golang.org/protobuf",
-        sum = "h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=",
-        version = "v1.36.10",
-    )
-    
     go_rules_dependencies()
     go_register_toolchains(go_version)
     if go_version != "host":
@@ -153,9 +141,13 @@ def envoy_dependency_imports(
         version = "v0.0.0-20230822172742-b8732ec3820d",
         build_external = "external",
     )
-    # Using mmorel-35/xds fork with protovalidate migration that includes protobuf v1.36.10
-    # See: https://github.com/mmorel-35/xds/commit/006306971edc85a646b0888eba1992e4f57f38c9
-    # This is temporary until the official cncf/xds repository merges the protovalidate migration
+    go_repository(
+        name = "org_golang_google_protobuf",
+        importpath = "google.golang.org/protobuf",
+        sum = "h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=",
+        version = "v1.36.10",
+        build_external = "external",
+    )
     go_repository(
         name = "com_github_cncf_xds_go",
         importpath = "github.com/cncf/xds/go",
@@ -209,6 +201,7 @@ def envoy_dependency_imports(
         importpath = "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go",
         sum = "h1:31on4W/yPcV4nZHL4+UCiCvLPsMqe/vJcNg8Rci0scc=",
         version = "v1.36.10-20250912141014-52f32327d4b0.1",
+        build_external = "external",
     )
 
     protoc_gen_jsonschema_go_dependencies()
