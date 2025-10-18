@@ -93,52 +93,55 @@ def envoy_dependency_imports(
     # These dependencies, like most of the Go in this repository, exist only for the API.
     # These repos also have transient dependencies - `build_external` allows them to use them.
     # TODO(phlax): remove `build_external` and pin all transients
+    # Updated to v1.67.3 to match api/go.mod and ensure compatibility with protobuf v1.36.10
     go_repository(
         name = "org_golang_google_grpc",
         build_file_proto_mode = "disable",
         importpath = "google.golang.org/grpc",
-        sum = "h1:raiipEjMOIC/TO2AvyTxP25XFdLxNIBwzDh3FM3XztI=",
-        version = "v1.34.0",
+        sum = "h1:OgPcDAFKHnH8X3O4WcO4XUc8GRDeKsKReqbQtiCj7N8=",
+        version = "v1.67.3",
         build_external = "external",
         # project_url = "https://pkg.go.dev/google.golang.org/grpc",
-        # last_update = "2020-12-02"
+        # last_update = "2024-10-18"
         # use_category = ["api"],
         # cpe = "cpe:2.3:a:grpc:grpc:*",
     )
+    # Updated to v0.28.0 to match api/go.mod
     go_repository(
         name = "org_golang_x_net",
         importpath = "golang.org/x/net",
-        sum = "h1:0mm1VjtFUOIlE1SbDlwjYaDxZVDP2S5ou6y0gSgXHu8=",
-        version = "v0.0.0-20200226121028-0de0cce0169b",
+        sum = "h1:a9JDOJc5GMUJ0+UDqmLT86WiEy7iWyIhz8gz8E4e5hE=",
+        version = "v0.28.0",
         build_external = "external",
         # project_url = "https://pkg.go.dev/golang.org/x/net",
-        # last_update = "2020-02-26"
+        # last_update = "2024-08-01"
         # use_category = ["api"],
-        # source = "https://github.com/bufbuild/protoc-gen-validate/blob/v0.6.1/dependencies.bzl#L129-L134"
     )
+    # Updated to v0.17.0 to match api/go.mod
     go_repository(
         name = "org_golang_x_text",
         importpath = "golang.org/x/text",
-        sum = "h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=",
-        version = "v0.3.3",
+        sum = "h1:XtiM5bkSOt+ewxlOE/aE/AKEHibwj/6gvWMl9Rsh0Qc=",
+        version = "v0.17.0",
         build_external = "external",
         # project_url = "https://pkg.go.dev/golang.org/x/text",
-        # last_update = "2021-06-16"
+        # last_update = "2024-08-01"
         # use_category = ["api"],
-        # source = "https://github.com/bufbuild/protoc-gen-validate/blob/v0.6.1/dependencies.bzl#L148-L153"
     )
+    # Updated to match api/go.mod
     go_repository(
         name = "org_golang_google_genproto_googleapis_api",
         importpath = "google.golang.org/genproto/googleapis/api",
-        sum = "h1:DoPTO70H+bcDXcd39vOqb2viZxgqeBeSGtZ55yZU4/Q=",
-        version = "v0.0.0-20230822172742-b8732ec3820d",
+        sum = "h1:wKguEg1hsxI2/L3hUYrpo1RVi48K+uTyzKqprwLXsb8=",
+        version = "v0.0.0-20240814211410-ddb44dafa142",
         build_external = "external",
     )
+    # Updated to match api/go.mod
     go_repository(
         name = "org_golang_google_genproto_googleapis_rpc",
         importpath = "google.golang.org/genproto/googleapis/rpc",
-        sum = "h1:uvYuEyMHKNt+lT4K3bN6fGswmK8qSvcreM3BwjDh+y4=",
-        version = "v0.0.0-20230822172742-b8732ec3820d",
+        sum = "h1:2035KHhUv+EpyB+hWgJnaWKJOdX1E95w2S8Rr4uWKTs=",
+        version = "v0.0.0-20240826202546-f6391c0de4c7",
         build_external = "external",
     )
     go_repository(
