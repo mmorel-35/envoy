@@ -1,4 +1,5 @@
 load("@aspect_bazel_lib//lib:repositories.bzl", "register_jq_toolchains", "register_yq_toolchains")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@base_pip3//:requirements.bzl", pip_dependencies = "install_deps")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
@@ -42,17 +43,21 @@ def envoy_dependency_imports(
     compatibility_proxy_repo()
     rules_foreign_cc_dependencies()
     
-    # Register org_golang_google_protobuf BEFORE any other Go dependency
-    # resolution to ensure we use the correct version (v1.36.10) that's compatible
-    # with the protovalidate generated code, instead of older versions that
-    # rules_go (v1.33.0) or gazelle (v1.33.0) might register.
-    go_repository(
+    # Register org_golang_google_protobuf BEFORE go_rules_dependencies()
+    # with v1.36.10 to override the v1.33.0 that rules_go would register.
+    # This is required for protovalidate generated code that needs MessageFieldStringOf.
+    http_archive(
         name = "org_golang_google_protobuf",
-        importpath = "google.golang.org/protobuf",
-        sum = "h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=",
-        version = "v1.36.10",
-        build_file_proto_mode = "disable_global",
-        build_naming_convention = "go_default_library",
+        sha256 = "7c5c835c5a9c1f1b68ccd9ebb067b1d5ae4d05c28ab07e9b9e14d70c53a70d58",
+        urls = [
+            "https://mirror.bazel.build/github.com/protocolbuffers/protobuf-go/archive/refs/tags/v1.36.10.zip",
+            "https://github.com/protocolbuffers/protobuf-go/archive/refs/tags/v1.36.10.zip",
+        ],
+        strip_prefix = "protobuf-go-1.36.10",
+        patches = [
+            "@io_bazel_rules_go//third_party:org_golang_google_protobuf-gazelle.patch",
+        ],
+        patch_args = ["-p1"],
     )
     
     go_rules_dependencies()
