@@ -41,6 +41,20 @@ def envoy_dependency_imports(
         buf_version = BUF_VERSION):
     compatibility_proxy_repo()
     rules_foreign_cc_dependencies()
+    
+    # Register org_golang_google_protobuf BEFORE any other Go dependency
+    # resolution to ensure we use the correct version (v1.36.10) that's compatible
+    # with the protovalidate generated code, instead of older versions that
+    # rules_go (v1.33.0) or gazelle (v1.33.0) might register.
+    go_repository(
+        name = "org_golang_google_protobuf",
+        importpath = "google.golang.org/protobuf",
+        sum = "h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=",
+        version = "v1.36.10",
+        build_file_proto_mode = "disable_global",
+        build_naming_convention = "go_default_library",
+    )
+    
     go_rules_dependencies()
     go_register_toolchains(go_version)
     if go_version != "host":
@@ -142,13 +156,6 @@ def envoy_dependency_imports(
         build_external = "external",
     )
     go_repository(
-        name = "org_golang_google_protobuf",
-        importpath = "google.golang.org/protobuf",
-        sum = "h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175w=",
-        version = "v1.28.1",
-        build_external = "external",
-    )
-    go_repository(
         name = "com_github_cncf_xds_go",
         importpath = "github.com/cncf/xds/go",
         sum = "h1:B/lvg4tQ5hfFZd4V2hcSfFVfUvAK6GSFKxIIzwnkv8g=",
@@ -201,7 +208,6 @@ def envoy_dependency_imports(
         importpath = "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go",
         sum = "h1:31on4W/yPcV4nZHL4+UCiCvLPsMqe/vJcNg8Rci0scc=",
         version = "v1.36.10-20250912141014-52f32327d4b0.1",
-        build_external = "external",
     )
 
     protoc_gen_jsonschema_go_dependencies()
