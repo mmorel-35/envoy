@@ -206,7 +206,6 @@ def envoy_dependency_imports(
         importpath = "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go",
         sum = "h1:31on4W/yPcV4nZHL4+UCiCvLPsMqe/vJcNg8Rci0scc=",
         version = "v1.36.10-20250912141014-52f32327d4b0.1",
-        build_external = "external",
     )
 
     protoc_gen_jsonschema_go_dependencies()
