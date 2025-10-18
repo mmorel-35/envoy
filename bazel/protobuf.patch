@@ -150,4 +150,3 @@ new file mode 100644
 +load("//python/dist:system_python.bzl", _system_python = "system_python")
 +
 +system_python = _system_python
-
