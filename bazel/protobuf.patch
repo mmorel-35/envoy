@@ -120,8 +120,8 @@ diff --git a/src/google/protobuf/compiler/BUILD.bazel b/src/google/protobuf/comp
 diff --git a/src/google/protobuf/io/BUILD.bazel b/src/google/protobuf/io/BUILD.bazel
 --- a/src/google/protobuf/io/BUILD.bazel
 +++ b/src/google/protobuf/io/BUILD.bazel
-@@ -163,7 +163,7 @@ cc_library(
-         "@com_google_absl//absl/log:absl_log",
+@@ -162,7 +162,7 @@ cc_library(
+         "@abseil-cpp//absl/log:absl_log",
      ] + select({
          "//build_defs:config_msvc": [],
 -        "//conditions:default": ["@zlib"],
@@ -141,3 +141,13 @@ diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
  // This error has been generally flaky, but we need to disable it specifically
  // to fix https://github.com/protocolbuffers/protobuf/issues/12313
  #pragma clang diagnostic ignored "-Wunused-parameter"
+diff --git a/bazel/system_python.bzl b/bazel/system_python.bzl
+new file mode 100644
+--- /dev/null
++++ b/bazel/system_python.bzl
+@@ -0,0 +1,4 @@
++# Forward to new location for backward compatibility
++load("//python/dist:system_python.bzl", _system_python = "system_python")
++
++system_python = _system_python
+
