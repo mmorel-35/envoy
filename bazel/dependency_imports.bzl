@@ -153,11 +153,14 @@ def envoy_dependency_imports(
         version = "v0.0.0-20230822172742-b8732ec3820d",
         build_external = "external",
     )
+    # Using mmorel-35/xds fork with protovalidate migration that includes protobuf v1.36.10
+    # See: https://github.com/mmorel-35/xds/commit/006306971edc85a646b0888eba1992e4f57f38c9
+    # This is temporary until the official cncf/xds repository merges the protovalidate migration
     go_repository(
         name = "com_github_cncf_xds_go",
         importpath = "github.com/cncf/xds/go",
-        sum = "h1:B/lvg4tQ5hfFZd4V2hcSfFVfUvAK6GSFKxIIzwnkv8g=",
-        version = "v0.0.0-20220520190051-1e77728a1eaa",
+        remote = "https://github.com/mmorel-35/xds",
+        commit = "006306971edc85a646b0888eba1992e4f57f38c9",
         build_external = "external",
     )
     go_repository(
