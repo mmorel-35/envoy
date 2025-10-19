@@ -11,7 +11,6 @@ option java_outer_classname = "AdsProto";
 option java_multiple_files = true;
 option go_package = "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2;discoveryv2";
 option (udpa.annotations.file_status).package_version_status = FROZEN;
-option cc_generic_services = true;
 
 // [#protodoc-title: Aggregated Discovery Service (ADS)]
 
