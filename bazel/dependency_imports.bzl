@@ -203,8 +203,8 @@ def envoy_dependency_imports(
     go_repository(
         name = "build_buf_gen_go_bufbuild_protovalidate_protocolbuffers_go",
         importpath = "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go",
-        sum = "h1:LCgXGnYlrF0/jc30fSUx8/E66tpob+KN08OT2n7uqtc=",
-        version = "v1.34.2-20240717164558-a6c49f84cc0f.1",
+        sum = "h1:31on4W/yPcV4nZHL4+UCiCvLPsMqe/vJcNg8Rci0scc=",
+        version = "v1.36.10-20250912141014-52f32327d4b0.1",
         build_external = "external",
     )
 
