@@ -239,6 +239,13 @@ Planned enhancements to CI/CD validation:
 - [Bazel CI Documentation](https://github.com/bazelbuild/continuous-integration)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 
+## BCR Publishing
+
+For information on publishing Envoy to Bazel Central Registry (BCR):
+- See `.bcr/README.md` for detailed publishing guide
+- Use `.bcr/prepare-bcr-submission.sh` to prepare a submission
+- BCR templates available in `.bcr/` directory
+
 ## Contact
 
 For questions about CI/CD setup:
