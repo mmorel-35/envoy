@@ -123,8 +123,8 @@ use_repo(
 
 envoy_toolchains = use_extension("@envoy//bazel/extensions:toolchains.bzl", "toolchains")
 
-# API extensions from API module
-envoy_api_deps = use_extension("@envoy_api//bazel/extensions:api_dependencies.bzl", "envoy_api_deps")
+# API dependencies are handled by the envoy_api module itself via local_path_override
+# No need to load API extensions separately in mobile module
 
 # Envoy Mobile extensions - streamlined design following bzlmod best practices
 # This architecture mirrors the main envoy module for consistency
