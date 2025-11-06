@@ -1,0 +1,15 @@
+{
+  "homepage": "https://github.com/envoyproxy/envoy",
+  "maintainers": [
+    {
+      "email": "envoy-maintainers@googlegroups.com",
+      "github": "envoyproxy",
+      "name": "Envoy Maintainers"
+    }
+  ],
+  "repository": [
+    "github:envoyproxy/envoy"
+  ],
+  "versions": [],
+  "yanked_versions": {}
+}

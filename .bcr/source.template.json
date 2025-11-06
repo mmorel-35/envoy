@@ -1,0 +1,5 @@
+{
+  "integrity": "sha256-REPLACE_WITH_ACTUAL_SHA256_OF_RELEASE_ARCHIVE",
+  "strip_prefix": "envoy-{version}",
+  "url": "https://github.com/envoyproxy/envoy/archive/refs/tags/v{version}.tar.gz"
+}
