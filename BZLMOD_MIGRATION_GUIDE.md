@@ -183,6 +183,7 @@ Extensions only run in bzlmod mode:
 - **EXTENSION_REFACTORING.md** - Technical details on extension architecture
 - **BZLMOD_STATUS.md** - Quick reference validation commands
 - **BZLMOD_CI_CD.md** - CI/CD validation setup and troubleshooting
+- **.bcr/README.md** - Guide for publishing Envoy to Bazel Central Registry
 - **tools/bazel8_tidy.sh** - Automated MODULE.bazel maintenance
 - **Bazel bzlmod docs** - https://bazel.build/external/overview#bzlmod
 
