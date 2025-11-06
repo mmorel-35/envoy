@@ -27,8 +27,13 @@ To calculate the SHA256:
 
 ```bash
 VERSION="1.29.0"
-wget https://github.com/envoyproxy/envoy/archive/refs/tags/v${VERSION}.tar.gz
-sha256sum v${VERSION}.tar.gz
+curl -L -o "v${VERSION}.tar.gz" https://github.com/envoyproxy/envoy/archive/refs/tags/v${VERSION}.tar.gz
+
+# On Linux
+sha256sum "v${VERSION}.tar.gz"
+
+# On macOS
+shasum -a 256 "v${VERSION}.tar.gz"
 ```
 
 ### 2. Fork the Bazel Central Registry

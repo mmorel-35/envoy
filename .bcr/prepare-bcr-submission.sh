@@ -77,7 +77,15 @@ if ! curl -L -o "$TEMP_ARCHIVE" "$ARCHIVE_URL"; then
 fi
 
 echo "Calculating SHA256..."
-SHA256=$(sha256sum "$TEMP_ARCHIVE" | awk '{print $1}')
+# Use sha256sum on Linux or shasum on macOS
+if command -v sha256sum >/dev/null 2>&1; then
+    SHA256=$(sha256sum "$TEMP_ARCHIVE" | awk '{print $1}')
+elif command -v shasum >/dev/null 2>&1; then
+    SHA256=$(shasum -a 256 "$TEMP_ARCHIVE" | awk '{print $1}')
+else
+    echo "Error: Neither sha256sum nor shasum command found"
+    exit 1
+fi
 echo "SHA256: $SHA256"
 
 # Create source.json
