@@ -61,7 +61,7 @@ def android_dependencies():
     
     native.register_toolchains(
         "@rules_android//toolchains/android:android_default_toolchain",
-        "@rules_android//toolchains/android_sdk:android_sdk_toolchain",
+        "@rules_android//toolchains/android_sdk:android_sdk_tools",
     )
 
 def swift_dependencies():
