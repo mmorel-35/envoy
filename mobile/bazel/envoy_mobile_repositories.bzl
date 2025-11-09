@@ -58,8 +58,8 @@ def swift_repos():
 def kotlin_repos():
     http_archive(
         name = "rules_java",
-        sha256 = "c0ee60f8757f140c157fc2c7af703d819514de6e025ebf70386d38bdd85fce83",
-        url = "https://github.com/bazelbuild/rules_java/releases/download/7.12.3/rules_java-7.12.3.tar.gz",
+        sha256 = "6d8c6d5cd86fed031ee48424f238fa35f33abc9921fd97dd4ae1119a29fc807f",
+        url = "https://github.com/bazelbuild/rules_java/releases/download/8.6.3/rules_java-8.6.3.tar.gz",
         patch_args = ["-p1"],
         patches = ["@envoy//bazel:rules_java.patch"],
     )
@@ -108,9 +108,9 @@ def kotlin_repos():
 def android_repos():
     http_archive(
         name = "rules_android",
-        urls = ["https://github.com/bazelbuild/rules_android/releases/download/v0.5.1/rules_android-v0.5.1.tar.gz"],
-        sha256 = "b1599e4604c1594a1b0754184c5e50f895a68f444d1a5a82b688b2370d990ba0",
-        strip_prefix = "rules_android-0.5.1",
+        urls = ["https://github.com/bazelbuild/rules_android/releases/download/v0.6.6/rules_android-v0.6.6.tar.gz"],
+        sha256 = "f8f8bca6df61ea6070a0a8abc4054940b19c9fdb4fabb864e40d29d124f517f9",
+        strip_prefix = "rules_android-0.6.6",
     )
     http_archive(
         name = "rules_android_ndk",

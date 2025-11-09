@@ -5,7 +5,7 @@ load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
 load("@rules_android//:prereqs.bzl", "rules_android_prereqs")
 load("@rules_android//:defs.bzl", "rules_android_workspace")
 load("@rules_detekt//detekt:dependencies.bzl", "rules_detekt_dependencies")
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies")
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
@@ -50,15 +50,22 @@ def envoy_mobile_dependencies(extra_maven_dependencies = []):
     if not native.existing_rule("envoy_mobile_extra_jni_deps"):
         _default_extra_jni_deps(name = "envoy_mobile_extra_jni_deps")
 
-    android_dependencies()
     swift_dependencies()
     kotlin_dependencies(extra_maven_dependencies)
+    android_dependencies()
 
 def android_dependencies():
-    """Initialize rules_android dependencies and toolchains."""
+    """Initialize rules_android 0.6.6 dependencies and toolchains."""
+    # Android rules dependencies
     rules_android_prereqs()
+    
+    # rules_java setup for rules_android
+    rules_java_toolchains()
+    
+    # rules_android workspace setup
     rules_android_workspace()
     
+    # Register Android toolchains
     native.register_toolchains(
         "@rules_android//toolchains/android:android_default_toolchain",
         "@rules_android//toolchains/android_sdk:android_sdk_tools",
