@@ -2,8 +2,6 @@ load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependen
 load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
 load("@build_bazel_rules_swift//swift:repositories.bzl", "swift_rules_dependencies")
 load("@robolectric//bazel:robolectric.bzl", "robolectric_repositories")
-load("@rules_android//:prereqs.bzl", "rules_android_prereqs")
-load("@rules_android//:defs.bzl", "rules_android_workspace")
 load("@rules_detekt//detekt:dependencies.bzl", "rules_detekt_dependencies")
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
@@ -56,14 +54,11 @@ def envoy_mobile_dependencies(extra_maven_dependencies = []):
 
 def android_dependencies():
     """Initialize rules_android 0.6.6 dependencies and toolchains."""
-    # Android rules dependencies
-    rules_android_prereqs()
-    
     # rules_java setup for rules_android
     rules_java_toolchains()
     
-    # rules_android workspace setup
-    rules_android_workspace()
+    # rules_android workspace setup - TEMPORARILY DISABLED
+    # rules_android_workspace()
     
     # Register Android toolchains
     native.register_toolchains(
