@@ -57,13 +57,13 @@ jobs:
       run: |
         # Parse the request data
         echo "$REQUEST_DATA" | jq '.'
-        
+
         # Check if MODULE.bazel files were changed
         MODULE_CHANGED=$(echo "$REQUEST_DATA" | jq -r '.request.changed // [] | map(select(. | test("MODULE\\.bazel$"))) | length > 0')
-        
+
         # Check if bzlmod label is present
         HAS_BZLMOD_LABEL=$(echo "$REQUEST_DATA" | jq -r '.request.labels // [] | map(select(. == "bzlmod")) | length > 0')
-        
+
         # Run if either condition is true
         if [[ "$MODULE_CHANGED" == "true" || "$HAS_BZLMOD_LABEL" == "true" ]]; then
           echo "should-run=true" >> "$GITHUB_OUTPUT"
