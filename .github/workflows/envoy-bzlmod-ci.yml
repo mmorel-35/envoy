@@ -1,0 +1,138 @@
+name: Envoy/Bzlmod CI
+
+permissions:
+  contents: read
+
+on:
+  workflow_run:
+    workflows:
+    - Request
+    types:
+    - completed
+
+concurrency:
+  group: >-
+    ${{ ((github.event.workflow_run.head_branch == 'main'
+          || startsWith(github.event.workflow_run.head_branch, 'release/v'))
+          && github.event.repository.full_name == github.repository)
+        && github.run_id
+        || github.event.workflow_run.head_branch }}-${{ github.event.repository.full_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  CI_DEBUG: ${{ vars.CI_DEBUG }}
+
+
+jobs:
+  load:
+    secrets:
+      app-key: ${{ secrets.ENVOY_CI_APP_KEY }}
+      app-id: ${{ secrets.ENVOY_CI_APP_ID }}
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      pull-requests: read
+    if: |
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.repository.full_name == github.repository
+      && contains(fromJSON('["pull_request_target", "push"]'), github.event.workflow_run.event)
+      && (github.repository == 'envoyproxy/envoy' || vars.ENVOY_CI)
+    uses: ./.github/workflows/_load.yml
+    with:
+      check-name: bzlmod-ci
+
+  # Check if we should run bzlmod tests based on file changes or labels
+  check-trigger:
+    needs: load
+    runs-on: ubuntu-24.04
+    if: ${{ needs.load.outputs.request }}
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+    - name: Check if bzlmod CI should run
+      id: check
+      env:
+        REQUEST_DATA: ${{ needs.load.outputs.request }}
+      run: |
+        # Parse the request data
+        echo "$REQUEST_DATA" | jq '.'
+        
+        # Check if MODULE.bazel files were changed
+        MODULE_CHANGED=$(echo "$REQUEST_DATA" | jq -r '.request.changed // [] | map(select(. | test("MODULE\\.bazel$"))) | length > 0')
+        
+        # Check if bzlmod label is present
+        HAS_BZLMOD_LABEL=$(echo "$REQUEST_DATA" | jq -r '.request.labels // [] | map(select(. == "bzlmod")) | length > 0')
+        
+        # Run if either condition is true
+        if [[ "$MODULE_CHANGED" == "true" || "$HAS_BZLMOD_LABEL" == "true" ]]; then
+          echo "should-run=true" >> "$GITHUB_OUTPUT"
+          echo "Bzlmod CI will run (MODULE.bazel changed: $MODULE_CHANGED, has bzlmod label: $HAS_BZLMOD_LABEL)"
+        else
+          echo "should-run=false" >> "$GITHUB_OUTPUT"
+          echo "Bzlmod CI will be skipped (MODULE.bazel changed: $MODULE_CHANGED, has bzlmod label: $HAS_BZLMOD_LABEL)"
+        fi
+
+  bzlmod-build:
+    secrets:
+      gcs-cache-key: ${{ secrets.GCS_CACHE_KEY }}
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      pull-requests: read
+    name: Bzlmod (${{ matrix.module }})
+    uses: ./.github/workflows/_run.yml
+    if: ${{ needs.check-trigger.outputs.should-run == 'true' }}
+    needs:
+    - load
+    - check-trigger
+    with:
+      bazel-extra: '--enable_bzlmod --config=remote-envoy-engflow'
+      cache-build-image: ${{ fromJSON(needs.load.outputs.request).request.build-image.default }}
+      concurrency-suffix: -bzlmod-${{ matrix.module }}
+      error-match: |
+        ERROR
+        error:
+        Error:
+      gcs-cache-bucket: ${{ vars.ENVOY_CACHE_BUCKET }}
+      rbe: true
+      request: ${{ needs.load.outputs.request }}
+      target: ${{ matrix.target }}
+      timeout-minutes: 180
+      trusted: ${{ needs.load.outputs.trusted && fromJSON(needs.load.outputs.trusted) || false }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        # Test envoy_api module with basic API targets
+        - module: envoy_api
+          target: api
+        # Test envoy module with basic build targets
+        - module: envoy
+          target: compile_time_options
+        # Test envoy module with GCC build
+        - module: envoy
+          target: gcc
+
+  request:
+    secrets:
+      app-id: ${{ secrets.ENVOY_CI_APP_ID }}
+      app-key: ${{ secrets.ENVOY_CI_APP_KEY }}
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    if: |
+      always()
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.repository.full_name == github.repository
+      && contains(fromJSON('["pull_request_target", "push"]'), github.event.workflow_run.event)
+      && needs.check-trigger.outputs.should-run == 'true'
+    needs:
+    - load
+    - check-trigger
+    - bzlmod-build
+    uses: ./.github/workflows/_finish.yml
+    with:
+      needs: ${{ toJSON(needs) }}
