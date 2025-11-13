@@ -76,9 +76,12 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        "//tools/zstd",
         "@jq_toolchains//:resolved_toolchain",
+        "@zstd//:zstd_cli",
     ],
+    env = {
+        "ZSTD_BIN": "$(location @zstd//:zstd_cli)",
+    },
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
     visibility = ["//visibility:public"],
 )
