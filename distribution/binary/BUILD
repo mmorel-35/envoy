@@ -36,7 +36,7 @@ pkg_tar(
     srcs = [
         ":release_files",
     ],
-    compressor = "@com_github_facebook_zstd//:zstd_cli",
+    compressor = "//tools/zstd",
     compressor_args = "-T0",
     extension = "tar.zst",
 )
