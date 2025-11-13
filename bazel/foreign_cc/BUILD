@@ -540,14 +540,6 @@ envoy_cmake(
     }),
 )
 
-# Alias to the native zstd build from @com_github_facebook_zstd.
-# This maintains backward compatibility while using the BCR-compatible BUILD file.
-alias(
-    name = "zstd",
-    actual = "@com_github_facebook_zstd//:zstd",
-    visibility = ["//visibility:public"],
-)
-
 envoy_cmake(
     name = "maxmind",
     build_args = select({

@@ -34,7 +34,7 @@ make(
         "install",
     ],
     deps = [
-        "//bazel/foreign_cc:zstd",
+        "@com_github_facebook_zstd//:zstd",
         "//contrib/qat:qatlib",
     ],
 )

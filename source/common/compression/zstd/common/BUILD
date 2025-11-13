@@ -13,7 +13,7 @@ envoy_cc_library(
     srcs = ["base.cc"],
     hdrs = ["base.h"],
     deps = [
-        "//bazel/foreign_cc:zstd",
+        "@com_github_facebook_zstd//:zstd",
         "//source/common/buffer:buffer_lib",
     ],
 )

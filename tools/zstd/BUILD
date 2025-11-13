@@ -1,5 +1,3 @@
-load(":zstd.bzl", "zstd")
-
 licenses(["notice"])  # Apache 2
 
 # Now using the native zstd_cli from @com_github_facebook_zstd instead of
