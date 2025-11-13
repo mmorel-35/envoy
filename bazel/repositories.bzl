@@ -506,7 +506,7 @@ def _org_brotli():
 def _com_github_facebook_zstd():
     external_http_archive(
         name = "com_github_facebook_zstd",
-        build_file_content = BUILD_ALL_CONTENT,
+        build_file = "@envoy//bazel/external:zstd.BUILD",
     )
 
 def _com_google_cel_cpp():

@@ -1,9 +1,7 @@
-load(":zstd.bzl", "zstd")
-
 licenses(["notice"])  # Apache 2
 
-zstd(
+alias(
     name = "zstd",
-    target = "//bazel/foreign_cc:zstd",
+    actual = "@com_github_facebook_zstd//:zstd_cli",
     visibility = ["//visibility:public"],
 )
