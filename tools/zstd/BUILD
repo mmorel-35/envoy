@@ -1,9 +1,10 @@
-load(":zstd.bzl", "zstd")
-
 licenses(["notice"])  # Apache 2
 
-zstd(
+genrule(
     name = "zstd",
-    target = "//bazel/foreign_cc:zstd",
+    srcs = ["@com_github_facebook_zstd//:zstd_cli"],
+    outs = ["zstd_cli"],
+    cmd = "cp $< $@ && chmod +x $@",
+    executable = True,
     visibility = ["//visibility:public"],
 )

@@ -76,7 +76,7 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        "//tools/zstd",
+        "@com_github_facebook_zstd//:zstd_cli",
         "@jq_toolchains//:resolved_toolchain",
     ],
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
