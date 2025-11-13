@@ -1,4 +1,7 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+""" Builds zstd.
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -64,6 +67,27 @@ cc_library(
     }),
 )
 
+cc_binary(
+    name = "zstd_cli",
+    srcs = glob(
+        include = [
+            "programs/*.c",
+            "programs/*.h",
+        ],
+        exclude = [
+            "programs/datagen.c",
+            "programs/datagen.h",
+            "programs/platform.h",
+            "programs/util.h",
+        ],
+    ),
+    deps = [
+        ":datagen",
+        ":util",
+        ":zstd",
+    ],
+)
+
 cc_library(
     name = "util",
     srcs = [
@@ -91,22 +115,48 @@ cc_library(
 )
 
 cc_binary(
-    name = "zstd_cli",
-    srcs = glob(
-        include = [
-            "programs/*.c",
-            "programs/*.h",
-        ],
-        exclude = [
-            "programs/datagen.c",
-            "programs/datagen.h",
-            "programs/platform.h",
-            "programs/util.h",
-        ],
-    ),
+    name = "datagen_cli",
+    srcs = [
+        "programs/lorem.c",
+        "programs/lorem.h",
+        "tests/datagencli.c",
+        "tests/loremOut.c",
+        "tests/loremOut.h",
+    ],
+    includes = [
+        "programs",
+        "tests",
+    ],
+    deps = [":datagen"],
+)
+
+cc_test(
+    name = "fullbench",
+    srcs = [
+        "lib/decompress/zstd_decompress_internal.h",
+        "programs/benchfn.c",
+        "programs/benchfn.h",
+        "programs/benchzstd.c",
+        "programs/benchzstd.h",
+        "programs/lorem.c",
+        "programs/lorem.h",
+        "programs/timefn.c",
+        "programs/timefn.h",
+        "tests/fullbench.c",
+        "tests/loremOut.c",
+        "tests/loremOut.h",
+    ],
+    copts = select({
+        "@platforms//os:windows": [],
+        "//conditions:default": ["-Wno-deprecated-declarations"],
+    }),
+    includes = [
+        "lib/common",
+        "programs",
+        "tests",
+    ],
     deps = [
         ":datagen",
-        ":util",
         ":zstd",
     ],
 )
