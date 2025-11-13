@@ -1,6 +1,3 @@
-""" Builds zstd from BCR (Bazel Central Registry).
-"""
-
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 licenses(["notice"])  # BSD-3-Clause
