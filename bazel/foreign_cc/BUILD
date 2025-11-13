@@ -540,40 +540,12 @@ envoy_cmake(
     }),
 )
 
-envoy_cmake(
+# Alias to the native zstd build from @com_github_facebook_zstd.
+# This maintains backward compatibility while using the BCR-compatible BUILD file.
+alias(
     name = "zstd",
-    build_args = select({
-        "//bazel/foreign_cc:parallel_builds_enabled": ["-j"],
-        "//bazel:engflow_rbe_x86_64": ["-j"],
-        "//bazel:engflow_rbe_aarch64": ["-j"],
-        "//conditions:default": ["-j1"],
-    }),
-    build_data = ["@com_github_facebook_zstd//:all"],
-    cache_entries = {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_LIBDIR": "lib",
-        "ZSTD_BUILD_SHARED": "off",
-        "ZSTD_BUILD_STATIC": "on",
-    },
-    exec_properties = select({
-        "//bazel:engflow_rbe_x86_64": {
-            "Pool": "linux_x64_large",
-        },
-        "//bazel:engflow_rbe_aarch64": {
-            "Pool": "linux_arm64_small",
-        },
-        "//conditions:default": {},
-    }),
-    generate_args = [
-        "-G",
-        "Ninja",
-    ],
-    lib_source = "@com_github_facebook_zstd//:all",
-    out_static_libs = select({
-        "//bazel:windows_x86_64": ["zstd_static.lib"],
-        "//conditions:default": ["libzstd.a"],
-    }),
-    working_directory = "build/cmake",
+    actual = "@com_github_facebook_zstd//:zstd",
+    visibility = ["//visibility:public"],
 )
 
 envoy_cmake(

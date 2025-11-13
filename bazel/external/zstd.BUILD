@@ -1,41 +1,117 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+""" Builds zstd from BCR (Bazel Central Registry).
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 licenses(["notice"])  # BSD-3-Clause
 
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "zstd",
+filegroup(
+    name = "common_sources",
     srcs = glob([
         "lib/common/*.c",
-        "lib/compress/*.c",
-        "lib/decompress/*.c",
-        "lib/dictBuilder/*.c",
-    ]) + select({
-        "@platforms//cpu:x86_64": glob(["lib/decompress/*.S"]),
-        "//conditions:default": [],
-    }),
-    hdrs = glob([
-        "lib/*.h",
         "lib/common/*.h",
+    ]),
+)
+
+filegroup(
+    name = "compress_sources",
+    srcs = glob([
+        "lib/compress/*.c",
         "lib/compress/*.h",
+    ]),
+)
+
+filegroup(
+    name = "decompress_sources",
+    srcs = glob([
+        "lib/decompress/*.c",
         "lib/decompress/*.h",
+    ]) + select({
+        "@platforms//os:windows": [],
+        "//conditions:default": glob(["lib/decompress/*.S"]),
+    }),
+)
+
+filegroup(
+    name = "dictbuilder_sources",
+    srcs = glob([
+        "lib/dictBuilder/*.c",
         "lib/dictBuilder/*.h",
     ]),
-    defines = select({
-        "@platforms//cpu:x86_64": [],
-        "//conditions:default": ["ZSTD_DISABLE_ASM"],
-    }),
-    includes = [
-        "lib",
-        "lib/common",
+)
+
+cc_library(
+    name = "zstd",
+    srcs = [
+        ":common_sources",
+        ":compress_sources",
+        ":decompress_sources",
+        ":dictbuilder_sources",
     ],
+    hdrs = [
+        "lib/zdict.h",
+        "lib/zstd.h",
+        "lib/zstd_errors.h",
+    ],
+    includes = ["lib"],
+    linkopts = ["-pthread"],
+    linkstatic = True,
     local_defines = [
         "XXH_NAMESPACE=ZSTD_",
         "ZSTD_MULTITHREAD",
-    ],
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "//conditions:default": ["-pthread"],
+        "ZSTD_BUILD_SHARED=OFF",
+        "ZSTD_BUILD_STATIC=ON",
+    ] + select({
+        "@platforms//os:windows": ["ZSTD_DISABLE_ASM"],
+        "//conditions:default": [],
     }),
+)
+
+cc_library(
+    name = "util",
+    srcs = [
+        "programs/platform.h",
+        "programs/util.c",
+    ],
+    hdrs = [
+        "lib/common/compiler.h",
+        "lib/common/debug.h",
+        "lib/common/mem.h",
+        "lib/common/portability_macros.h",
+        "lib/common/zstd_deps.h",
+        "programs/util.h",
+    ],
+)
+
+cc_library(
+    name = "datagen",
+    srcs = [
+        "programs/datagen.c",
+        "programs/platform.h",
+    ],
+    hdrs = ["programs/datagen.h"],
+    deps = [":util"],
+)
+
+cc_binary(
+    name = "zstd_cli",
+    srcs = glob(
+        include = [
+            "programs/*.c",
+            "programs/*.h",
+        ],
+        exclude = [
+            "programs/datagen.c",
+            "programs/datagen.h",
+            "programs/platform.h",
+            "programs/util.h",
+        ],
+    ),
+    deps = [
+        ":datagen",
+        ":util",
+        ":zstd",
+    ],
 )
