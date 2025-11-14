@@ -18,14 +18,6 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
-genrule(
-    name = "zstd_symlink",
-    srcs = ["//tools/zstd:zstd"],
-    outs = ["zstd"],
-    cmd = "ln -sf $$(realpath $<) $@",
-    visibility = ["//visibility:public"],
-)
-
 jq(
     name = "grcov_config",
     srcs = [],
@@ -84,7 +76,7 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        ":zstd_symlink",
+        "//tools/zstd",
         "@jq_toolchains//:resolved_toolchain",
     ],
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
