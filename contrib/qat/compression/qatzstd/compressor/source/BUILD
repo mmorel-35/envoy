@@ -16,10 +16,18 @@ make(
     env = select({
         "//bazel:clang_build": {
             "CFLAGS": "-Wno-error=unused-parameter -Wno-error=unused-command-line-argument -I$$EXT_BUILD_DEPS/qatlib/include",
+            # Note: This path references the external directory directly. For bzlmod migration,
+            # this should ideally use a more indirect reference, but rules_foreign_cc make()
+            # has limited support for dependency path resolution. The external/ symlink path
+            # should continue to work with bzlmod as Bazel maintains compatibility symlinks.
             "ZSTDLIB": "$$EXT_BUILD_ROOT/external/com_github_facebook_zstd/lib",
         },
         "//conditions:default": {
             "CFLAGS": "-I$$EXT_BUILD_DEPS/qatlib/include",
+            # Note: This path references the external directory directly. For bzlmod migration,
+            # this should ideally use a more indirect reference, but rules_foreign_cc make()
+            # has limited support for dependency path resolution. The external/ symlink path
+            # should continue to work with bzlmod as Bazel maintains compatibility symlinks.
             "ZSTDLIB": "$$EXT_BUILD_ROOT/external/com_github_facebook_zstd/lib",
         },
     }),

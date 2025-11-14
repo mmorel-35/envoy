@@ -18,6 +18,15 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
+genrule(
+    name = "zstd",
+    srcs = ["@com_github_facebook_zstd//:zstd_cli"],
+    outs = ["zstd"],
+    cmd = "cp $< $@ && chmod +x $@",
+    executable = True,
+    visibility = ["//visibility:public"],
+)
+
 jq(
     name = "grcov_config",
     srcs = [],
@@ -76,7 +85,7 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        "//tools/zstd",
+        ":zstd",
         "@jq_toolchains//:resolved_toolchain",
     ],
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
