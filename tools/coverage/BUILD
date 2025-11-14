@@ -19,9 +19,9 @@ genrule(
 )
 
 genrule(
-    name = "zstd",
+    name = "zstd_bin",
     srcs = ["@com_github_facebook_zstd//:zstd_cli"],
-    outs = ["zstd_bin"],
+    outs = ["zstd"],
     cmd = "cp $< $@ && chmod +x $@",
     executable = True,
     visibility = ["//visibility:public"],
@@ -85,7 +85,7 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        ":zstd",
+        ":zstd_bin",
         "@jq_toolchains//:resolved_toolchain",
     ],
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
