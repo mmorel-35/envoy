@@ -21,7 +21,7 @@ genrule(
 genrule(
     name = "zstd",
     srcs = ["@com_github_facebook_zstd//:zstd_cli"],
-    outs = ["zstd"],
+    outs = ["zstd_bin"],
     cmd = "cp $< $@ && chmod +x $@",
     executable = True,
     visibility = ["//visibility:public"],
