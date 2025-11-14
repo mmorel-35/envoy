@@ -19,8 +19,8 @@ genrule(
 )
 
 genrule(
-    name = "zstd_bin",
-    srcs = ["//tools/zstd:zstd_bin"],
+    name = "zstd_symlink",
+    srcs = ["//tools/zstd:zstd"],
     outs = ["zstd"],
     cmd = "ln -sf $$(realpath $<) $@",
     visibility = ["//visibility:public"],
@@ -84,7 +84,7 @@ sh_binary(
         ":templates/base.html",
         ":templates/index.html",
         ":templates/macros.html",
-        ":zstd_bin",
+        ":zstd_symlink",
         "@jq_toolchains//:resolved_toolchain",
     ],
     toolchains = ["@jq_toolchains//:resolved_toolchain"],

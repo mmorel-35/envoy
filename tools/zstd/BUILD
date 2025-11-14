@@ -1,9 +1,9 @@
 licenses(["notice"])  # Apache 2
 
 genrule(
-    name = "zstd_bin",
+    name = "zstd",
     srcs = ["@com_github_facebook_zstd//:zstd_cli"],
-    outs = ["zstd"],
+    outs = ["zstd_out"],
     cmd = "cp $< $@ && chmod +x $@",
     executable = True,
     visibility = ["//visibility:public"],
