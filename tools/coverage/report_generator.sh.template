@@ -22,7 +22,7 @@ done
 find_file() {
     # kinda wierd to use PYTHON_RUNFILES but that is what is available in the
     # bazel generator customization
-    find "${PYTHON_RUNFILES}" -type f -o -type l -name "${1}" -path "*/tools/coverage/**/*" | head -1
+    find "${PYTHON_RUNFILES}" \( -type f -o -type l \) -name "${1}" | head -1
 }
 
 GRCOV="$(find_file grcov_bin)"

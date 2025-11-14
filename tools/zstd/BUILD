@@ -1,7 +1,10 @@
 licenses(["notice"])  # Apache 2
 
-alias(
+genrule(
     name = "zstd",
-    actual = "@com_github_facebook_zstd//:zstd_cli",
+    srcs = ["@com_github_facebook_zstd//:zstd_cli"],
+    outs = ["zstd"],
+    cmd = "cp $< $@ && chmod +x $@",
+    executable = True,
     visibility = ["//visibility:public"],
 )
