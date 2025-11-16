@@ -55,8 +55,8 @@ def _cc_proto_descriptor_library(name, visibility):
         deps = [name],
     )
 
-def _pgv_cc_proto_library(name, visibility, linkstatic, deps):
-    """Helper to create pgv_cc_proto_library with standard naming."""
+def _cc_proto_library(name, visibility, linkstatic, deps, has_services):
+    """Helper to create pgv_cc_proto_library and optionally cc_grpc_library with standard naming."""
     cc_proto_library_name = name + _CC_PROTO_SUFFIX
     pgv_cc_proto_library(
         name = cc_proto_library_name,
@@ -70,7 +70,19 @@ def _pgv_cc_proto_library(name, visibility, linkstatic, deps):
         deps = [":" + name],
         visibility = ["//visibility:public"],
     )
-    return cc_proto_library_name
+
+    # Optionally define gRPC services
+    if has_services:
+        # TODO: when Python services are required, add to the below stub generations.
+        cc_proto_deps = [cc_proto_library_name] + [_cc_proto_mapping(dep) for dep in deps]
+        cc_grpc_library(
+            name = name + _CC_GRPC_SUFFIX,
+            srcs = [":" + name],
+            deps = cc_proto_deps,
+            proto_only = False,
+            grpc_only = True,
+            visibility = ["//visibility:public"],
+        )
 
 def _py_proto_library(name):
     """Helper to create py_proto_library with standard naming."""
@@ -87,17 +99,6 @@ def _java_proto_library(name):
         name = name + _JAVA_PROTO_SUFFIX,
         visibility = ["//visibility:public"],
         deps = [":" + name],
-    )
-
-def _api_cc_grpc_library(name, proto, deps = []):
-    """Helper to create cc_grpc_library with standard naming."""
-    cc_grpc_library(
-        name = name + _CC_GRPC_SUFFIX,
-        srcs = [proto],
-        deps = deps,
-        proto_only = False,
-        grpc_only = True,
-        visibility = ["//visibility:public"],
     )
 
 def api_cc_py_proto_library(
@@ -121,7 +122,7 @@ def api_cc_py_proto_library(
     # cc_proto_descriptor_library.
     _cc_proto_descriptor_library(name, visibility)
 
-    cc_proto_library_name = _pgv_cc_proto_library(name, visibility, linkstatic, deps)
+    _cc_proto_library(name, visibility, linkstatic, deps, has_services)
 
     # Uses gRPC implementation of py_proto_library.
     # https://github.com/grpc/grpc/blob/v1.59.1/bazel/python_rules.bzl#L160
@@ -129,9 +130,3 @@ def api_cc_py_proto_library(
 
     if java:
         _java_proto_library(name)
-
-    # Optionally define gRPC services
-    if has_services:
-        # TODO: when Python services are required, add to the below stub generations.
-        cc_proto_deps = [cc_proto_library_name] + [_cc_proto_mapping(dep) for dep in deps]
-        _api_cc_grpc_library(name = name, proto = ":" + name, deps = cc_proto_deps)
