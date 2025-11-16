@@ -1,6 +1,6 @@
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load(
-    ":api_cc_py_proto_library.bzl",
+    ":proto_library.bzl",
     "api_cc_py_proto_library",
 )
 load(

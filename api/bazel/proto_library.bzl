@@ -1,3 +1,5 @@
+"""Proto library creation rules for Envoy API."""
+
 load("@com_envoyproxy_protoc_gen_validate//bazel:pgv_proto_library.bzl", "pgv_cc_proto_library")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
@@ -11,8 +13,6 @@ load(
     "//bazel/cc_proto_descriptor_library:builddefs.bzl",
     "cc_proto_descriptor_library",
 )
-
-EnvoyProtoDepsInfo = provider(fields = ["deps"])
 
 _PY_PROTO_SUFFIX = "_py_proto"
 _CC_PROTO_SUFFIX = "_cc_proto"
@@ -109,6 +109,17 @@ def api_cc_py_proto_library(
         linkstatic = 0,
         has_services = 0,
         java = True):
+    """Creates proto libraries for C++, Python, and Java.
+    
+    Args:
+        name: Name of the proto_library target
+        visibility: Visibility of the proto_library target
+        srcs: Proto source files
+        deps: Proto dependencies
+        linkstatic: Whether to link statically
+        has_services: Whether the proto has gRPC services
+        java: Whether to generate Java proto library
+    """
     proto_library(
         name = name,
         srcs = srcs,

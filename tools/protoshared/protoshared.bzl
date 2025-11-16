@@ -1,4 +1,4 @@
-load("@envoy_api//bazel:api_cc_py_proto_library.bzl", "EnvoyProtoDepsInfo")
+load("@envoy_api//bazel:providers.bzl", "EnvoyProtoDepsInfo")
 
 MNEMONIC = "ProtoShared"
 
