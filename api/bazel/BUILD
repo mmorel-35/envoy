@@ -15,6 +15,7 @@ exports_files([
     "extensions.bzl",
     "repository_locations.bzl",
     "repository_locations_utils.bzl",
+    "rules.bzl",
     "utils.bzl",
 ])
 
