@@ -12,10 +12,13 @@ load(":repository_locations_utils.bzl", "load_repository_locations_spec")
 licenses(["notice"])  # Apache 2
 
 exports_files([
+    "api_cc_py_proto_library.bzl",
+    "api_cc_test.bzl",
+    "api_go_test.bzl",
+    "api_proto_package.bzl",
     "extensions.bzl",
     "repository_locations.bzl",
     "repository_locations_utils.bzl",
-    "rules.bzl",
     "utils.bzl",
 ])
 

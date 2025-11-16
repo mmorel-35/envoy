@@ -1,11 +1,20 @@
 # This file is deprecated and maintained for backward compatibility only.
-# Please use rules.bzl directly instead.
+# Please use the individual rule files directly instead.
 load(
-    ":rules.bzl",
+    ":api_cc_py_proto_library.bzl",
     _EnvoyProtoDepsInfo = "EnvoyProtoDepsInfo",
     _api_cc_py_proto_library = "api_cc_py_proto_library",
+)
+load(
+    ":api_cc_test.bzl",
     _api_cc_test = "api_cc_test",
+)
+load(
+    ":api_go_test.bzl",
     _api_go_test = "api_go_test",
+)
+load(
+    ":api_proto_package.bzl",
     _api_proto_package = "api_proto_package",
 )
 
