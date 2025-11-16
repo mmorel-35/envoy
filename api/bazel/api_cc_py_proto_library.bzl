@@ -1,6 +1,6 @@
 load("@com_envoyproxy_protoc_gen_validate//bazel:pgv_proto_library.bzl", "pgv_cc_proto_library")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
-load("@com_github_grpc_grpc//bazel:python_rules.bzl", _py_proto_library = "py_proto_library")
+load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 load(
@@ -47,9 +47,52 @@ def _proto_mapping(dep, proto_dep_map, proto_suffix):
 def _cc_proto_mapping(dep):
     return _proto_mapping(dep, EXTERNAL_PROTO_CC_BAZEL_DEP_MAP, _CC_PROTO_SUFFIX)
 
+def _cc_proto_descriptor_library(name, visibility):
+    """Helper to create cc_proto_descriptor_library with standard naming."""
+    cc_proto_descriptor_library(
+        name = name + _CC_PROTO_DESCRIPTOR_SUFFIX,
+        visibility = visibility,
+        deps = [name],
+    )
+
+def _pgv_cc_proto_library(name, visibility, linkstatic, deps):
+    """Helper to create pgv_cc_proto_library with standard naming."""
+    cc_proto_library_name = name + _CC_PROTO_SUFFIX
+    pgv_cc_proto_library(
+        name = cc_proto_library_name,
+        linkstatic = linkstatic,
+        cc_deps = [_cc_proto_mapping(dep) for dep in deps] + [
+            "@com_google_googleapis//google/api:http_cc_proto",
+            "@com_google_googleapis//google/api:httpbody_cc_proto",
+            "@com_google_googleapis//google/api:annotations_cc_proto",
+            "@com_google_googleapis//google/rpc:status_cc_proto",
+        ],
+        deps = [":" + name],
+        visibility = ["//visibility:public"],
+    )
+    return cc_proto_library_name
+
+def _py_proto_library(name):
+    """Helper to create py_proto_library with standard naming."""
+    py_proto_library(
+        name = name + _PY_PROTO_SUFFIX,
+        # Actual dependencies are resolved automatically from the proto_library dep tree.
+        deps = [":" + name],
+        visibility = ["//visibility:public"],
+    )
+
+def _java_proto_library(name):
+    """Helper to create java_proto_library with standard naming."""
+    java_proto_library(
+        name = name + _JAVA_PROTO_SUFFIX,
+        visibility = ["//visibility:public"],
+        deps = [":" + name],
+    )
+
 def _api_cc_grpc_library(name, proto, deps = []):
+    """Helper to create cc_grpc_library with standard naming."""
     cc_grpc_library(
-        name = name,
+        name = name + _CC_GRPC_SUFFIX,
         srcs = [proto],
         deps = deps,
         proto_only = False,
@@ -65,7 +108,6 @@ def api_cc_py_proto_library(
         linkstatic = 0,
         has_services = 0,
         java = True):
-    relative_name = ":" + name
     proto_library(
         name = name,
         srcs = srcs,
@@ -77,45 +119,19 @@ def api_cc_py_proto_library(
     # Protobuf-Lite generated C++ code does not include reflection
     # capabilities but analogous functionality can be provided by
     # cc_proto_descriptor_library.
-    cc_proto_descriptor_library(
-        name = name + _CC_PROTO_DESCRIPTOR_SUFFIX,
-        visibility = visibility,
-        deps = [name],
-    )
+    _cc_proto_descriptor_library(name, visibility)
 
-    cc_proto_library_name = name + _CC_PROTO_SUFFIX
-    pgv_cc_proto_library(
-        name = cc_proto_library_name,
-        linkstatic = linkstatic,
-        cc_deps = [_cc_proto_mapping(dep) for dep in deps] + [
-            "@com_google_googleapis//google/api:http_cc_proto",
-            "@com_google_googleapis//google/api:httpbody_cc_proto",
-            "@com_google_googleapis//google/api:annotations_cc_proto",
-            "@com_google_googleapis//google/rpc:status_cc_proto",
-        ],
-        deps = [relative_name],
-        visibility = ["//visibility:public"],
-    )
+    cc_proto_library_name = _pgv_cc_proto_library(name, visibility, linkstatic, deps)
 
     # Uses gRPC implementation of py_proto_library.
     # https://github.com/grpc/grpc/blob/v1.59.1/bazel/python_rules.bzl#L160
-    _py_proto_library(
-        name = name + _PY_PROTO_SUFFIX,
-        # Actual dependencies are resolved automatically from the proto_library dep tree.
-        deps = [relative_name],
-        visibility = ["//visibility:public"],
-    )
+    _py_proto_library(name)
 
     if java:
-        java_proto_library(
-            name = name + _JAVA_PROTO_SUFFIX,
-            visibility = ["//visibility:public"],
-            deps = [relative_name],
-        )
+        _java_proto_library(name)
 
     # Optionally define gRPC services
     if has_services:
         # TODO: when Python services are required, add to the below stub generations.
-        cc_grpc_name = name + _CC_GRPC_SUFFIX
         cc_proto_deps = [cc_proto_library_name] + [_cc_proto_mapping(dep) for dep in deps]
-        _api_cc_grpc_library(name = cc_grpc_name, proto = relative_name, deps = cc_proto_deps)
+        _api_cc_grpc_library(name = name, proto = ":" + name, deps = cc_proto_deps)
