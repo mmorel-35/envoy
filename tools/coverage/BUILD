@@ -79,6 +79,9 @@ sh_binary(
         "@com_github_facebook_zstd//:zstd_cli",
         "@jq_toolchains//:resolved_toolchain",
     ],
+    env = {
+        "ZSTD_BIN": "$(location @com_github_facebook_zstd//:zstd_cli)",
+    },
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
     visibility = ["//visibility:public"],
 )
