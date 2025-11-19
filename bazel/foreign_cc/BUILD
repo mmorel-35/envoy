@@ -56,13 +56,16 @@ envoy_cc_library(
     }),
 )
 
-alias(
+cc_library(
     name = "gperftools",
-    actual = select({
-        "//bazel:debug_tcmalloc": "@gperftools//:tcmalloc_debug",
-        "//conditions:default": "@gperftools//:tcmalloc",
-    }),
     tags = ["skip_on_windows"],
+    deps = select({
+        "//bazel:debug_tcmalloc": ["@gperftools//:tcmalloc_debug"],
+        "//conditions:default": [
+            "@gperftools//:tcmalloc",
+            "@gperftools//:cpu_profiler",
+        ],
+    }),
 )
 
 make(
