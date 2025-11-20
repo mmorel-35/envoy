@@ -462,13 +462,13 @@ def _net_zlib():
     # Bind for grpc.
     native.bind(
         name = "madler_zlib",
-        actual = "@envoy//bazel/foreign_cc:zlib",
+        actual = "@envoy//bazel/external:zlib",
     )
 
     # Bind for protobuf.
     native.bind(
         name = "zlib",
-        actual = "@envoy//bazel/foreign_cc:zlib",
+        actual = "@envoy//bazel/external:zlib",
     )
 
 def _com_github_zlib_ng_zlib_ng():
