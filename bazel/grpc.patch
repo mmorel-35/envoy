@@ -92,7 +92,7 @@ index 9cf5e50cb8..d15970783c 100644
      tags = ["manual"],
  )
  
-@@ -74,7 +68,7 @@ alias(
+ @@ -74,7 +68,7 @@ alias(
  
  alias(
      name = "cares",
