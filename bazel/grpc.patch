@@ -1,5 +1,5 @@
 diff --git a/BUILD b/BUILD
-index 848e65dabb857..84aea6256b976 100644
+index 848e65d..84aea62 100644
 --- a/BUILD
 +++ b/BUILD
 @@ -33,7 +33,7 @@ package(
@@ -12,7 +12,7 @@ index 848e65dabb857..84aea6256b976 100644
  )
  
 diff --git a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
-index 0fc2e1d061..aab6e990a6 100644
+index 0fc2e1d..aab6e99 100644
 --- a/bazel/grpc_build_system.bzl
 +++ b/bazel/grpc_build_system.bzl
 @@ -27,7 +27,6 @@
@@ -38,9 +38,8 @@ index 0fc2e1d061..aab6e990a6 100644
              "//conditions:default": [name + "_native"],
          }),
          outs = [name],
- 
 diff --git a/src/core/BUILD b/src/core/BUILD
-index e8bf5e85629c4..442348ddf70ca 100644
+index e8bf5e8..442348d 100644
 --- a/src/core/BUILD
 +++ b/src/core/BUILD
 @@ -27,7 +27,7 @@ licenses(["reciprocal"])
@@ -52,59 +51,11 @@ index e8bf5e85629c4..442348ddf70ca 100644
      ],
  )
  
-diff --git a/src/proto/grpc/health/v1/BUILD b/src/proto/grpc/health/v1/BUILD
---- a/src/proto/grpc/health/v1/BUILD
-+++ b/src/proto/grpc/health/v1/BUILD
-@@ -44,3 +44,10 @@
-         "health.proto",
-     ],
- )
-+
-+# This alias is required by Envoy's build
-+alias(
-+    name = "_health_proto_only",
-+    actual = ":health_proto",
-+    visibility = ["//visibility:public"],
-+)
-diff --git a/third_party/BUILD b/third_party/BUILD
-index 9cf5e50cb8..d15970783c 100644
---- a/third_party/BUILD
-+++ b/third_party/BUILD
-@@ -31,18 +31,12 @@ config_setting(
- 
- alias(
-     name = "libssl",
--    actual = select({
--        ":grpc_use_openssl_setting": "@openssl//:ssl",
--        "//conditions:default": "@boringssl//:ssl",
--    }),
-+    actual = "@envoy//bazel:boringssl",
-     tags = ["manual"],
- )
- 
- alias(
-     name = "libcrypto",
--    actual = select({
--        ":grpc_use_openssl_setting": "@openssl//:crypto",
--        "//conditions:default": "@boringssl//:crypto",
--    }),
-+    actual = "@envoy//bazel:boringcrypto",
-     tags = ["manual"],
- )
- 
- @@ -74,7 +68,7 @@ alias(
- 
- alias(
-     name = "cares",
--    actual = "@com_github_cares_cares//:ares",
-+    actual = "@envoy//bazel/foreign_cc:ares",
-     tags = ["manual"],
- )
- 
 diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promise/detail/promise_factory.h
+index 53b75cb..485acda 100644
 --- a/src/core/lib/promise/detail/promise_factory.h
 +++ b/src/core/lib/promise/detail/promise_factory.h
-@@ -119,10 +119,9 @@ struct OnceToken {};
+@@ -125,17 +125,16 @@ struct OnceToken {};
  // Promote a callable(A) -> T | Poll<T> to a PromiseFactory(A) -> Promise<T> by
  // capturing A.
  template <typename Token, typename A, typename F>
@@ -118,7 +69,6 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
    return Curried<RemoveCVRef<F>, A>(std::forward<F>(f), std::forward<A>(arg));
  }
  
-@@ -131,7 +130,7 @@ template <typename Token, typename A, typename F>
  // Promote a callable() -> T|Poll<T> to a PromiseFactory(A) -> Promise<T>
  // by dropping the argument passed to the factory.
  template <typename A, typename F>
@@ -127,7 +77,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      !IsVoidCallable<ResultOf<F()>>::value, PromiseLike<RemoveCVRef<F>>>
  PromiseFactoryImpl(OnceToken, F f, A&&) {
    return PromiseLike<F>(std::move(f));
-@@ -140,7 +139,7 @@ PromiseFactoryImpl(OnceToken, F f, A&&) {
+@@ -143,7 +142,7 @@ PromiseFactoryImpl(OnceToken, F f, A&&) {
  
  // Promote a callable() -> Poll<T> to a PromiseFactory() -> Promise<T>
  template <typename F>
@@ -136,7 +86,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      !IsVoidCallable<ResultOf<F()>>::value &&
          PollTraits<ResultOf<F()>>::is_poll(),
      PromiseLike<RemoveCVRef<F>>>
-@@ -150,7 +149,7 @@ PromiseFactoryImpl(OnceToken, F f) {
+@@ -153,7 +152,7 @@ PromiseFactoryImpl(OnceToken, F f) {
  
  // Promote a callable() -> T to a PromiseFactory() -> Immediate<T>
  template <typename F>
@@ -145,7 +95,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      std::enable_if_t<!IsVoidCallable<ResultOf<F()>>::value &&
                           !PollTraits<ResultOf<F()>>::is_poll() &&
                           !std::is_same_v<ResultOf<F()>, void>,
-@@ -160,7 +159,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
+@@ -163,7 +162,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
    return PromiseLike<decltype(f2)>(std::move(f2));
  }
  template <typename F>
@@ -154,7 +104,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      std::enable_if_t<!IsVoidCallable<ResultOf<F()>>::value &&
                           !PollTraits<ResultOf<F()>>::is_poll() &&
                           std::is_same_v<ResultOf<F()>, void>,
-@@ -173,7 +172,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
+@@ -176,7 +175,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
  
  // Given a callable(A) -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename A, typename F>
@@ -163,7 +113,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      IsVoidCallable<ResultOf<F(A)>>::value,
      PromiseLike<decltype(std::declval<F>()(std::declval<A>()))>>
  PromiseFactoryImpl(Token, F&& f, A&& arg) {
-@@ -182,7 +181,7 @@ PromiseFactoryImpl(Token, F&& f, A&& arg) {
+@@ -185,7 +184,7 @@ PromiseFactoryImpl(Token, F&& f, A&& arg) {
  
  // Given a callable(A) -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename A, typename F>
@@ -172,7 +122,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      IsVoidCallable<ResultOf<F(A)>>::value,
      PromiseLike<decltype(std::declval<F>()(std::declval<A>()))>>
  PromiseFactoryImpl(Token, F& f, A&& arg) {
-@@ -192,10 +191,9 @@ PromiseFactoryImpl(Token, F& f, A&& arg) {
+@@ -195,19 +194,17 @@ PromiseFactoryImpl(Token, F& f, A&& arg) {
  // Given a callable() -> Promise<T>, promote it to a
  // PromiseFactory(A) -> Promise<T> by dropping the first argument.
  template <typename Token, typename A, typename F>
@@ -186,7 +136,6 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
    return f();
  }
  
-@@ -203,9 +201,8 @@ template <typename Token, typename A, typename F>
  // Given a callable() -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename F>
 -GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION
@@ -212,8 +161,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      return PromiseFactoryImpl(OnceToken{}, std::move(f_), std::forward<Arg>(a));
    }
  };
- 
-@@ -242,10 +239,10 @@ class OncePromiseFactory<void, F> {
+@@ -241,10 +238,10 @@ class OncePromiseFactory<void, F> {
    using Arg = void;
    using Promise = decltype(PromiseFactoryImpl(OnceToken{}, std::move(f_)));
  
@@ -226,7 +174,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      return PromiseFactoryImpl(OnceToken{}, std::move(f_));
    }
  };
-@@ -264,14 +261,14 @@ class RepeatedPromiseFactory {
+@@ -263,13 +260,13 @@ class RepeatedPromiseFactory {
    using Promise =
        decltype(PromiseFactoryImpl(RepeatableToken{}, f_, std::declval<A>()));
  
@@ -243,8 +191,7 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      return PromiseFactoryImpl(RepeatableToken{}, f_, std::forward<Arg>(a));
    }
  };
- 
-@@ -285,13 +282,13 @@ class RepeatedPromiseFactory<void, F> {
+@@ -283,13 +280,13 @@ class RepeatedPromiseFactory<void, F> {
    using Arg = void;
    using Promise = decltype(PromiseFactoryImpl(RepeatableToken{}, f_));
  
@@ -261,3 +208,53 @@ diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promis
      return PromiseFactoryImpl(RepeatableToken{}, f_);
    }
  };
+diff --git a/src/proto/grpc/health/v1/BUILD b/src/proto/grpc/health/v1/BUILD
+index f6165e0..3746535 100644
+--- a/src/proto/grpc/health/v1/BUILD
++++ b/src/proto/grpc/health/v1/BUILD
+@@ -44,3 +44,10 @@ filegroup(
+         "health.proto",
+     ],
+ )
++
++# This alias is required by Envoy's build
++alias(
++    name = "_health_proto_only",
++    actual = ":health_proto",
++    visibility = ["//visibility:public"],
++)
+diff --git a/third_party/BUILD b/third_party/BUILD
+index 9cf5e50..5771ad9 100644
+--- a/third_party/BUILD
++++ b/third_party/BUILD
+@@ -31,19 +31,13 @@ config_setting(
+ 
+ alias(
+     name = "libssl",
+-    actual = select({
+-        ":grpc_use_openssl_setting": "@openssl//:ssl",
+-        "//conditions:default": "@boringssl//:ssl",
+-    }),
++    actual = "@envoy//bazel:boringssl",
+     tags = ["manual"],
+ )
+ 
+ alias(
+     name = "libcrypto",
+-    actual = select({
+-        ":grpc_use_openssl_setting": "@openssl//:crypto",
+-        "//conditions:default": "@boringssl//:crypto",
+-    }),
++    actual = "@envoy//bazel:boringcrypto",
+     tags = ["manual"],
+ )
+ 
+@@ -80,7 +74,7 @@ alias(
+ 
+ alias(
+     name = "cares",
+-    actual = "@com_github_cares_cares//:ares",
++    actual = "@envoy//bazel/foreign_cc:ares",
+     tags = ["manual"],
+ )
+ 
