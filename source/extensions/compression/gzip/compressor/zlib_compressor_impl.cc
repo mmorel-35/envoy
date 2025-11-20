@@ -32,13 +32,13 @@ void ZlibCompressorImpl::init(CompressionLevel comp_level, CompressionStrategy c
                               int64_t window_bits, uint64_t memory_level = 8) {
   ASSERT(initialized_ == false);
   // deflateInit2 is a macro that uses old-style cast in zlib.h, which we cannot modify
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
   const int result = deflateInit2(zstream_ptr_.get(), static_cast<int64_t>(comp_level), Z_DEFLATED,
                                   window_bits, memory_level, static_cast<uint64_t>(comp_strategy));
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
   RELEASE_ASSERT(result >= 0, "");
