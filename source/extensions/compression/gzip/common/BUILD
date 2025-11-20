@@ -13,7 +13,7 @@ envoy_cc_library(
     srcs = ["base.cc"],
     hdrs = ["base.h"],
     deps = [
-        "@zlib//:zlib",
         "//source/common/buffer:buffer_lib",
+        "@zlib",
     ],
 )
