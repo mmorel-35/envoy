@@ -40,9 +40,3 @@ cc_library(
         ],
     }),
 )
-
-cc_library(
-    name = "zlib",
-    visibility = ["//visibility:public"],
-    deps = ["@zlib//:zlib"],
-)
