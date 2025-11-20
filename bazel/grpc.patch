@@ -70,7 +70,7 @@ diff --git a/third_party/BUILD b/third_party/BUILD
 index 9cf5e50cb8..d15970783c 100644
 --- a/third_party/BUILD
 +++ b/third_party/BUILD
-@@ -31,25 +31,19 @@ config_setting(
+@@ -31,18 +31,12 @@ config_setting(
  
  alias(
      name = "libssl",
@@ -92,14 +92,7 @@ index 9cf5e50cb8..d15970783c 100644
      tags = ["manual"],
  )
  
- alias(
-     name = "madler_zlib",
--    actual = "@zlib//:zlib",
-+    actual = "@envoy//bazel/foreign_cc:zlib",
-     tags = ["manual"],
- )
- 
-@@ -80,7 +74,7 @@ alias(
+@@ -74,7 +68,7 @@ alias(
  
  alias(
      name = "cares",
