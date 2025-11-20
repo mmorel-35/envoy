@@ -14,7 +14,7 @@ envoy_cc_library(
     srcs = ["zlib_decompressor_impl.cc"],
     hdrs = ["zlib_decompressor_impl.h"],
     deps = [
-        "@net_zlib//:zlib",
+        "@zlib//:zlib",
         "//envoy/compression/decompressor:decompressor_interface",
         "//envoy/stats:stats_interface",
         "//envoy/stats:stats_macros",

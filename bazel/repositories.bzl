@@ -453,20 +453,15 @@ def _net_colm_open_source_ragel():
 
 def _net_zlib():
     external_http_archive(
-        name = "net_zlib",
+        name = "zlib",
+        location_name = "net_zlib",
         build_file = "@envoy//bazel/external:zlib.BUILD",
     )
 
     # Bind for grpc.
     native.bind(
         name = "madler_zlib",
-        actual = "@net_zlib//:zlib",
-    )
-
-    # Bind for protobuf.
-    native.bind(
-        name = "zlib",
-        actual = "@net_zlib//:zlib",
+        actual = "@zlib//:zlib",
     )
 
 def _com_github_zlib_ng_zlib_ng():
