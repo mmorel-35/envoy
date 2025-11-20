@@ -36,8 +36,10 @@ void ZlibCompressorImpl::init(CompressionLevel comp_level, CompressionStrategy c
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
-  const int result = deflateInit2(zstream_ptr_.get(), static_cast<int>(comp_level), Z_DEFLATED,
-                                  window_bits, memory_level, static_cast<int>(comp_strategy));
+  const int result =
+      deflateInit2(zstream_ptr_.get(), static_cast<int>(comp_level), Z_DEFLATED,
+                   static_cast<int>(window_bits), static_cast<int>(memory_level),
+                   static_cast<int>(comp_strategy));
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
