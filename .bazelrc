@@ -132,14 +132,15 @@ build:gcc --action_env=CC=gcc --action_env=CXX=g++
 # option not play well with fission:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=110885
 build:gcc --copt=-fno-debug-types-section
-# These trigger errors in multiple places both in Envoy dependecies
-# and in Envoy code itself when using GCC.
-# And in all cases the reports appear to be clear false positives.
-build:gcc --copt=-Wno-error=restrict
+# NOTE: The following GCC-specific warning flags have been removed as the RBE GCC
+# toolchain actually uses clang which doesn't recognize these flags.
+# If you need these for local GCC builds, add them to user.bazelrc:
+# --copt=-Wno-error=restrict
+# --copt=-Wno-error=uninitialized
+# --cxxopt=-Wno-missing-requires
+# --cxxopt=-Wno-dangling-reference
+# --cxxopt=-Wno-nonnull-compare
 build:gcc --copt=-Wno-error=uninitialized
-build:gcc --cxxopt=-Wno-missing-requires
-build:gcc --cxxopt=-Wno-dangling-reference
-build:gcc --cxxopt=-Wno-nonnull-compare
 build:gcc --linkopt=-fuse-ld=gold --host_linkopt=-fuse-ld=gold
 
 # libc++ default for clang
