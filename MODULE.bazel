@@ -69,6 +69,16 @@ local_path_override(
     path = "mobile",
 )
 
+# Git overrides for dependencies not in BCR
+bazel_dep(name = "googleurl", version = "0.0.0-dev", repo_name = "com_googlesource_googleurl")
+git_override(
+    module_name = "googleurl",
+    commit = "dd4080fec0b443296c0ed0036e1e776df8813aa7",
+    patches = ["//bazel/external:googleurl.patch"],
+    patch_strip = 1,
+    remote = "https://github.com/google/gurl",
+)
+
 # Rules CC extensions for toolchain configuration
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
