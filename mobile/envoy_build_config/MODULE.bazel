@@ -3,10 +3,12 @@ module(
     version = "1.37.0-dev",
 )
 
+# All bazel_dep entries are organized alphabetically for improved readability.
 bazel_dep(name = "envoy", version = "1.37.0-dev")
 bazel_dep(name = "envoy_mobile", version = "1.37.0-dev")
 bazel_dep(name = "platforms", version = "1.0.0")
 
+# Local module overrides
 local_path_override(
     module_name = "envoy",
     path = "../..",
