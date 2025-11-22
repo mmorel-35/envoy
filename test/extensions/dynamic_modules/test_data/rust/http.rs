@@ -870,13 +870,11 @@ impl<EHF: EnvoyHttpFilter> std::io::Write for BodyWriter<'_, EHF> {
           "Buffer is not available",
         ));
       }
-    } else {
-      if !self.envoy_filter.append_buffered_response_body(buf) {
-        return Err(std::io::Error::new(
-          std::io::ErrorKind::Other,
-          "Buffer is not available",
-        ));
-      }
+    } else if !self.envoy_filter.append_buffered_response_body(buf) {
+      return Err(std::io::Error::new(
+        std::io::ErrorKind::Other,
+        "Buffer is not available",
+      ));
     }
 
     Ok(buf.len())
