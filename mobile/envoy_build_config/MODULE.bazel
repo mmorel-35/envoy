@@ -3,10 +3,12 @@ module(
     version = "1.37.0-dev",
 )
 
+# All bazel_dep entries are organized alphabetically for improved readability.
 bazel_dep(name = "envoy", version = "1.37.0-dev")
 bazel_dep(name = "envoy_mobile", version = "1.37.0-dev")
 bazel_dep(name = "platforms", version = "1.0.0")
 
+# Local module overrides
 local_path_override(
     module_name = "envoy",
     path = "../..",
@@ -15,4 +17,16 @@ local_path_override(
 local_path_override(
     module_name = "envoy_mobile",
     path = "..",
+)
+
+local_path_override(
+    module_name = "envoy_api",
+    path = "../../api",
+)
+
+# Git overrides for dependencies not in BCR
+git_override(
+    module_name = "googleurl",
+    commit = "94ff147fe0b96b4cca5d6d316b9af6210c0b8051",
+    remote = "https://github.com/google/gurl",
 )
