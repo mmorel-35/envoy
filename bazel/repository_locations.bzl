@@ -1556,8 +1556,10 @@ REPOSITORY_LOCATIONS_SPEC = dict(
         license = "Emscripten SDK",
         license_url = "https://github.com/emscripten-core/emsdk/blob/{version}/LICENSE",
     ),
-    # TODO(phlax): required for rules_rust compat, may be possible to remove once
-    #   bazel is updated 8+
+    # NOTE: Required for rules_rust 0.67.0 compatibility with Bazel 7.x.
+    # This provides the UEFI platform constraint used by rules_rust.
+    # May be removable once Envoy upgrades to Bazel 8.0+ which includes this by default.
+    # See: https://github.com/envoyproxy/envoy/pull/41172#issuecomment-2365923085
     platforms = dict(
         project_name = "platforms",
         project_desc = "Constraint values for specifying platforms and toolchains",
