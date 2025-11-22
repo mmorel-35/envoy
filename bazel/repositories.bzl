@@ -112,6 +112,7 @@ def _go_deps(skip_targets):
 def _rust_deps():
     external_http_archive(
         "rules_rust",
+        patch_args = ["-p0"],
         patches = ["@envoy//bazel:rules_rust.patch"],
     )
 
