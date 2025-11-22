@@ -132,14 +132,6 @@ build:gcc --action_env=CC=gcc --action_env=CXX=g++
 # option not play well with fission:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=110885
 build:gcc --copt=-fno-debug-types-section
-# NOTE: Some GCC-specific warning flags have been removed as the RBE GCC
-# toolchain actually uses clang which doesn't recognize these flags.
-# The -Wno-error=uninitialized flag is kept as it's supported by both compilers.
-# If you need the removed flags for local GCC builds, add them to user.bazelrc:
-# --copt=-Wno-error=restrict
-# --cxxopt=-Wno-missing-requires
-# --cxxopt=-Wno-dangling-reference
-# --cxxopt=-Wno-nonnull-compare
 build:gcc --copt=-Wno-error=uninitialized
 build:gcc --linkopt=-fuse-ld=gold --host_linkopt=-fuse-ld=gold
 
