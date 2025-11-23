@@ -394,7 +394,6 @@ build:rbe-toolchain-clang --crosstool_top=@envoy//bazel/rbe/toolchains/configs/l
 
 build:rbe-toolchain-gcc --config=rbe-toolchain
 build:rbe-toolchain-gcc --config=gcc
-build:rbe-toolchain-gcc --noenable_cc_toolchain_resolution
 build:rbe-toolchain-gcc --platforms=@envoy//bazel/rbe/toolchains:rbe_linux_gcc_platform
 build:rbe-toolchain-gcc --host_platform=@envoy//bazel/rbe/toolchains:rbe_linux_gcc_platform
 build:rbe-toolchain-gcc --crosstool_top=@envoy//bazel/rbe/toolchains/configs/linux/gcc/cc:toolchain
