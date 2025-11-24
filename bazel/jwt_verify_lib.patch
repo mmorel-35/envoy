@@ -1,0 +1,155 @@
+diff --git a/BUILD b/BUILD
+index 1234567..abcdefg 100644
+--- a/BUILD
++++ b/BUILD
+@@ -22,11 +22,11 @@ cc_library(
+         "jwt_verify_lib/verify.h",
+     ],
+     deps = [
+-        "//external:abseil_flat_hash_set",
+-        "//external:abseil_strings",
+-        "//external:abseil_time",
+-        "//external:protobuf",
+-        "//external:ssl",
++        "@com_google_absl//absl/container:flat_hash_set",
++        "@com_google_absl//absl/strings",
++        "@com_google_absl//absl/time",
++        "@com_google_protobuf//:protobuf",
++        "@boringssl//:ssl",
+     ],
+ )
+ 
+@@ -36,7 +36,7 @@ cc_library(
+         "simple_lru_cache/simple_lru_cache_inl.h",
+     ],
+     deps = [
+-        "//external:abseil_flat_hash_map",
++        "@com_google_absl//absl/container:flat_hash_map",
+     ],
+ )
+ 
+@@ -52,7 +52,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -68,7 +68,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -85,7 +85,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -101,7 +101,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":simple_lru_cache_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -118,7 +118,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -135,7 +135,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -152,7 +152,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -169,7 +169,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -186,7 +186,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -203,7 +203,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -220,7 +220,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -237,7 +237,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -254,7 +254,7 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
+ 
+@@ -271,6 +271,6 @@ cc_test(
+     linkstatic = 1,
+     deps = [
+         ":jwt_verify_lib",
+-        "//external:googletest_main",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
