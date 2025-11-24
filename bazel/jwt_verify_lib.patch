@@ -153,3 +153,33 @@ index 1234567..abcdefg 100644
 +        "@com_google_googletest//:gtest_main",
      ],
  )
+diff --git a/test/fuzz/BUILD b/test/fuzz/BUILD
+index 28247dd..e35142b 100644
+--- a/test/fuzz/BUILD
++++ b/test/fuzz/BUILD
+@@ -1,5 +1,5 @@
+ load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
+-# load cc_proto_library
++load("@rules_proto//proto:defs.bzl", "proto_library")
+ 
+ licenses(["notice"])
+ 
+@@ -27,7 +27,7 @@ cc_fuzz_test(
+     deps = [
+         ":jwt_verify_lib_fuzz_input_cc_proto",
+         "//:jwt_verify_lib",
+-        "//external:libprotobuf_mutator",
++        "@com_github_google_libprotobuf_mutator//:libprotobuf_mutator",
+     ],
+ )
+ 
+@@ -41,7 +41,7 @@ cc_test(
+     deps = [
+         ":jwt_verify_lib_fuzz_input_cc_proto",
+         "//:jwt_verify_lib",
+-        "//external:abseil_strings",
+-        "//external:googletest_main",
++        "@com_google_absl//absl/strings",
++        "@com_google_googletest//:gtest_main",
+     ],
+ )
