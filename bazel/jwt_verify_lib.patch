@@ -160,7 +160,7 @@ index 28247dd..e35142b 100644
 @@ -1,5 +1,5 @@
  load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 -# load cc_proto_library
-+load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
  
  licenses(["notice"])
  
