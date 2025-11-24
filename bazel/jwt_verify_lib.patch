@@ -157,9 +157,10 @@ diff --git a/test/fuzz/BUILD b/test/fuzz/BUILD
 index 28247dd..e35142b 100644
 --- a/test/fuzz/BUILD
 +++ b/test/fuzz/BUILD
-@@ -1,5 +1,5 @@
+@@ -1,5 +1,6 @@
  load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 -# load cc_proto_library
++load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 +load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
  
  licenses(["notice"])
