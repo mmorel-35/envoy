@@ -644,13 +644,6 @@ def _com_google_protobuf():
         patch_args = ["-p1"],
     )
 
-    # Needed for `bazel fetch` to work with @com_google_protobuf
-    # https://github.com/google/protobuf/blob/v3.6.1/util/python/BUILD#L6-L9
-    native.bind(
-        name = "python_headers",
-        actual = "//bazel:python_headers",
-    )
-
 def _v8():
     external_http_archive(
         name = "v8",

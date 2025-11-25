@@ -135,9 +135,9 @@ def envoy_copts(repository, test = False):
 
 # Mapping of external dependency short names to their actual Bazel targets.
 # This replaces the need for native.bind() calls and //external: references.
-# TODO(https://github.com/envoyproxy/envoy/issues/7719): Continue migrating
-# remaining bindings used by external dependencies.
 EXTERNAL_DEPS_MAP = {
+    # Abseil
+    "abseil_strings": "@com_google_absl//absl/strings",
     # gRPC transcoding
     "grpc_transcoding": "@grpc_httpjson_transcoding//src:transcoding",
     "path_matcher": "@grpc_httpjson_transcoding//src:path_matcher",
@@ -148,7 +148,7 @@ EXTERNAL_DEPS_MAP = {
     "nghttp2": "@envoy//bazel/foreign_cc:nghttp2",
     # gRPC
     "grpc": "@com_github_grpc_grpc//:grpc++",
-    "grpc_health_proto": "@envoy//bazel:grpc_health_proto",
+    "grpc_health_proto": "@com_github_grpc_grpc//src/proto/grpc/health/v1:health_cc_proto",
     # SSL/Crypto (aliases defined in @envoy//bazel)
     "ssl": "@envoy//bazel:boringssl",
     "crypto": "@envoy//bazel:boringcrypto",
@@ -161,9 +161,7 @@ def envoy_external_dep_path(dep):
     if dep in EXTERNAL_DEPS_MAP:
         return EXTERNAL_DEPS_MAP[dep]
 
-    # Fall back to //external: for any remaining dependencies
-    # that are still provided via native.bind() for external consumers.
-    return "//external:%s" % dep
+    fail("Unknown external dependency '%s'. Add it to EXTERNAL_DEPS_MAP in bazel/envoy_internal.bzl" % dep)
 
 def envoy_linkstatic():
     return select({
