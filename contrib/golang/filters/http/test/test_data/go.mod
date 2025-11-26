@@ -1,6 +1,6 @@
 module example.com/test-data
 
-go 1.23
+go 1.24.6
 
 require github.com/envoyproxy/envoy v1.33.2
 
@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	cel.dev/expr v0.15.0 // indirect
+	cel.dev/expr v0.25.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
