@@ -49,6 +49,7 @@ configure_make(
     visibility = ["//visibility:public"],
     deps = [
         "@lz4",
+        "@lz4//:lz4_frame",
         "@zlib",
         "//contrib/qat:qatlib",
         # Use boringssl alias to select fips vs non-fips version.
