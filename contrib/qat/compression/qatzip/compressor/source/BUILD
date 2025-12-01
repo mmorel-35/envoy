@@ -15,7 +15,7 @@ licenses(["notice"])  # Apache 2
 envoy_contrib_package()
 
 COMMON_ENV = {
-    "LDFLAGS": "-L$$EXT_BUILD_ROOT/$(BINDIR)/external/numactl/lib",
+    "LDFLAGS": "-L$$EXT_BUILD_ROOT/$(BINDIR)/external/numactl/lib -L$$EXT_BUILD_ROOT/$(BINDIR)/external/lz4/lib",
 }
 
 configure_make(
@@ -28,7 +28,10 @@ configure_make(
     ],
     # Include the numa_archive genrule output so that libnuma.a is available
     # for the linker to find with -lnuma.
+    # Include the lz4_archive genrule output so that liblz4.a is available
+    # for the linker to find with -llz4.
     data = [
+        "@lz4//:lz4_archive",
         "@numactl//:numa_archive",
     ],
     # Point to the directory containing the libnuma.a archive created by the
