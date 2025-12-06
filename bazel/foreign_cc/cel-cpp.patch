@@ -60,3 +60,34 @@ index abcdef123..987654fed 100644
    ABSL_DCHECK(descriptor_pool != nullptr);
    ABSL_DCHECK(message_factory != nullptr);
    ABSL_DCHECK(arena != nullptr);
+diff --git a/internal/json.cc b/internal/json.cc
+index abcdef123..123456789 100644
+--- a/internal/json.cc
++++ b/internal/json.cc
+@@ -302,7 +302,7 @@
+         SetStringValue(result, TimeUtil::ToString(timestamp));
+       } break;
+       case Descriptor::WELLKNOWNTYPE_VALUE: {
+-        absl::Cord serialized;
++        std::string serialized;
+         if (!message.SerializePartialToString(&serialized)) {
+           return absl::UnknownError(
+               "failed to serialize message google.protobuf.Value");
+@@ -313,7 +313,7 @@
+         }
+       } break;
+       case Descriptor::WELLKNOWNTYPE_LISTVALUE: {
+-        absl::Cord serialized;
++        std::string serialized;
+         if (!message.SerializePartialToString(&serialized)) {
+           return absl::UnknownError(
+               "failed to serialize message google.protobuf.ListValue");
+@@ -324,7 +324,7 @@
+         }
+       } break;
+       case Descriptor::WELLKNOWNTYPE_STRUCT: {
+-        absl::Cord serialized;
++        std::string serialized;
+         if (!message.SerializePartialToString(&serialized)) {
+           return absl::UnknownError(
+               "failed to serialize message google.protobuf.Struct");
