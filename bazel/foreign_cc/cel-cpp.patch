@@ -91,3 +91,16 @@ index abcdef123..123456789 100644
          if (!message.SerializePartialToString(&serialized)) {
            return absl::UnknownError(
                "failed to serialize message google.protobuf.Struct");
+diff --git a/internal/well_known_types.cc b/internal/well_known_types.cc
+index abcdef123..123456789 100644
+--- a/internal/well_known_types.cc
++++ b/internal/well_known_types.cc
+@@ -1974,7 +1974,7 @@
+                                       return unpacked->ParseFromString(string);
+                                     },
+                                     [&](const absl::Cord& cord) -> bool {
+-                                      return unpacked->ParseFromString(cord);
++                                      return unpacked->ParseFromString(static_cast<std::string>(cord));
+                                     }),
+                                 AsVariant(value));
+     if (!ok) {
