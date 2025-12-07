@@ -2,6 +2,7 @@
   - cc_proto_descriptor_library()
 """
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@com_google_protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
@@ -270,7 +271,7 @@ def _cc_proto_descriptor_aspect_impl(target, ctx, generator, cc_provider, file_p
         file_provider(srcs = files),
     ]
     if provide_cc_shared_library_hints:
-        if hasattr(cc_common, "CcSharedLibraryHintInfo"):
+        if bazel_features.globals.CcSharedLibraryHintInfo != None:
             providers.append(cc_common.CcSharedLibraryHintInfo(owners = owners))
         elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_constructor_do_not_use"):
             # This branch can be deleted once 6.X is not supported by rules
@@ -297,7 +298,7 @@ def _get_cc_proto_descriptor_library_aspect_provides():
         _CcProtoDescriptorWrappedGeneratedSrcsInfo,
     ]
 
-    if hasattr(cc_common, "CcSharedLibraryHintInfo"):
+    if bazel_features.globals.CcSharedLibraryHintInfo != None:
         provides.append(cc_common.CcSharedLibraryHintInfo)
     elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_getter_do_not_use"):
         # This branch can be deleted once 6.X is not supported by upb rules
