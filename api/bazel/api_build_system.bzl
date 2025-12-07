@@ -1,3 +1,4 @@
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@com_envoyproxy_protoc_gen_validate//bazel:pgv_proto_library.bzl", "pgv_cc_proto_library")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", _py_proto_library = "py_proto_library")
@@ -25,7 +26,6 @@ _CC_GRPC_SUFFIX = "_cc_grpc"
 _GO_PROTO_SUFFIX = "_go_proto"
 _GO_IMPORTPATH_PREFIX = "github.com/envoyproxy/go-control-plane/"
 _JAVA_PROTO_SUFFIX = "_java_proto"
-_IS_BZLMOD = str(Label("//:invalid")).startswith("@@")
 
 _COMMON_PROTO_DEPS = [
     "@com_google_protobuf//:any_proto",
@@ -45,7 +45,7 @@ _COMMON_PROTO_DEPS = [
 def _proto_mapping(dep, proto_dep_map, proto_suffix):
     mapped = proto_dep_map.get(dep)
     if mapped == None:
-        prefix = "@@" if _IS_BZLMOD else "@"
+        prefix = "@@" if bazel_features.external_deps.is_bzlmod_enabled else "@"
         prefix = prefix + Label(dep).repo_name if not dep.startswith("//") else ""
         return prefix + "//" + Label(dep).package + ":" + Label(dep).name + proto_suffix
     return mapped
