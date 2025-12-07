@@ -271,7 +271,7 @@ def _cc_proto_descriptor_aspect_impl(target, ctx, generator, cc_provider, file_p
         file_provider(srcs = files),
     ]
     if provide_cc_shared_library_hints:
-        if bazel_features.globals.CcSharedLibraryHintInfo != None:
+        if bazel_features.globals.CcSharedLibraryHintInfo is not None:
             providers.append(cc_common.CcSharedLibraryHintInfo(owners = owners))
         elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_constructor_do_not_use"):
             # This branch can be deleted once 6.X is not supported by rules
@@ -298,7 +298,7 @@ def _get_cc_proto_descriptor_library_aspect_provides():
         _CcProtoDescriptorWrappedGeneratedSrcsInfo,
     ]
 
-    if bazel_features.globals.CcSharedLibraryHintInfo != None:
+    if bazel_features.globals.CcSharedLibraryHintInfo is not None:
         provides.append(cc_common.CcSharedLibraryHintInfo)
     elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_getter_do_not_use"):
         # This branch can be deleted once 6.X is not supported by upb rules
