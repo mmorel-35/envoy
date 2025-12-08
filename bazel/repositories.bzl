@@ -165,7 +165,7 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     # dependencies and name conflicts.
     _com_github_awslabs_aws_c_auth()
     _com_github_axboe_liburing()
-    _com_github_bazel_buildtools()
+    # buildtools moved to dev dependencies extension
     _com_github_c_ares_c_ares()
     _com_github_openhistogram_libcircllhist()
     if not bzlmod:
@@ -266,7 +266,9 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     # Unconditional, since we use this only for compiler-agnostic fuzzing utils.
     _org_llvm_releases_compiler_rt()
 
-    _toolchains_llvm()
+    # LLVM toolchains - in BCR for bzlmod (using git_override for specific commit)
+    if not bzlmod:
+        _toolchains_llvm()
     
     # Protoc binaries for different platforms - needed for both modes
     for platform in PROTOC_VERSIONS:

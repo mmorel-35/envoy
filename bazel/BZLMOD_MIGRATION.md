@@ -15,9 +15,48 @@ Envoy has begun migrating from WORKSPACE to bzlmod. Both build systems currently
 
 Envoy uses module extensions to load dependencies not yet in Bazel Central Registry (BCR):
 
-- **`bazel/extensions.bzl`**: Main Envoy dependencies (~80 non-BCR repos)
+- **`bazel/extensions.bzl`**: Main Envoy runtime dependencies (~75 non-BCR repos)
+- **`bazel/extensions.bzl`**: Envoy development dependencies (testing, linting tools)
 - **`api/bazel/extensions.bzl`**: Envoy API dependencies
 - **`mobile/bazel/extensions.bzl`**: Envoy Mobile dependencies
+
+### Separating Dev Dependencies
+
+Dependencies are separated into runtime and development:
+
+```python
+# In MODULE.bazel
+# Runtime dependencies
+envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies_extension")
+use_repo(envoy_deps, "boringssl_fips", ...)
+
+# Development dependencies (testing, linting)
+envoy_dev_deps = use_extension(
+    "//bazel:extensions.bzl",
+    "envoy_dev_dependencies_extension",
+    dev_dependency = True,  # Won't be loaded by dependents
+)
+use_repo(envoy_dev_deps, "com_github_bazelbuild_buildtools", ...)
+```
+
+### Using git_override for Unpublished Modules
+
+For dependencies with MODULE.bazel that need specific commits:
+
+```python
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+
+git_override(
+    module_name = "toolchains_llvm",
+    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
+)
+```
+
+This allows using dependencies that:
+- Have MODULE.bazel but aren't in BCR yet
+- Need a specific commit with patches
+- Require unreleased features
 
 ### Pattern: Reuse with Conditionals
 

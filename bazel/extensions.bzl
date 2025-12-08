@@ -27,12 +27,21 @@ This approach:
 This extension is used in the root MODULE.bazel file as follows:
 
 ```python
-envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies")
+# Regular dependencies
+envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies_extension")
 use_repo(
     envoy_deps,
     "boringssl_fips",
     "com_github_grpc_grpc",
     # ... other non-module dependencies
+)
+
+# Development dependencies (testing, linting, etc.)
+envoy_dev_deps = use_extension("//bazel:extensions.bzl", "envoy_dev_dependencies_extension", dev_dependency = True)
+use_repo(
+    envoy_dev_deps,
+    "com_github_bazelbuild_buildtools",
+    # ... other dev dependencies
 )
 ```
 
@@ -42,7 +51,7 @@ When adding new dependencies:
 - Add them to envoy_dependencies() in bazel/repositories.bzl
 - If the dependency is in BCR, wrap it with `if not bzlmod:`
 - If patches are needed, add them to the function
-- Update the use_repo() call in MODULE.bazel
+- Update the use_repo() call in MODULE.bazel (regular or dev)
 
 When removing dependencies:
 - If moving to BCR, wrap existing calls with `if not bzlmod:`
@@ -62,11 +71,25 @@ Dependencies already migrated to BCR (skipped when bzlmod=True):
 - boringssl (non-FIPS), emsdk
 - rules_fuzzing, rules_license, rules_pkg, rules_shellcheck
 - aspect_bazel_lib, abseil-cpp
+- toolchains_llvm (using git_override for specific commit)
 
 See MODULE.bazel for the complete list of bazel_dep() entries.
 """
 
+load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
+load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
 load(":repositories.bzl", "envoy_dependencies")
+load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
+
+REPOSITORY_LOCATIONS = load_repository_locations(REPOSITORY_LOCATIONS_SPEC)
+
+def _external_http_archive(name, **kwargs):
+    """Helper to load external http archives."""
+    envoy_http_archive(
+        name,
+        locations = REPOSITORY_LOCATIONS,
+        **kwargs
+    )
 
 def _envoy_dependencies_impl(module_ctx):
     """Implementation of the envoy_dependencies module extension.
@@ -80,11 +103,23 @@ def _envoy_dependencies_impl(module_ctx):
     """
     envoy_dependencies(bzlmod = True)
 
-# Define the module extension
+def _envoy_dev_dependencies_impl(module_ctx):
+    """Implementation of the envoy_dev_dependencies module extension.
+    
+    This extension loads development-only dependencies (testing, linting, formatting).
+    These are separated to avoid loading dev tools in production builds.
+    
+    Args:
+        module_ctx: The module extension context
+    """
+    # Bazel buildtools for BUILD file formatting and linting
+    _external_http_archive("com_github_bazelbuild_buildtools")
+
+# Define the module extensions
 envoy_dependencies_extension = module_extension(
     implementation = _envoy_dependencies_impl,
     doc = """
-    Extension for Envoy dependencies not available in BCR or requiring patches.
+    Extension for Envoy runtime dependencies not available in BCR or requiring patches.
 
     This extension calls the same envoy_dependencies() function used by WORKSPACE mode,
     but with bzlmod=True. This ensures both build systems load dependencies identically,
@@ -94,5 +129,19 @@ envoy_dependencies_extension = module_extension(
     For WORKSPACE mode, call envoy_dependencies() directly from WORKSPACE.
     
     See the module documentation above for maintenance guidelines.
+    """,
+)
+
+envoy_dev_dependencies_extension = module_extension(
+    implementation = _envoy_dev_dependencies_impl,
+    doc = """
+    Extension for Envoy development dependencies not available in BCR.
+    
+    This extension is for dev-only tools like testing frameworks, linters, and
+    formatters. These are separated from runtime dependencies to avoid loading
+    dev tools in production builds.
+    
+    Currently loads:
+    - com_github_bazelbuild_buildtools: BUILD file formatting and linting
     """,
 )

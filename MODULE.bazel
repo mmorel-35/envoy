@@ -42,6 +42,7 @@ bazel_dep(name = "rules_rust", version = "0.67.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "rules_swift", version = "2.3.0", repo_name = "build_bazel_rules_swift")
 bazel_dep(name = "spdlog", version = "1.16.0", repo_name = "com_github_gabime_spdlog")
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 bazel_dep(name = "xxhash", version = "0.8.3", repo_name = "com_github_cyan4973_xxhash")
 bazel_dep(name = "yaml-cpp", version = "0.8.0", repo_name = "com_github_jbeder_yaml_cpp")
 bazel_dep(name = "zlib", version = "1.3.1.bcr.7")
@@ -74,6 +75,15 @@ git_override(
     # Commit containing MODULE.bazel with version 0.0.0
     commit = "8bfbf64dc13ee1a570be4fbdcfccbdd8532463f0",
     remote = "https://github.com/cncf/xds",
+)
+
+# Use git_override for toolchains_llvm to use a specific commit with patches
+# This allows using dependencies with MODULE.bazel that aren't published to BCR yet
+git_override(
+    module_name = "toolchains_llvm",
+    # Specific commit used by Envoy
+    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
 )
 
 # Rules CC extensions for toolchain configuration
@@ -307,8 +317,20 @@ use_repo(
     # WASM runtimes
     "com_github_wamr",
     "com_github_wasmtime",
-    # LLVM toolchains
-    "toolchains_llvm",
-    # Bazel buildtools
+    # Ruby rules
+    "rules_ruby",
+)
+
+# Envoy's development-only dependencies extension
+# This extension loads dev dependencies (testing, linting, formatting tools)
+# that are not yet available as Bazel modules
+envoy_dev_deps = use_extension(
+    "//bazel:extensions.bzl",
+    "envoy_dev_dependencies_extension",
+    dev_dependency = True,
+)
+use_repo(
+    envoy_dev_deps,
+    # Bazel buildtools for formatting and linting
     "com_github_bazelbuild_buildtools",
 )
