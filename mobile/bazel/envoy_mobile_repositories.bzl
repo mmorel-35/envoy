@@ -13,13 +13,16 @@ def envoy_mobile_repositories(bzlmod = False):
     # Dependencies already in BCR when bzlmod=True:
     # - rules_android, rules_android_ndk, rules_apple, rules_java
     # - rules_jvm_external, rules_kotlin, rules_proto_grpc, rules_swift
+    # - google_bazel_common (using git_override), rules_detekt
     
-    http_archive(
-        name = "google_bazel_common",
-        sha256 = "d8c9586b24ce4a5513d972668f94b62eb7d705b92405d4bc102131f294751f1d",
-        strip_prefix = "bazel-common-413b433b91f26dbe39cdbc20f742ad6555dd1e27",
-        urls = ["https://github.com/google/bazel-common/archive/413b433b91f26dbe39cdbc20f742ad6555dd1e27.zip"],
-    )
+    # google_bazel_common is loaded via git_override in bzlmod mode
+    if not bzlmod:
+        http_archive(
+            name = "google_bazel_common",
+            sha256 = "d8c9586b24ce4a5513d972668f94b62eb7d705b92405d4bc102131f294751f1d",
+            strip_prefix = "bazel-common-413b433b91f26dbe39cdbc20f742ad6555dd1e27",
+            urls = ["https://github.com/google/bazel-common/archive/413b433b91f26dbe39cdbc20f742ad6555dd1e27.zip"],
+        )
 
     upstream_envoy_overrides()
     swift_repos()
@@ -70,7 +73,7 @@ def swift_repos():
     )
 
 def kotlin_repos():
-    # Note: rules_java, rules_jvm_external, rules_kotlin, and rules_proto_grpc
+    # Note: rules_java, rules_jvm_external, rules_kotlin, rules_proto_grpc, and rules_detekt
     # are already in BCR and loaded via bazel_dep in bzlmod mode
     http_archive(
         name = "rules_java",

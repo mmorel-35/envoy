@@ -78,18 +78,8 @@ See MODULE.bazel for the complete list of bazel_dep() entries.
 
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
-load(":repositories.bzl", "envoy_dependencies")
+load(":repositories.bzl", "envoy_dependencies", "external_http_archive")
 load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
-
-REPOSITORY_LOCATIONS = load_repository_locations(REPOSITORY_LOCATIONS_SPEC)
-
-def _external_http_archive(name, **kwargs):
-    """Helper to load external http archives."""
-    envoy_http_archive(
-        name,
-        locations = REPOSITORY_LOCATIONS,
-        **kwargs
-    )
 
 def _envoy_dependencies_impl(module_ctx):
     """Implementation of the envoy_dependencies module extension.
@@ -113,7 +103,7 @@ def _envoy_dev_dependencies_impl(module_ctx):
         module_ctx: The module extension context
     """
     # Bazel buildtools for BUILD file formatting and linting
-    _external_http_archive("com_github_bazelbuild_buildtools")
+    external_http_archive("com_github_bazelbuild_buildtools")
 
 # Define the module extensions
 envoy_dependencies_extension = module_extension(

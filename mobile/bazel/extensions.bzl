@@ -23,7 +23,7 @@ This extension is used in mobile/MODULE.bazel as follows:
 mobile_deps = use_extension("//bazel:extensions.bzl", "envoy_mobile_dependencies")
 use_repo(
     mobile_deps,
-    "google_bazel_common",
+    "com_github_libevent_libevent",
     "DrString",
     "SwiftLint",
     # ... other non-module dependencies
@@ -36,7 +36,8 @@ Dependencies already migrated to BCR (skipped when bzlmod=True):
 - rules_android, rules_android_ndk
 - rules_apple, rules_swift
 - rules_java, rules_jvm_external
-- rules_kotlin, rules_proto_grpc
+- rules_kotlin, rules_proto_grpc, rules_detekt
+- google_bazel_common (using git_override for specific commit)
 
 See mobile/MODULE.bazel for the complete list of bazel_dep() entries.
 """

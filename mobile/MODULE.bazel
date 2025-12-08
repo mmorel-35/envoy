@@ -7,9 +7,11 @@ bazel_dep(name = "apple_support", version = "1.24.1", repo_name = "build_bazel_a
 bazel_dep(name = "envoy")
 bazel_dep(name = "envoy_api")
 bazel_dep(name = "envoy_build_config")
+bazel_dep(name = "google_bazel_common", version = "0.0.0")
 bazel_dep(name = "rules_android", version = "0.6.0")
 bazel_dep(name = "rules_android_ndk", version = "0.1.2")
 bazel_dep(name = "rules_apple", version = "3.16.0", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "rules_detekt", version = "0.8.1.2")
 bazel_dep(name = "rules_java", version = "8.14.0")
 bazel_dep(name = "rules_jvm_external", version = "6.8")
 bazel_dep(name = "rules_kotlin", version = "2.1.0")
@@ -32,21 +34,27 @@ local_path_override(
     path = "envoy_build_config",
 )
 
+# Use git_override for google_bazel_common to use specific commit
+# This allows using dependencies with MODULE.bazel that aren't published to BCR yet
+git_override(
+    module_name = "google_bazel_common",
+    commit = "413b433b91f26dbe39cdbc20f742ad6555dd1e27",
+    remote = "https://github.com/google/bazel-common",
+)
+
 # Envoy Mobile's non-module dependencies extension
 # This extension loads dependencies specific to mobile that are not yet available as Bazel modules
 mobile_deps = use_extension("//bazel:extensions.bzl", "envoy_mobile_dependencies")
 use_repo(
     mobile_deps,
     # Mobile-specific dependencies not in BCR
-    "google_bazel_common",
     "com_github_libevent_libevent",  # Override for NDK compatibility
     # Swift tooling
     "DrString",
     "SwiftLint",
     "com_github_buildbuddy_io_rules_xcodeproj",
     "xctestrunner",
-    # Kotlin/Android tooling (loaded in WORKSPACE, but need mobile-specific versions)
-    "rules_detekt",
+    # Kotlin/Android tooling
     "kotlin_formatter",
     "robolectric",
 )
