@@ -52,3 +52,36 @@ index 78ac01d..eeef238 100644
      },
 +    visibility = ["//visibility:public"],
  )
+diff --git a/base/containers/span.h b/base/containers/span.h
+index 0000000..1111111 100644
+--- a/base/containers/span.h
++++ b/base/containers/span.h
+@@ -5,6 +5,14 @@
+ #ifndef BASE_CONTAINERS_SPAN_H_
+ #define BASE_CONTAINERS_SPAN_H_
+ 
++// Disable lexicographical_compare_three_way for libc++ as it's not available yet
++// See: https://github.com/envoyproxy/envoy/issues/xxxxx
++#if defined(_LIBCPP_VERSION)
++#if defined(__cpp_lib_three_way_comparison)
++#undef __cpp_lib_three_way_comparison
++#endif
++#endif
++
+ #include <stddef.h>
+ #include <stdint.h>
+ 
+diff --git a/polyfills/third_party/perfetto/include/perfetto/tracing/traced_value.h b/polyfills/third_party/perfetto/include/perfetto/tracing/traced_value.h
+index 0000000..1111111 100644
+--- a/polyfills/third_party/perfetto/include/perfetto/tracing/traced_value.h
++++ b/polyfills/third_party/perfetto/include/perfetto/tracing/traced_value.h
+@@ -13,7 +13,8 @@
+ // Polyfill for perfetto traced values.
+ namespace perfetto {
+ class EventContext;
+-void WriteIntoTracedValue(TracedValue context, int32_t value) {}
++void WriteIntoTracedValue([[maybe_unused]] TracedValue context,
++                          [[maybe_unused]] int32_t value) {}
+ }  // namespace perfetto
+ 
+ #endif  // GOOGLEURL_POLYFILLS_THIRD_PARTY_PERFETTO_INCLUDE_PERFETTO_TRACING_TRACED_VALUE_H_
