@@ -202,7 +202,7 @@ use_repo(
 # Envoy's non-module dependencies extension
 # This extension loads dependencies that are not yet available as Bazel modules
 # while preserving the patches and custom configurations from WORKSPACE mode
-envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies")
+envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies_extension")
 use_repo(
     envoy_deps,
     # BoringSSL FIPS and related build tools
