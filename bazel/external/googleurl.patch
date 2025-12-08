@@ -13,17 +13,17 @@ index 0174b6d..fb5b80d 100644
  // A wrapper around `__has_attribute()`, which is similar to the C++20-standard
  // `__has_cpp_attribute()`, but tests for support for `__attribute__(())`s.
  // Compilers that do not support this (e.g. MSVC) are also assumed not to
-diff --git a/build_config/build_config.bzl b/build_config/build_config.bzl
-index 5960d2a..08295ff 100644
---- a/build_config/build_config.bzl
-+++ b/build_config/build_config.bzl
-@@ -7,6 +7,7 @@
-     "//conditions:default": [
-         "-std=c++20",
-         "-fno-strict-aliasing",
-+        "-Wno-unused-parameter",
-     ],
- })
+diff --git a/base/numerics/clamped_math_impl.h b/base/numerics/clamped_math_impl.h
+index 10023f0..783f5da 100644
+--- a/base/numerics/clamped_math_impl.h
++++ b/base/numerics/clamped_math_impl.h
+@@ -31,6 +31,7 @@
+ template <typename T>
+   requires(std::unsigned_integral<T>)
+ constexpr T SaturatedNegWrapper(T value) {
++  (void)value;  // unused
+   return T(0);
+ }
  
 diff --git a/build_config/BUILD b/build_config/BUILD
 index 78ac01d..eeef238 100644
