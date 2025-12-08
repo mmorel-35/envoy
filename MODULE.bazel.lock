@@ -470,7 +470,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies": {
       "general": {
-        "bzlTransitiveDigest": "9Pdb7PoinjYmbR7kbbJQxRHHH1xK5qtToM+CupPYt40=",
+        "bzlTransitiveDigest": "vMlBKOq3b45+he9hxrd1WJSLN3ZYXLO2wzpSqjG7U/g=",
         "usagesDigest": "dr8DfxKCzbPcIsAjIPyUOh7mRUsMi2bghbV4asko6D0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -673,7 +673,13 @@
               ],
               "sha256": "f1d10cb058c97c953b4c0c446b11e9177e8c8b32a5a88b309f23fdd389e26370",
               "strip_prefix": "liburing-liburing-2.12",
-              "build_file": "@@//bazel/external:liburing.BUILD"
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//bazel/foreign_cc:liburing.patch"
+              ]
             }
           },
           "com_github_c_ares_c_ares": {
@@ -686,11 +692,11 @@
               "sha256": "7d935790e9af081c25c495fd13c2cfcda4792983418e96358ef6e7320ee06346",
               "strip_prefix": "c-ares-1.34.5",
               "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patches": [
-                "@@//bazel:c-ares.patch"
-              ],
               "patch_args": [
                 "-p1"
+              ],
+              "patches": [
+                "@@//bazel:c-ares.patch"
               ]
             }
           },
@@ -703,7 +709,7 @@
               ],
               "sha256": "96c10c8e950a141a32034f19b19cdeb1da48fe859cf96ae5e19f894f36c62c71",
               "strip_prefix": "sql-parser-3b40ba2d106587bdf053a292f7e3bb17e818a57f",
-              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])"
+              "build_file": "@@//bazel/external:sqlparser.BUILD"
             }
           },
           "com_github_mirror_tclap": {
@@ -715,7 +721,10 @@
               ],
               "sha256": "7e87d13734076fa4f626f6144ce9a02717198b3f054341a6886e2107b048b235",
               "strip_prefix": "tclap-1.2.5",
-              "build_file": "@@//bazel/external:tclap.BUILD"
+              "build_file": "@@//bazel/external:tclap.BUILD",
+              "patch_args": [
+                "-p1"
+              ]
             }
           },
           "com_github_google_libprotobuf_mutator": {
@@ -751,16 +760,13 @@
               ],
               "sha256": "ded3a96f6b7236d160df30af46593165b9c78a4ec72a414aa63cf50614e4c14e",
               "strip_prefix": "icu-release-77-1",
-              "build_file": "@@//bazel/external:icu.BUILD",
               "patches": [
                 "@@//bazel/foreign_cc:icu.patch"
               ],
               "patch_args": [
                 "-p1"
               ],
-              "patch_cmds": [
-                "rm source/common/unicode/uversion.h"
-              ]
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])"
             }
           },
           "com_github_intel_ipp_crypto_crypto_mb": {
@@ -772,13 +778,7 @@
               ],
               "sha256": "a1d87cb3b90fe4718609e4e9dd8343fd4531bb815e69bad901ac6b46f98b3b53",
               "strip_prefix": "cryptography-primitives-1.3.0",
-              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patches": [
-                "@@//bazel/foreign_cc:ipp-crypto.patch"
-              ],
-              "patch_args": [
-                "-p1"
-              ]
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])"
             }
           },
           "com_github_intel_qatlib": {
@@ -790,7 +790,13 @@
               ],
               "sha256": "786101683b4817ded72c8ea51204a190aa26e0b5ac8205ee199c7a9438138770",
               "strip_prefix": "qatlib-25.08.0",
-              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])"
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
+              "patches": [
+                "@@//bazel/foreign_cc:qatlib.patch"
+              ],
+              "patch_args": [
+                "-p1"
+              ]
             }
           },
           "com_github_intel_qatzip": {
@@ -802,7 +808,13 @@
               ],
               "sha256": "75e6e57f49da739d0a509220263e9dabb30b1e8c94be11c809aecc0adf4ee2dc",
               "strip_prefix": "QATzip-1.3.1",
-              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])"
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
+              "patches": [
+                "@@//bazel/foreign_cc:qatzip.patch"
+              ],
+              "patch_args": [
+                "-p1"
+              ]
             }
           },
           "com_github_qat_zstd": {
@@ -815,11 +827,11 @@
               "sha256": "00f2611719f0a1c9585965c6c3c1fe599119aa8e932a569041b1876ffc944fb3",
               "strip_prefix": "QAT-ZSTD-Plugin-1.0.0",
               "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patches": [
-                "@@//bazel/foreign_cc:qat_zstd.patch"
-              ],
               "patch_args": [
                 "-p1"
+              ],
+              "patches": [
+                "@@//bazel/foreign_cc:qatzstd.patch"
               ]
             }
           },
@@ -892,10 +904,7 @@
               ],
               "sha256": "a5800f405508f5df8114558ca9855d2640a2de8f0445f051fa1c7c3383045724",
               "strip_prefix": "boost_1_84_0",
-              "build_file": "@@//bazel/external:boost.BUILD",
-              "patch_cmds": [
-                "rm -rf doc"
-              ]
+              "build_file_content": "\nfilegroup(\n    name = \"header\",\n    srcs = glob([\n        \"boost/**/*.h\",\n        \"boost/**/*.hpp\",\n        \"boost/**/*.ipp\",\n    ]),\n    visibility = [\"@envoy//contrib/hyperscan/matching/input_matchers/source:__pkg__\"],\n)\n"
             }
           },
           "v8": {
@@ -1167,7 +1176,23 @@
               ],
               "sha256": "5766e26732c779b83daf37f9e7584ddee9748adcde662bf1f2291bbeb13e1a0a",
               "strip_prefix": "cel-cpp-0.13.0",
-              "build_file": "@@//bazel/external:cel-cpp.BUILD"
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//bazel/foreign_cc:cel-cpp.patch"
+              ]
+            }
+          },
+          "com_google_cel_spec": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/google/cel-spec/archive/v0.25.0.tar.gz"
+              ],
+              "sha256": "ab5fd1e880e74874097efb63b72c7b5d94e7816e9a325a2598098e3edbfea376",
+              "strip_prefix": "cel-spec-0.25.0"
             }
           },
           "com_github_google_perfetto": {
@@ -1179,7 +1204,7 @@
               ],
               "sha256": "b25023f3281165a1a7d7cde9f3ed2dfcfce022ffd727e77f6589951e0ba6af9a",
               "strip_prefix": "perfetto-53.0/sdk",
-              "build_file": "@@//bazel/external:perfetto.BUILD"
+              "build_file_content": "\npackage(default_visibility = [\"//visibility:public\"])\ncc_library(\n    name = \"perfetto\",\n    srcs = [\"perfetto.cc\"],\n    hdrs = [\"perfetto.h\"],\n)\n"
             }
           },
           "com_github_nghttp2_nghttp2": {
@@ -1192,11 +1217,11 @@
               "sha256": "e178687730c207f3a659730096df192b52d3752786c068b8e5ee7aeb8edae05a",
               "strip_prefix": "nghttp2-1.66.0",
               "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patches": [
-                "@@//bazel/foreign_cc:nghttp2.patch"
-              ],
               "patch_args": [
                 "-p1"
+              ],
+              "patches": [
+                "@@//bazel/foreign_cc:nghttp2.patch"
               ]
             }
           },
@@ -1222,14 +1247,11 @@
               "sha256": "32b0f24b3113bbc46b6bfaa05cf7cf45840b6b59333d078cc1f624e4c40b2b99",
               "strip_prefix": "hyperscan-5.4.2",
               "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patches": [
-                "@@//bazel/foreign_cc:hyperscan.patch"
-              ],
               "patch_args": [
                 "-p1"
               ],
-              "patch_cmds": [
-                "rm -rf BUILD"
+              "patches": [
+                "@@//bazel/foreign_cc:hyperscan.patch"
               ]
             }
           },
@@ -1243,8 +1265,12 @@
               "sha256": "905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711",
               "strip_prefix": "vectorscan-vectorscan-5.4.11",
               "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"], exclude=[]), visibility = [\"//visibility:public\"])",
-              "patch_cmds": [
-                "rm -rf BUILD"
+              "type": "tar.gz",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//bazel/foreign_cc:vectorscan.patch"
               ]
             }
           },
@@ -1267,8 +1293,7 @@
                 "https://github.com/DataDog/dd-trace-cpp/archive/v2.0.0.tar.gz"
               ],
               "sha256": "e4a0dabc3e186ce99c71685178448f93c501577102cdc50ddbf12cbaaba54713",
-              "strip_prefix": "dd-trace-cpp-2.0.0",
-              "build_file": "@@//bazel/external:dd_trace_cpp.BUILD"
+              "strip_prefix": "dd-trace-cpp-2.0.0"
             }
           },
           "com_github_skyapm_cpp2sky": {
@@ -1285,8 +1310,24 @@
               ],
               "patch_args": [
                 "-p1"
+              ]
+            }
+          },
+          "skywalking_data_collect_protocol": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/apache/skywalking-data-collect-protocol/archive/v10.2.0.tar.gz"
               ],
-              "build_file": "@@//bazel/external:cpp2sky.BUILD"
+              "sha256": "e4e93723488b32dcdd16c399d7634fb1eb9444f3d54bd7229dc20eaa09bf4d1a",
+              "strip_prefix": "skywalking-data-collect-protocol-10.2.0",
+              "patches": [
+                "@@//bazel:skywalking_data_collect_protocol.patch"
+              ],
+              "patch_args": [
+                "-p1"
+              ]
             }
           },
           "com_github_alibaba_hessian2_codec": {
@@ -1297,8 +1338,7 @@
                 "https://github.com/alibaba/hessian2-codec/archive/6f5a64770f0374a761eece13c8863b80dc5adcd8.tar.gz"
               ],
               "sha256": "bb4c4af6a7e3031160bf38dfa957b0ee950e2d8de47d4ba14c7a658c3a2c74d1",
-              "strip_prefix": "hessian2-codec-6f5a64770f0374a761eece13c8863b80dc5adcd8",
-              "build_file": "@@//bazel/external:hessian2_codec.BUILD"
+              "strip_prefix": "hessian2-codec-6f5a64770f0374a761eece13c8863b80dc5adcd8"
             }
           },
           "com_github_ncopa_suexec": {
@@ -1310,7 +1350,7 @@
               ],
               "sha256": "1de7479857879b6d14772792375290a87eac9a37b0524d39739a4a0739039620",
               "strip_prefix": "su-exec-0.3",
-              "build_file": "@@//bazel/external:suexec.BUILD"
+              "build_file": "@@//bazel/external:su-exec.BUILD"
             }
           },
           "com_github_maxmind_libmaxminddb": {
@@ -1581,6 +1621,11 @@
           }
         },
         "recordedRepoMappingEntries": [
+          [
+            "",
+            "com_google_googleapis",
+            "googleapis~"
+          ],
           [
             "",
             "envoy_api",
