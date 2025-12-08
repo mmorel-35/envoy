@@ -60,8 +60,10 @@ index 0000000..1111111 100644
  #ifndef BASE_CONTAINERS_SPAN_H_
  #define BASE_CONTAINERS_SPAN_H_
  
-+// Disable lexicographical_compare_three_way for libc++ as it's not available yet
-+// See: https://github.com/envoyproxy/envoy/issues/xxxxx
++// Workaround for libc++ not having std::lexicographical_compare_three_way yet.
++// This forces the code to use the fallback comparison operators defined below.
++// This workaround is scoped to only this header file.
++// See: https://github.com/llvm/llvm-project/issues/92840
 +#if defined(_LIBCPP_VERSION)
 +#if defined(__cpp_lib_three_way_comparison)
 +#undef __cpp_lib_three_way_comparison
