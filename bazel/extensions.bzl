@@ -70,7 +70,7 @@ Dependencies already migrated to BCR (skipped when bzlmod=True):
 - platforms, rules_shell, rules_cc, rules_foreign_cc
 - boringssl (non-FIPS), emsdk
 - rules_fuzzing, rules_license, rules_pkg, rules_shellcheck
-- aspect_bazel_lib, abseil-cpp
+- aspect_bazel_lib, abseil-cpp, rules_ruby
 - toolchains_llvm (using git_override for specific commit)
 
 See MODULE.bazel for the complete list of bazel_dep() entries.

@@ -240,7 +240,9 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     external_http_archive("proxy_wasm_rust_sdk")
     _com_google_cel_cpp(bzlmod = bzlmod)
     _com_github_google_perfetto()
-    _rules_ruby()
+    # rules_ruby is in BCR for bzlmod
+    if not bzlmod:
+        _rules_ruby()
     if not bzlmod:
         external_http_archive("com_github_google_flatbuffers")  # flatbuffers is in BCR for bzlmod
         external_http_archive("bazel_features")  # bazel_features is in BCR for bzlmod
