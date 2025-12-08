@@ -31,3 +31,22 @@ local_path_override(
     module_name = "envoy_build_config",
     path = "envoy_build_config",
 )
+
+# Envoy Mobile's non-module dependencies extension
+# This extension loads dependencies specific to mobile that are not yet available as Bazel modules
+mobile_deps = use_extension("//bazel:extensions.bzl", "envoy_mobile_dependencies")
+use_repo(
+    mobile_deps,
+    # Mobile-specific dependencies not in BCR
+    "google_bazel_common",
+    "com_github_libevent_libevent",  # Override for NDK compatibility
+    # Swift tooling
+    "DrString",
+    "SwiftLint",
+    "com_github_buildbuddy_io_rules_xcodeproj",
+    "xctestrunner",
+    # Kotlin/Android tooling (loaded in WORKSPACE, but need mobile-specific versions)
+    "rules_detekt",
+    "kotlin_formatter",
+    "robolectric",
+)
