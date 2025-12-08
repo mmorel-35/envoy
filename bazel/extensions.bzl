@@ -4,6 +4,56 @@ This file defines module extensions to support Envoy's bzlmod migration while
 respecting existing WORKSPACE patches and custom BUILD files. Each dependency
 loaded here is not yet available as a Bazel module in the Bazel Central Registry
 or requires custom configuration/patches specific to Envoy.
+
+## Background
+
+Bazel's new module system (bzlmod) allows for better dependency management, but
+requires a migration from the traditional WORKSPACE-based approach. This extension
+serves as a bridge during the migration, handling dependencies that:
+
+1. Are not yet published to the Bazel Central Registry (BCR)
+2. Require Envoy-specific patches for compatibility or bug fixes
+3. Need custom BUILD files that differ from upstream
+4. Have platform-specific variants (e.g., protoc binaries)
+
+## Usage in MODULE.bazel
+
+This extension is used in the root MODULE.bazel file as follows:
+
+```python
+envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies")
+use_repo(
+    envoy_deps,
+    "boringssl_fips",
+    "com_github_grpc_grpc",
+    # ... other non-module dependencies
+)
+```
+
+## Maintenance
+
+When adding new dependencies:
+- Check if the dependency is available in BCR first
+- If available in BCR, use bazel_dep() instead of adding it here
+- If patches are needed, add them to this extension
+- Update the use_repo() call in MODULE.bazel to include the new dependency
+
+When removing dependencies:
+- Only remove from this extension if the dependency is now in BCR
+- Update the use_repo() call in MODULE.bazel accordingly
+- Document the removal in the commit message
+
+## Bzlmod Migration Status
+
+Dependencies already migrated to BCR and loaded via bazel_dep():
+- bazel_features, highway, fast_float
+- zlib, zstd, org_brotli, re2
+- protobuf, spdlog, fmt, yaml-cpp
+- nlohmann_json, xxhash, gperftools, numactl
+- flatbuffers, google_benchmark, googletest
+- bazel_gazelle, io_bazel_rules_go
+
+See MODULE.bazel for the complete list of bazel_dep() entries.
 """
 
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
