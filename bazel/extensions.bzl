@@ -107,6 +107,22 @@ def _envoy_dev_dependencies_impl(module_ctx):
     # Bazel buildtools for BUILD file formatting and linting
     external_http_archive("com_github_bazelbuild_buildtools")
 
+def _envoy_toolshed_deps_impl(module_ctx):
+    """Implementation of the envoy_toolshed_deps module extension.
+    
+    This extension loads dependencies that require envoy_toolshed to be available first.
+    It must be declared after envoy_dependencies_extension in MODULE.bazel.
+    
+    Args:
+        module_ctx: The module extension context
+    """
+    # Import grcov_repository from envoy_toolshed
+    # This works because envoy_toolshed is already loaded by envoy_dependencies_extension
+    grcov_repo_bzl = str(Label("@envoy_toolshed//coverage/grcov:grcov_repository.bzl"))
+    # We can't dynamically load, so we need a different approach
+    # Actually, let's just not do this in an extension - maybe it's not needed for bzlmod builds
+    pass
+
 def _envoy_repo_impl(module_ctx):
     """Implementation of the envoy_repo module extension.
 

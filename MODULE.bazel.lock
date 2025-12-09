@@ -481,7 +481,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "kHWZM0rdBtS5cN0g6yDod2QteoGOge1YbeNLIl90JXk=",
+        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
         "usagesDigest": "7qQW8NJi1LQGLVvBXgGGtsrLCGN4svky+9z+/d1vs4w=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -1627,9 +1627,53 @@
         ]
       }
     },
+    "//bazel:extensions.bzl%envoy_dev_dependencies_extension": {
+      "general": {
+        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
+        "usagesDigest": "itgwZYREZ6oWsESZlxlhFLTxbH/rSusk5bMY3NPA9jk=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "com_github_bazelbuild_buildtools": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/bazelbuild/buildtools/archive/v8.2.1.tar.gz"
+              ],
+              "sha256": "53119397bbce1cd7e4c590e117dcda343c2086199de62932106c80733526c261",
+              "strip_prefix": "buildtools-8.2.1"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "com_google_googleapis",
+            "googleapis~"
+          ],
+          [
+            "",
+            "envoy_api",
+            "envoy_api~"
+          ],
+          [
+            "envoy_api~",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "envoy_api~",
+            "envoy_api",
+            "envoy_api~"
+          ]
+        ]
+      }
+    },
     "//bazel:extensions.bzl%envoy_repo_extension": {
       "general": {
-        "bzlTransitiveDigest": "kHWZM0rdBtS5cN0g6yDod2QteoGOge1YbeNLIl90JXk=",
+        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
         "usagesDigest": "6vEi+T6tKbM/JdB+YFkpxMNIv0lvTbW+upHHmYR1VX4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
