@@ -480,7 +480,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "utF0u6ipALnzSy34OXODp5Rdxx6rrFq7NF/wjifi7to=",
+        "bzlTransitiveDigest": "2fKexE+O8hknU4bbhfBrD/KWAz4wcIDJ2OrY/YjVsNg=",
         "usagesDigest": "7qQW8NJi1LQGLVvBXgGGtsrLCGN4svky+9z+/d1vs4w=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -1626,9 +1626,52 @@
         ]
       }
     },
+    "//bazel:extensions.bzl%envoy_repo_extension": {
+      "general": {
+        "bzlTransitiveDigest": "2fKexE+O8hknU4bbhfBrD/KWAz4wcIDJ2OrY/YjVsNg=",
+        "usagesDigest": "6vEi+T6tKbM/JdB+YFkpxMNIv0lvTbW+upHHmYR1VX4=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "yq": {
+            "bzlFile": "@@//bazel:extensions.bzl",
+            "ruleClassName": "_yq_alias",
+            "attributes": {}
+          },
+          "envoy_repo": {
+            "bzlFile": "@@//bazel:repo.bzl",
+            "ruleClassName": "_envoy_repo",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "com_google_googleapis",
+            "googleapis~"
+          ],
+          [
+            "",
+            "envoy_api",
+            "envoy_api~"
+          ],
+          [
+            "envoy_api~",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "envoy_api~",
+            "envoy_api",
+            "envoy_api~"
+          ]
+        ]
+      }
+    },
     "@@aspect_rules_esbuild~//esbuild:extensions.bzl%esbuild": {
       "general": {
-        "bzlTransitiveDigest": "S1/JGCCSy4uDLY+ccHrTvSRjUoLuvKLw5KAGzrwFgLU=",
+        "bzlTransitiveDigest": "kaf8U7vAbqfDVmDclNtr0Pf6MVMKyJY8lQyBa58ojVk=",
         "usagesDigest": "iDVoyPxUeADmfK8ssoyG3Ehq1bj6p7A43LpEiE266os=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -3121,67 +3164,6 @@
             "bazel_tools"
           ]
         ]
-      }
-    },
-    "@@tar.bzl~//tar:extensions.bzl%toolchains": {
-      "general": {
-        "bzlTransitiveDigest": "/2afh6fPjq/rcyE/jztQDK3ierehmFFngfvmqyRv72M=",
-        "usagesDigest": "I6HvqeURBJAsVftolZUnMjAJqsIpyPsnCw4Sngx2dSg=",
-        "recordedFileInputs": {},
-        "recordedDirentsInputs": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "bsd_tar_toolchains": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:toolchain.bzl",
-            "ruleClassName": "tar_toolchains_repo",
-            "attributes": {
-              "user_repository_name": "bsd_tar_toolchains"
-            }
-          },
-          "bsd_tar_toolchains_darwin_amd64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "darwin_amd64"
-            }
-          },
-          "bsd_tar_toolchains_darwin_arm64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "darwin_arm64"
-            }
-          },
-          "bsd_tar_toolchains_linux_amd64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "linux_amd64"
-            }
-          },
-          "bsd_tar_toolchains_linux_arm64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "linux_arm64"
-            }
-          },
-          "bsd_tar_toolchains_windows_amd64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "windows_amd64"
-            }
-          },
-          "bsd_tar_toolchains_windows_arm64": {
-            "bzlFile": "@@tar.bzl~//tar/toolchain:platforms.bzl",
-            "ruleClassName": "bsdtar_binary_repo",
-            "attributes": {
-              "platform": "windows_arm64"
-            }
-          }
-        },
-        "recordedRepoMappingEntries": []
       }
     }
   }

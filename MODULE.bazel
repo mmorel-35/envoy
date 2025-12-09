@@ -332,3 +332,9 @@ use_repo(
     # Bazel buildtools for formatting and linting
     "com_github_bazelbuild_buildtools",
 )
+
+# Envoy repository metadata extension
+# This extension creates the envoy_repo repository which provides version
+# information and container metadata for RBE builds
+envoy_repo_ext = use_extension("//bazel:extensions.bzl", "envoy_repo_extension")
+use_repo(envoy_repo_ext, "envoy_repo", "yq")
