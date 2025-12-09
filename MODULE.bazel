@@ -4,6 +4,7 @@ module(
 
 # All bazel_dep entries are organized alphabetically for improved readability.
 # Runtime dependencies from Bazel Central Registry
+bazel_dep(name = "abseil-cpp", version = "20250814.1", repo_name = "com_google_absl")
 bazel_dep(name = "apple_support", version = "1.24.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "aspect_bazel_lib", version = "2.21.2")
 bazel_dep(name = "aspect_rules_js", version = "2.5.0")
@@ -39,9 +40,11 @@ bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_python", version = "1.6.3")
 bazel_dep(name = "rules_rust", version = "0.67.0")
+bazel_dep(name = "rules_ruby", version = "0.3.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "rules_swift", version = "2.3.0", repo_name = "build_bazel_rules_swift")
 bazel_dep(name = "spdlog", version = "1.16.0", repo_name = "com_github_gabime_spdlog")
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 bazel_dep(name = "xxhash", version = "0.8.3", repo_name = "com_github_cyan4973_xxhash")
 bazel_dep(name = "yaml-cpp", version = "0.8.0", repo_name = "com_github_jbeder_yaml_cpp")
 bazel_dep(name = "zlib", version = "1.3.1.bcr.7")
@@ -74,6 +77,15 @@ git_override(
     # Commit containing MODULE.bazel with version 0.0.0
     commit = "8bfbf64dc13ee1a570be4fbdcfccbdd8532463f0",
     remote = "https://github.com/cncf/xds",
+)
+
+# Use git_override for toolchains_llvm to use a specific commit with patches
+# This allows using dependencies with MODULE.bazel that aren't published to BCR yet
+git_override(
+    module_name = "toolchains_llvm",
+    # Specific commit used by Envoy
+    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
 )
 
 # Rules CC extensions for toolchain configuration
@@ -197,4 +209,128 @@ use_repo(
     python,
     "python_3_12",
     python = "python_versions",
+)
+
+# Envoy's non-module dependencies extension
+# This extension loads dependencies that are not yet available as Bazel modules
+# while preserving the patches and custom configurations from WORKSPACE mode
+envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies_extension")
+use_repo(
+    envoy_deps,
+    # BoringSSL FIPS and related build tools
+    "boringssl_fips",
+    "fips_ninja",
+    "fips_cmake_linux_x86_64",
+    "fips_cmake_linux_aarch64",
+    "fips_go_linux_amd64",
+    "fips_go_linux_arm64",
+    # SSL/TLS libraries
+    "aws_lc",
+    # C++ dependencies with custom BUILD files
+    "grpc_httpjson_transcoding",
+    "com_google_protoconverter",
+    "com_google_protofieldextraction",
+    "com_google_protoprocessinglib",
+    "ocp",
+    # Dependencies with custom BUILD files
+    "com_github_openhistogram_libcircllhist",
+    "com_github_awslabs_aws_c_auth",
+    "com_github_axboe_liburing",
+    "com_github_c_ares_c_ares",
+    "com_github_envoyproxy_sqlparser",
+    "com_github_mirror_tclap",
+    "com_github_google_libprotobuf_mutator",
+    "com_github_google_libsxg",
+    "com_github_unicode_org_icu",
+    "com_github_intel_ipp_crypto_crypto_mb",
+    "com_github_intel_qatlib",
+    "com_github_intel_qatzip",
+    "com_github_qat_zstd",
+    "com_github_lz4_lz4",
+    "com_github_libevent_libevent",
+    "net_colm_open_source_colm",
+    "net_colm_open_source_ragel",
+    "com_github_zlib_ng_zlib_ng",
+    "org_boost",
+    # V8 and related dependencies
+    "v8",
+    "dragonbox",
+    "fp16",
+    "simdutf",
+    "intel_ittapi",
+    # QUICHE and URL parsing
+    "com_github_google_quiche",
+    "googleurl",
+    # LLVM compiler runtime
+    "org_llvm_releases_compiler_rt",
+    # gRPC and dependencies
+    "com_github_grpc_grpc",
+    "build_bazel_rules_apple",
+    "rules_proto_grpc",
+    # Proxy WASM
+    "proxy_wasm_cpp_sdk",
+    "proxy_wasm_cpp_host",
+    "proxy_wasm_rust_sdk",
+    # JWT verification
+    "com_github_google_jwt_verify",
+    # LuaJIT
+    "com_github_luajit_luajit",
+    # TCMalloc
+    "com_github_google_tcmalloc",
+    # CEL and observability
+    "com_google_cel_cpp",
+    "com_github_google_perfetto",
+    # Network protocols
+    "com_github_nghttp2_nghttp2",
+    "com_github_msgpack_cpp",
+    # Regex engines
+    "io_hyperscan",
+    "io_vectorscan",
+    # Observability and tracing
+    "io_opentelemetry_cpp",
+    "com_github_datadog_dd_trace_cpp",
+    "com_github_skyapm_cpp2sky",
+    "com_github_alibaba_hessian2_codec",
+    # Utilities
+    "com_github_ncopa_suexec",
+    "com_github_maxmind_libmaxminddb",
+    # Protoc binaries
+    "com_google_protobuf_protoc_linux_aarch_64",
+    "com_google_protobuf_protoc_linux_x86_64",
+    "com_google_protobuf_protoc_linux_ppcle_64",
+    "com_google_protobuf_protoc_osx_aarch_64",
+    "com_google_protobuf_protoc_osx_x86_64",
+    "com_google_protobuf_protoc_win64",
+    # Build tools
+    "bazel_toolchains",
+    "bazel_compdb",
+    "envoy_examples",
+    "envoy_toolshed",
+    # Intel DLB
+    "intel_dlb",
+    # Kafka dependencies
+    "kafka_source",
+    "confluentinc_librdkafka",
+    "kafka_server_binary",
+    # VPP
+    "com_github_fdio_vpp_vcl",
+    # WASM runtimes
+    "com_github_wamr",
+    "com_github_wasmtime",
+    # Ruby rules
+    "rules_ruby",
+)
+
+# Envoy's development-only dependencies extension
+# This extension loads dev dependencies (testing, linting, formatting tools)
+# that are not yet available as Bazel modules
+envoy_dev_deps = use_extension(
+    "//bazel:extensions.bzl",
+    "envoy_dev_dependencies_extension",
+    dev_dependency = True,
+)
+use_repo(
+    envoy_dev_deps,
+    # Bazel buildtools for formatting and linting
+    "com_github_bazelbuild_buildtools",
 )
