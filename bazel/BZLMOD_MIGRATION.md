@@ -6,8 +6,22 @@ This document provides practical guidance for continuing Envoy's migration to Ba
 
 Envoy has begun migrating from WORKSPACE to bzlmod. Both build systems currently work:
 
-- **WORKSPACE mode** (legacy): `bazel build --noenable_bzlmod //...`
-- **Bzlmod mode** (new): `bazel build --enable_bzlmod //...`
+- **WORKSPACE mode** (default, legacy): Uses traditional WORKSPACE file for dependencies
+- **Bzlmod mode** (new): Uses MODULE.bazel for dependency management
+
+**Default Mode**: The repository defaults to WORKSPACE mode via `.bazelrc` (`common --noenable_bzlmod`). This allows time for thorough validation before switching the default.
+
+To use bzlmod mode explicitly:
+```bash
+bazel build --enable_bzlmod //...
+bazel test --enable_bzlmod //...
+```
+
+To use WORKSPACE mode explicitly (when default changes):
+```bash
+bazel build --noenable_bzlmod //...
+bazel test --noenable_bzlmod //...
+```
 
 ## Architecture
 
@@ -15,8 +29,9 @@ Envoy has begun migrating from WORKSPACE to bzlmod. Both build systems currently
 
 Envoy uses module extensions to load dependencies not yet in Bazel Central Registry (BCR):
 
-- **`bazel/extensions.bzl`**: Main Envoy runtime dependencies (~75 non-BCR repos)
-- **`bazel/extensions.bzl`**: Envoy development dependencies (testing, linting tools)
+- **`bazel/extensions.bzl`**: 
+  - `envoy_dependencies_extension` - Main Envoy runtime dependencies (~75 non-BCR repos)
+  - `envoy_dev_dependencies_extension` - Development dependencies (testing, linting tools)
 - **`api/bazel/extensions.bzl`**: Envoy API dependencies
 - **`mobile/bazel/extensions.bzl`**: Envoy Mobile dependencies
 
@@ -67,23 +82,50 @@ All extensions follow the same pattern to avoid code duplication:
 def envoy_dependencies(skip_targets = [], bzlmod = False):
     """Load dependencies for both WORKSPACE and bzlmod modes."""
     
-    # BCR dependencies - skip in bzlmod mode
+    # BCR dependencies - skip in bzlmod mode (loaded via bazel_dep)
     if not bzlmod:
         external_http_archive("zlib")  # In BCR
         _com_google_protobuf()  # In BCR
     
-    # Non-BCR dependencies - always load
+    # Non-BCR dependencies - always load (via extension in bzlmod)
     _boringssl_fips()  # Not in BCR
-    _com_github_grpc_grpc(bzlmod=bzlmod)  # Has patches
+    _com_github_grpc_grpc(bzlmod=bzlmod)  # Has patches, works in both modes
 
 # In bazel/extensions.bzl
 def _envoy_dependencies_impl(module_ctx):
-    envoy_dependencies(bzlmod = True)  # Skips BCR deps
+    envoy_dependencies(bzlmod = True)  # Skips BCR deps automatically
 
 envoy_dependencies_extension = module_extension(
     implementation = _envoy_dependencies_impl,
 )
 ```
+
+**Two function patterns**:
+
+1. **Dual-mode functions** (take `bzlmod` parameter): Used for dependencies that need both modes
+   ```python
+   def _com_github_grpc_grpc(bzlmod = False):
+       grpc_kwargs = {"patches": ["@envoy//bazel:grpc.patch"]}
+       if not bzlmod:
+           grpc_kwargs["repo_mapping"] = {"@openssl": "@boringssl"}
+       external_http_archive(**grpc_kwargs)
+   ```
+
+2. **WORKSPACE-only functions** (no `bzlmod` parameter): Used for BCR dependencies
+   ```python
+   def _com_google_absl():
+       # Only called when "if not bzlmod", so repo_mapping is fine
+       external_http_archive(
+           name = "com_google_absl",
+           repo_mapping = {"@googletest": "@com_google_googletest"},
+       )
+   ```
+   
+   Called with guard:
+   ```python
+   if not bzlmod:
+       _com_google_absl()  # In BCR for bzlmod
+   ```
 
 ## Adding New Dependencies
 
@@ -169,6 +211,47 @@ def _com_google_cel_cpp(bzlmod = False):
         native.new_local_repository(...)
 ```
 
+### Special Cases
+
+#### googleapis
+
+The `googleapis` dependency is in BCR but requires special handling in WORKSPACE mode:
+
+```python
+# In bazel/repositories.bzl - at top level
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+def envoy_dependencies(bzlmod = False):
+    # ... other dependencies ...
+    
+    # googleapis is loaded via bazel_dep in bzlmod, but needs imports in WORKSPACE
+    if not bzlmod:
+        switched_rules_by_language(
+            name = "com_google_googleapis_imports",
+            cc = True,
+            go = True,
+            python = True,
+            grpc = True,
+        )
+```
+
+In MODULE.bazel, it's a regular bazel_dep:
+```python
+bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1", repo_name = "com_google_googleapis")
+```
+
+#### Go and Rust Dependencies
+
+Go and Rust dependencies use language-specific extensions in bzlmod but repository functions in WORKSPACE:
+
+```python
+def envoy_dependencies(bzlmod = False):
+    if not bzlmod:
+        _go_deps(skip_targets)  # In WORKSPACE, load via repository functions
+        _rust_deps()
+    # In bzlmod, these are handled by go_deps and crate extensions in MODULE.bazel
+```
+
 ## Testing Both Modes
 
 Always test changes in both modes:
@@ -216,6 +299,49 @@ When migrating a dependency to BCR:
 **Symptom**: Build fails with patch errors
 
 **Fix**: Ensure patch paths use `@envoy//` or `@envoy_mobile//` prefix
+
+### Build works in one mode but not the other
+
+**Symptom**: Build succeeds with `--enable_bzlmod` but fails with `--noenable_bzlmod` (or vice versa)
+
+**Root causes**:
+- Dependency wrapped with wrong conditional (should be `if not bzlmod` for BCR deps)
+- Missing dependency in `use_repo()` for bzlmod mode
+- Missing dependency load in WORKSPACE mode
+
+**Fix**: Review the dependency in both MODULE.bazel and repositories.bzl to ensure consistency
+
+## Project Status and Timeline
+
+### Current Phase: Dual Support (WORKSPACE + Bzlmod)
+
+Both modes are fully supported and tested. WORKSPACE remains the default for now.
+
+**Completed**:
+- ✅ MODULE.bazel created with 50+ BCR dependencies
+- ✅ Module extensions for non-BCR dependencies
+- ✅ Both modes working and validated
+- ✅ Development dependencies separated
+- ✅ Patches preserved across modes
+
+**Active Work**:
+- 🔄 Ongoing validation and testing in both modes
+- 🔄 Documentation improvements
+- 🔄 Monitoring for new dependencies in BCR
+
+### Future Phases
+
+**Phase 2: Switch Default (Timeline TBD)**
+- Switch `.bazelrc` default to `--enable_bzlmod`
+- Continue supporting WORKSPACE mode
+- Update CI to primarily test bzlmod mode
+
+**Phase 3: Deprecate WORKSPACE (Timeline TBD)**
+- Announce WORKSPACE deprecation timeline
+- Provide migration period for downstream users
+- Remove WORKSPACE support
+
+**Note**: Timeline depends on ecosystem maturity, BCR coverage, and community feedback.
 
 ## References
 
