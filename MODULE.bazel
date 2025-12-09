@@ -211,6 +211,32 @@ use_repo(
     python = "python_versions",
 )
 
+# Python pip dependencies
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+# Base pip dependencies
+pip.parse(
+    hub_name = "base_pip3",
+    python_version = "3.12",
+    requirements_lock = "//tools/base:requirements.txt",
+)
+
+# Dev pip dependencies
+pip.parse(
+    hub_name = "dev_pip3",
+    python_version = "3.12",
+    requirements_lock = "//tools/dev:requirements.txt",
+)
+
+# Fuzzing pip dependencies
+pip.parse(
+    hub_name = "fuzzing_pip3",
+    python_version = "3.12",
+    requirements_lock = "@rules_fuzzing//fuzzing:requirements.txt",
+)
+
+use_repo(pip, "base_pip3", "dev_pip3", "fuzzing_pip3")
+
 # Envoy's non-module dependencies extension
 # This extension loads dependencies that are not yet available as Bazel modules
 # while preserving the patches and custom configurations from WORKSPACE mode
@@ -318,6 +344,16 @@ use_repo(
     "com_github_wamr",
     "com_github_wasmtime",
 )
+
+# LLVM toolchain configuration
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "18.1.8",
+    cxx_standard = {"": "c++20"},
+)
+
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
 
 # Envoy's development-only dependencies extension
 # This extension loads dev dependencies (testing, linting, formatting tools)
