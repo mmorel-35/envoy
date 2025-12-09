@@ -78,6 +78,7 @@ See MODULE.bazel for the complete list of bazel_dep() entries.
 
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
+load(":repo.bzl", "envoy_repo")
 load(":repositories.bzl", "envoy_dependencies", "external_http_archive")
 load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
 
@@ -105,6 +106,17 @@ def _envoy_dev_dependencies_impl(module_ctx):
 
     # Bazel buildtools for BUILD file formatting and linting
     external_http_archive("com_github_bazelbuild_buildtools")
+
+def _envoy_repo_impl(module_ctx):
+    """Implementation of the envoy_repo module extension.
+
+    This extension creates the envoy_repo repository which provides version
+    information and container metadata for RBE builds.
+
+    Args:
+        module_ctx: The module extension context
+    """
+    envoy_repo()
 
 # Define the module extensions
 envoy_dependencies_extension = module_extension(
@@ -134,5 +146,20 @@ envoy_dev_dependencies_extension = module_extension(
 
     Currently loads:
     - com_github_bazelbuild_buildtools: BUILD file formatting and linting
+    """,
+)
+
+envoy_repo_extension = module_extension(
+    implementation = _envoy_repo_impl,
+    doc = """
+    Extension for the envoy_repo repository.
+
+    This extension creates the @envoy_repo repository which provides:
+    - Version information (VERSION, API_VERSION)
+    - Container metadata for RBE builds (containers.bzl)
+    - LLVM compiler configuration
+    - Repository path information
+
+    This is required for RBE toolchain configuration and various build utilities.
     """,
 )
