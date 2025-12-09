@@ -83,11 +83,11 @@ load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
 
 def _envoy_dependencies_impl(module_ctx):
     """Implementation of the envoy_dependencies module extension.
-    
+
     This extension calls envoy_dependencies(bzlmod=True) which loads all Envoy
     dependencies. Dependencies already available in BCR are skipped via conditional
     checks within the function.
-    
+
     Args:
         module_ctx: The module extension context
     """
@@ -95,13 +95,14 @@ def _envoy_dependencies_impl(module_ctx):
 
 def _envoy_dev_dependencies_impl(module_ctx):
     """Implementation of the envoy_dev_dependencies module extension.
-    
+
     This extension loads development-only dependencies (testing, linting, formatting).
     These are separated to avoid loading dev tools in production builds.
-    
+
     Args:
         module_ctx: The module extension context
     """
+
     # Bazel buildtools for BUILD file formatting and linting
     external_http_archive("com_github_bazelbuild_buildtools")
 
@@ -114,10 +115,10 @@ envoy_dependencies_extension = module_extension(
     This extension calls the same envoy_dependencies() function used by WORKSPACE mode,
     but with bzlmod=True. This ensures both build systems load dependencies identically,
     making the migration clear and reviewable.
-    
+
     Dependencies already in BCR are skipped automatically via conditional checks.
     For WORKSPACE mode, call envoy_dependencies() directly from WORKSPACE.
-    
+
     See the module documentation above for maintenance guidelines.
     """,
 )
@@ -126,11 +127,11 @@ envoy_dev_dependencies_extension = module_extension(
     implementation = _envoy_dev_dependencies_impl,
     doc = """
     Extension for Envoy development dependencies not available in BCR.
-    
+
     This extension is for dev-only tools like testing frameworks, linters, and
     formatters. These are separated from runtime dependencies to avoid loading
     dev tools in production builds.
-    
+
     Currently loads:
     - com_github_bazelbuild_buildtools: BUILD file formatting and linting
     """,
