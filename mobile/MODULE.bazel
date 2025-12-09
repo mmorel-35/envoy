@@ -7,6 +7,8 @@ bazel_dep(name = "apple_support", version = "1.24.1", repo_name = "build_bazel_a
 bazel_dep(name = "envoy")
 bazel_dep(name = "envoy_api")
 bazel_dep(name = "envoy_build_config")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "protoc-gen-validate", version = "1.2.1.bcr.1", repo_name = "com_envoyproxy_protoc_gen_validate")
 bazel_dep(name = "rules_android", version = "0.6.0")
 bazel_dep(name = "rules_android_ndk", version = "0.1.2")
 bazel_dep(name = "rules_apple", version = "3.16.0", repo_name = "build_bazel_rules_apple")
