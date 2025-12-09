@@ -317,8 +317,6 @@ use_repo(
     # WASM runtimes
     "com_github_wamr",
     "com_github_wasmtime",
-    # Ruby rules
-    "rules_ruby",
 )
 
 # Envoy's development-only dependencies extension
