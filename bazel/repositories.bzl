@@ -110,16 +110,16 @@ def _rust_deps():
 
 def envoy_dependencies(skip_targets = [], bzlmod = False):
     """Load Envoy dependencies.
-    
+
     This function loads all Envoy dependencies for both WORKSPACE and bzlmod modes.
     When bzlmod=True, dependencies already available in Bazel Central Registry (BCR)
     are skipped since they're loaded via bazel_dep() in MODULE.bazel.
-    
+
     Args:
         skip_targets: List of targets to skip (legacy WORKSPACE parameter)
         bzlmod: If True, skip dependencies already in BCR (loaded via bazel_dep)
     """
-    
+
     # Dependencies already in BCR when bzlmod=True (loaded via bazel_dep in MODULE.bazel):
     # - platforms, rules_shell, rules_cc, rules_foreign_cc
     # - boringssl (non-FIPS), emsdk
@@ -130,7 +130,7 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     # - protobuf, flatbuffers, google_benchmark, googletest
     # - rules_fuzzing, rules_license, rules_pkg, rules_shellcheck, aspect_bazel_lib
     # - bazel_features, bazel_gazelle, io_bazel_rules_go
-    
+
     if not bzlmod:
         external_http_archive("platforms")
 
@@ -165,6 +165,7 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     # dependencies and name conflicts.
     _com_github_awslabs_aws_c_auth()
     _com_github_axboe_liburing()
+
     # buildtools moved to dev dependencies extension
     if not bzlmod:
         _com_github_bazel_buildtools()
@@ -242,6 +243,7 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     external_http_archive("proxy_wasm_rust_sdk")
     _com_google_cel_cpp(bzlmod = bzlmod)
     _com_github_google_perfetto()
+
     # rules_ruby is in BCR for bzlmod
     if not bzlmod:
         _rules_ruby()
@@ -273,7 +275,7 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
     # LLVM toolchains - in BCR for bzlmod (using git_override for specific commit)
     if not bzlmod:
         _toolchains_llvm()
-    
+
     # Protoc binaries for different platforms - needed for both modes
     for platform in PROTOC_VERSIONS:
         external_http_archive(
@@ -724,14 +726,14 @@ def _v8(bzlmod = False):
             "find ./src ./include -type f -exec sed -i.bak -e 's!#include \"third_party/fast_float/src/include/fast_float/!#include \"fast_float/!' {} \\;",
         ],
     }
-    
+
     # repo_mapping is not supported in bzlmod mode
     if not bzlmod:
         v8_kwargs["repo_mapping"] = {
             "@abseil-cpp": "@com_google_absl",
             "@icu": "@com_github_unicode_org_icu",
         }
-    
+
     external_http_archive(**v8_kwargs)
 
 def _fast_float():
@@ -798,11 +800,11 @@ def _com_github_grpc_grpc(bzlmod = False):
         "patch_args": ["-p1"],
         "patches": ["@envoy//bazel:grpc.patch"],
     }
-    
+
     # repo_mapping is not supported in bzlmod mode
     if not bzlmod:
         grpc_kwargs["repo_mapping"] = {"@openssl": "@boringssl"}
-    
+
     external_http_archive(**grpc_kwargs)
     external_http_archive(
         "build_bazel_rules_apple",
