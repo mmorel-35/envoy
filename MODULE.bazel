@@ -179,9 +179,9 @@ use_repo(
 
 # Aspect Bazel lib extensions
 bazel_lib = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
-bazel_lib.jq()
-bazel_lib.yq()
-use_repo(bazel_lib, "jq_toolchains", "yq", "yq_toolchains")
+bazel_lib.jq(version = "1.7")
+bazel_lib.yq(version = "4.24.4")
+use_repo(bazel_lib, "jq", "jq_toolchains", "yq", "yq_toolchains")
 
 # Buf extension for protocol buffers
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
