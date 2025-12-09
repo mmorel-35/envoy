@@ -181,7 +181,7 @@ use_repo(
 bazel_lib = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
 bazel_lib.jq()
 bazel_lib.yq()
-use_repo(bazel_lib, "jq_toolchains", "yq_toolchains")
+use_repo(bazel_lib, "jq_toolchains", "yq", "yq_toolchains")
 
 # Buf extension for protocol buffers
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
@@ -375,4 +375,4 @@ use_repo(
 # This extension creates the envoy_repo repository which provides version
 # information and container metadata for RBE builds
 envoy_repo_ext = use_extension("//bazel:extensions.bzl", "envoy_repo_extension")
-use_repo(envoy_repo_ext, "envoy_repo", "yq")
+use_repo(envoy_repo_ext, "envoy_repo")

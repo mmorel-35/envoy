@@ -481,7 +481,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "2fKexE+O8hknU4bbhfBrD/KWAz4wcIDJ2OrY/YjVsNg=",
+        "bzlTransitiveDigest": "kHWZM0rdBtS5cN0g6yDod2QteoGOge1YbeNLIl90JXk=",
         "usagesDigest": "7qQW8NJi1LQGLVvBXgGGtsrLCGN4svky+9z+/d1vs4w=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -1629,17 +1629,12 @@
     },
     "//bazel:extensions.bzl%envoy_repo_extension": {
       "general": {
-        "bzlTransitiveDigest": "2fKexE+O8hknU4bbhfBrD/KWAz4wcIDJ2OrY/YjVsNg=",
+        "bzlTransitiveDigest": "kHWZM0rdBtS5cN0g6yDod2QteoGOge1YbeNLIl90JXk=",
         "usagesDigest": "6vEi+T6tKbM/JdB+YFkpxMNIv0lvTbW+upHHmYR1VX4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "yq": {
-            "bzlFile": "@@//bazel:extensions.bzl",
-            "ruleClassName": "_yq_alias",
-            "attributes": {}
-          },
           "envoy_repo": {
             "bzlFile": "@@//bazel:repo.bzl",
             "ruleClassName": "_envoy_repo",

@@ -82,41 +82,6 @@ load(":repositories.bzl", "envoy_dependencies", "external_http_archive")
 load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
 load(":repo.bzl", "envoy_repo")
 
-def _yq_alias_impl(repository_ctx):
-    """Create a symlink repository for yq toolchain.
-    
-    This creates a repository with a direct symlink to the yq binary
-    from aspect_bazel_lib's platform-specific toolchain.
-    """
-    # Determine the platform-specific yq repository
-    os_name = repository_ctx.os.name.lower()
-    if "mac" in os_name or "darwin" in os_name:
-        if repository_ctx.os.arch == "aarch64" or repository_ctx.os.arch == "arm64":
-            yq_repo = "yq_darwin_arm64"
-        else:
-            yq_repo = "yq_darwin_amd64"
-    elif "windows" in os_name:
-        yq_repo = "yq_windows_amd64"
-    else:  # Linux and others
-        if repository_ctx.os.arch == "aarch64":
-            yq_repo = "yq_linux_arm64"
-        else:
-            yq_repo = "yq_linux_amd64"
-    
-    # Create a symlink to the actual yq binary
-    yq_label = Label("@@aspect_bazel_lib~~toolchains~" + yq_repo + "//:yq")
-    yq_path = repository_ctx.path(yq_label)
-    repository_ctx.symlink(yq_path, "yq")
-    
-    repository_ctx.file("BUILD", """
-exports_files(["yq"])
-""")
-    repository_ctx.file("WORKSPACE", "")
-
-_yq_alias = repository_rule(
-    implementation = _yq_alias_impl,
-)
-
 def _envoy_dependencies_impl(module_ctx):
     """Implementation of the envoy_dependencies module extension.
 
@@ -151,10 +116,6 @@ def _envoy_repo_impl(module_ctx):
     Args:
         module_ctx: The module extension context
     """
-    # Create yq repository alias for compatibility with WORKSPACE mode
-    # In WORKSPACE mode, register_yq_toolchains creates a @yq repo
-    # In bzlmod mode, we need to create an alias to the platform-specific yq binary
-    _yq_alias(name = "yq")
     envoy_repo()
 
 # Define the module extensions
