@@ -46,11 +46,11 @@ load(":envoy_mobile_repositories.bzl", "envoy_mobile_repositories")
 
 def _envoy_mobile_dependencies_impl(module_ctx):
     """Implementation of the envoy_mobile_dependencies module extension.
-    
+
     This extension calls envoy_mobile_repositories(bzlmod=True) which loads all
     Envoy Mobile dependencies. Dependencies already in BCR are skipped via
     conditional checks within the function.
-    
+
     Args:
         module_ctx: The module extension context
     """
@@ -65,7 +65,7 @@ envoy_mobile_dependencies = module_extension(
     This extension calls the same envoy_mobile_repositories() function used by
     WORKSPACE mode, but with bzlmod=True. This ensures both build systems load
     dependencies identically.
-    
+
     Dependencies already in BCR are skipped automatically via conditional checks.
     For WORKSPACE mode, call envoy_mobile_repositories() directly from WORKSPACE.
     """,

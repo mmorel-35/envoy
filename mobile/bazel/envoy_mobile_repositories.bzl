@@ -2,27 +2,25 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 
 def envoy_mobile_repositories(bzlmod = False):
     """Load Envoy Mobile specific dependencies.
-    
+
     This function loads mobile-specific dependencies for both WORKSPACE and bzlmod modes.
     When bzlmod=True, dependencies already available in BCR are skipped.
-    
+
     Args:
         bzlmod: If True, skip dependencies already in BCR (loaded via bazel_dep)
     """
-    
+
     # Dependencies already in BCR when bzlmod=True:
     # - rules_android, rules_android_ndk, rules_apple, rules_java
     # - rules_jvm_external, rules_kotlin, rules_proto_grpc, rules_swift
-    # - google_bazel_common (using git_override), rules_detekt
-    
-    # google_bazel_common is loaded via git_override in bzlmod mode
-    if not bzlmod:
-        http_archive(
-            name = "google_bazel_common",
-            sha256 = "d8c9586b24ce4a5513d972668f94b62eb7d705b92405d4bc102131f294751f1d",
-            strip_prefix = "bazel-common-413b433b91f26dbe39cdbc20f742ad6555dd1e27",
-            urls = ["https://github.com/google/bazel-common/archive/413b433b91f26dbe39cdbc20f742ad6555dd1e27.zip"],
-        )
+    # - rules_detekt
+
+    http_archive(
+        name = "google_bazel_common",
+        sha256 = "d8c9586b24ce4a5513d972668f94b62eb7d705b92405d4bc102131f294751f1d",
+        strip_prefix = "bazel-common-413b433b91f26dbe39cdbc20f742ad6555dd1e27",
+        urls = ["https://github.com/google/bazel-common/archive/413b433b91f26dbe39cdbc20f742ad6555dd1e27.zip"],
+    )
 
     upstream_envoy_overrides()
     swift_repos()
