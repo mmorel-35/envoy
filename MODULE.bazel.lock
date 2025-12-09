@@ -152,6 +152,7 @@
     "https://bcr.bazel.build/modules/google_benchmark/1.9.4/MODULE.bazel": "3bab7c17c10580f87b647478a72a05621f88abc275afb97b578c828f56e59d45",
     "https://bcr.bazel.build/modules/google_benchmark/1.9.4/source.json": "8e0036f76a5c2aa9c16ca0da57d8065cff69edeed58f1f85584c588c0ef723a5",
     "https://bcr.bazel.build/modules/googleapis-cc/1.0.0/MODULE.bazel": "cf01757e7590c56140a4b81638ff2b3e7074769e6271720bbf738fcda25b6fc2",
+    "https://bcr.bazel.build/modules/googleapis-cc/1.0.0/source.json": "ab0e3a2ee9968a8848f59872fbbfa3e1f768597d71d2229e6caa319d357967c7",
     "https://bcr.bazel.build/modules/googleapis-go/1.0.0/MODULE.bazel": "0a207a4c49da28c5cc1f7b3aeb23c2f7828c85c14aa8d9db0e30357a8d2250ed",
     "https://bcr.bazel.build/modules/googleapis-java/1.0.0/MODULE.bazel": "d633989337d069b5a95e6101777319681d7a4af4677e36801f11839d6512095c",
     "https://bcr.bazel.build/modules/googleapis-rules-registry/1.0.0/MODULE.bazel": "97c6a4d413b373d4cc97065da3de1b2166e22cbbb5f4cc9f05760bfa83619e24",
