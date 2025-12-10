@@ -242,7 +242,6 @@ ERROR: module extension "envoy_mobile_dependencies" does not generate repository
 Removed `kotlin_formatter` and `robolectric` from use_repo in mobile/MODULE.bazel (commit 9423333).
 
 These tools are Kotlin/Android development dependencies that are only needed in WORKSPACE mode.
-Update envoy_toolshed/bazel/MODULE.bazel in the bzlmod branch to remove LLVM extension usage.
 
 ### 🟡 Blocker #5: Circular Dependency (envoy ↔ envoy_examples)
 
