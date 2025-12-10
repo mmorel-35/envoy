@@ -6,12 +6,37 @@ This document tracks the progress, blockers, and recommendations for migrating t
 
 The Envoy project is migrating from the traditional WORKSPACE-based dependency management to Bazel's new module system (bzlmod). This migration involves multiple repositories in the Envoy ecosystem:
 
-- **envoy** (main repository)
+- **envoy** (main repository) - ✅ This repository
 - **envoy_api** (API definitions - local module at `api/`)
 - **envoy_mobile** (mobile platform support - local module at `mobile/`)
 - **envoy_build_config** (build configuration - local module at `mobile/envoy_build_config/`)
-- **envoy_toolshed** (development and CI tooling)
-- **envoy_examples** (example configurations and WASM extensions)
+- **envoy_toolshed** (development and CI tooling) - 🔄 Using bzlmod branch via git_override
+- **envoy_examples** (example configurations and WASM extensions) - 🔄 Using bzlmod-migration branch via git_override
+
+## Changes Made in This Repository
+
+This repository (envoy) has been updated with the following bzlmod migration changes:
+
+### ✅ Completed Changes
+
+1. **Added bazel_dep declarations for ecosystem modules:**
+   - `bazel_dep(name = "envoy_toolshed")` - Runtime dependency
+   - `bazel_dep(name = "envoy_examples", dev_dependency = True)` - Dev-only dependency
+
+2. **Added git_override entries to use bzlmod migration branches:**
+   - `envoy_examples`: Points to https://github.com/mmorel-35/examples bzlmod-migration branch
+   - `envoy_toolshed`: Points to https://github.com/mmorel-35/toolshed bzlmod branch with `strip_prefix = "bazel"`
+
+3. **Updated bazel/repositories.bzl:**
+   - Wrapped `envoy_examples` and `envoy_toolshed` http_archive calls with `if not bzlmod:` condition
+   - This prevents double-loading when bzlmod is enabled
+
+4. **Removed from envoy_dependencies_extension use_repo:**
+   - Removed `envoy_examples` and `envoy_toolshed` from use_repo() call
+   - These are now loaded as bazel_dep modules instead of through the extension
+
+5. **Created comprehensive documentation:**
+   - This file (docs/bzlmod_migration.md) documents all blockers, recommendations, and migration status
 
 ## Migration Status
 
@@ -471,6 +496,28 @@ The envoy bzlmod implementation uses the following module structure:
 - ⏸️ Deprecation plan for WORKSPACE mode
 
 ## Appendix: Common Bzlmod Issues and Solutions
+
+### How to Update git_override Commits
+
+When the bzlmod migration branches are updated, you'll need to update the commit hashes in MODULE.bazel:
+
+```bash
+# Get latest commit hash from envoy_examples bzlmod-migration branch
+EXAMPLES_COMMIT=$(git ls-remote https://github.com/mmorel-35/examples refs/heads/bzlmod-migration | cut -f1)
+echo "envoy_examples: $EXAMPLES_COMMIT"
+
+# Get latest commit hash from envoy_toolshed bzlmod branch  
+TOOLSHED_COMMIT=$(git ls-remote https://github.com/mmorel-35/toolshed refs/heads/bzlmod | cut -f1)
+echo "envoy_toolshed: $TOOLSHED_COMMIT"
+
+# Update MODULE.bazel with the new commit hashes
+# Then test with: bazel mod graph --enable_bzlmod
+```
+
+After updating commits, always test module resolution before committing:
+```bash
+bazel mod graph --enable_bzlmod
+```
 
 ### Issue: "Only the root module can use extension X"
 
