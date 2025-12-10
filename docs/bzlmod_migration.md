@@ -13,6 +13,17 @@ The Envoy project is migrating from the traditional WORKSPACE-based dependency m
 - **envoy_toolshed** (development and CI tooling) - 🔄 Using bzlmod branch via git_override
 - **envoy_examples** (example configurations and WASM extensions) - 🔄 Using bzlmod-migration branch via git_override
 
+**Note on Repository References:**
+This implementation uses work-in-progress bzlmod migration branches from mmorel-35 forks as specified in the migration requirements:
+- https://github.com/mmorel-35/envoy/tree/bzlmod-migration
+- https://github.com/mmorel-35/examples/tree/bzlmod-migration
+- https://github.com/mmorel-35/toolshed/tree/bzlmod
+
+These are temporary development branches. Once the migration is complete and tested, these should be:
+1. Merged into the official envoyproxy organization repositories
+2. Updated in MODULE.bazel to point to official envoyproxy repositories
+3. Eventually published to Bazel Central Registry (BCR) if appropriate
+
 ## Changes Made in This Repository
 
 This repository (envoy) has been updated with the following bzlmod migration changes:
@@ -557,6 +568,12 @@ The envoy bzlmod implementation uses the following module structure:
 - ⏸️ Documentation updates
 - ⏸️ Migration guide for downstream users
 - ⏸️ Deprecation plan for WORKSPACE mode
+
+### Phase 5: Official Repository Migration
+- ⏸️ Merge bzlmod branches to official envoyproxy repositories
+- ⏸️ Update git_override entries to point to envoyproxy organization
+- ⏸️ Consider publishing to Bazel Central Registry (BCR)
+- ⏸️ Archive temporary development branches
 
 ## Appendix: Common Bzlmod Issues and Solutions
 
