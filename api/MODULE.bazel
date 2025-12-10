@@ -1,5 +1,6 @@
 module(
     name = "envoy_api",
+    version = "1.36.4-dev",
 )
 
 # Version overrides to ensure compatibility between grpc and googleapis
