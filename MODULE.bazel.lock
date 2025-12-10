@@ -34,6 +34,7 @@
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.0.0/MODULE.bazel": "e118477db5c49419a88d78ebc7a2c2cea9d49600fe0f490c1903324a2c16ecd9",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.11.0/MODULE.bazel": "cb1ba9f9999ed0bc08600c221f532c1ddd8d217686b32ba7d45b0713b5131452",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.14.0/MODULE.bazel": "2b31ffcc9bdc8295b2167e07a757dbbc9ac8906e7028e5170a3708cecaac119f",
+    "https://bcr.bazel.build/modules/aspect_bazel_lib/2.16.0/MODULE.bazel": "852f9ebbda017572a7c113a2434592dd3b2f55cd9a0faea3d4be5a09a59e4900",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.19.3/MODULE.bazel": "253d739ba126f62a5767d832765b12b59e9f8d2bc88cc1572f4a73e46eb298ca",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.21.2/MODULE.bazel": "276347663a25b0d5bd6cad869252bea3e160c4d980e764b15f3bae7f80b30624",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.21.2/source.json": "f42051fa42629f0e59b7ac2adf0a55749144b11f1efcd8c697f0ee247181e526",
@@ -305,6 +306,7 @@
     "https://bcr.bazel.build/modules/rules_detekt/0.8.1.2/MODULE.bazel": "d84df200a766e9f783aa576b6b71f6f20d68c72f9be9e3ae728e1a069806cf55",
     "https://bcr.bazel.build/modules/rules_detekt/0.8.1.2/source.json": "f067f68422c2267442c84d0055fa74312a083c8a79437072812a5528a01180d2",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.10.1/MODULE.bazel": "b9527010e5fef060af92b6724edb3691970a5b1f76f74b21d39f7d433641be60",
+    "https://bcr.bazel.build/modules/rules_foreign_cc/0.14.0/MODULE.bazel": "56fb9a239503bab4183d06ba6cabb01cd73aae296ab499085b9193624a8a66e2",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.15.1/MODULE.bazel": "c2c60d26c79fda484acb95cdbec46e89d6b28b4845cb277160ce1e0c8622bb88",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.15.1/source.json": "a161811a63ba8a859086da3b7ff3ad04f2e9c255d7727b41087103fc0eb22f55",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "c9e8c682bf75b0e7c704166d79b599f93b72cfca5ad7477df596947891feeef6",
@@ -376,7 +378,8 @@
     "https://bcr.bazel.build/modules/rules_nodejs/6.3.3/MODULE.bazel": "b66eadebd10f1f1b25f52f95ab5213a57e82c37c3f656fcd9a57ad04d2264ce7",
     "https://bcr.bazel.build/modules/rules_nodejs/6.3.3/source.json": "45bd343155bdfed2543f0e39b80ff3f6840efc31975da4b5795797f4c94147ad",
     "https://bcr.bazel.build/modules/rules_perl/0.2.4/MODULE.bazel": "5f5af7be4bf5fb88d91af7469518f0fd2161718aefc606188f7cd51f436ca938",
-    "https://bcr.bazel.build/modules/rules_perl/0.2.4/source.json": "574317d6b3c7e4843fe611b76f15e62a1889949f5570702e1ee4ad335ea3c339",
+    "https://bcr.bazel.build/modules/rules_perl/0.4.1/MODULE.bazel": "4d09ad3a3cf71e606faab258a753ba9f0516b5d3c6aff9b813d06ea65c04702f",
+    "https://bcr.bazel.build/modules/rules_perl/0.4.1/source.json": "70e943e2deea44c1b2ddfafe178a294b82f8b8a24ee25d547eaaa202142f1b4d",
     "https://bcr.bazel.build/modules/rules_pkg/0.7.0/MODULE.bazel": "df99f03fc7934a4737122518bb87e667e62d780b610910f0447665a7e2be62dc",
     "https://bcr.bazel.build/modules/rules_pkg/1.0.1/MODULE.bazel": "5b1df97dbc29623bccdf2b0dcd0f5cb08e2f2c9050aab1092fd39a41e82686ff",
     "https://bcr.bazel.build/modules/rules_pkg/1.1.0/MODULE.bazel": "9db8031e71b6ef32d1846106e10dd0ee2deac042bd9a2de22b4761b0c3036453",
@@ -406,6 +409,7 @@
     "https://bcr.bazel.build/modules/rules_python/0.4.0/MODULE.bazel": "9208ee05fd48bf09ac60ed269791cf17fb343db56c8226a720fbb1cdf467166c",
     "https://bcr.bazel.build/modules/rules_python/0.40.0/MODULE.bazel": "9d1a3cd88ed7d8e39583d9ffe56ae8a244f67783ae89b60caafc9f5cf318ada7",
     "https://bcr.bazel.build/modules/rules_python/1.0.0/MODULE.bazel": "898a3d999c22caa585eb062b600f88654bf92efb204fa346fb55f6f8edffca43",
+    "https://bcr.bazel.build/modules/rules_python/1.1.0/MODULE.bazel": "57e01abae22956eb96d891572490d20e07d983e0c065de0b2170cafe5053e788",
     "https://bcr.bazel.build/modules/rules_python/1.2.0/MODULE.bazel": "5aeeb48b2a6c19d668b48adf2b8a2b209a6310c230db0ce77450f148a89846e4",
     "https://bcr.bazel.build/modules/rules_python/1.3.0/MODULE.bazel": "8361d57eafb67c09b75bf4bbe6be360e1b8f4f18118ab48037f2bd50aa2ccb13",
     "https://bcr.bazel.build/modules/rules_python/1.4.1/MODULE.bazel": "8991ad45bdc25018301d6b7e1d3626afc3c8af8aaf4bc04f23d0b99c938b73a6",
@@ -417,11 +421,13 @@
     "https://bcr.bazel.build/modules/rules_ruby/0.3.0/source.json": "13c00401da44143a0f2413877fe918183c7da3344d6c937f315bafeb4fb9fe43",
     "https://bcr.bazel.build/modules/rules_rust/0.45.1/MODULE.bazel": "a69d0db3a958fab2c6520961e1b2287afcc8b36690fd31bbc4f6f7391397150d",
     "https://bcr.bazel.build/modules/rules_rust/0.51.0/MODULE.bazel": "2b6d1617ac8503bfdcc0e4520c20539d4bba3a691100bee01afe193ceb0310f9",
+    "https://bcr.bazel.build/modules/rules_rust/0.56.0/MODULE.bazel": "3295b00757db397122092322fe1e920be7f5c9fbfb8619138977e820f2cbbbae",
     "https://bcr.bazel.build/modules/rules_rust/0.67.0/MODULE.bazel": "87c3816c4321352dcfd9e9e26b58e84efc5b21351ae3ef8fb5d0d57bde7237f5",
     "https://bcr.bazel.build/modules/rules_rust/0.67.0/source.json": "a8ef4d3be30eb98e060cad9e5875a55b603195487f76e01b619b51a1df4641cc",
     "https://bcr.bazel.build/modules/rules_shell/0.1.2/MODULE.bazel": "66e4ca3ce084b04af0b9ff05ff14cab4e5df7503973818bb91cbc6cda08d32fc",
     "https://bcr.bazel.build/modules/rules_shell/0.2.0/MODULE.bazel": "fda8a652ab3c7d8fee214de05e7a9916d8b28082234e8d2c0094505c5268ed3c",
     "https://bcr.bazel.build/modules/rules_shell/0.3.0/MODULE.bazel": "de4402cd12f4cc8fda2354fce179fdb068c0b9ca1ec2d2b17b3e21b24c1a937b",
+    "https://bcr.bazel.build/modules/rules_shell/0.4.0/MODULE.bazel": "0f8f11bb3cd11755f0b48c1de0bbcf62b4b34421023aa41a2fc74ef68d9584f0",
     "https://bcr.bazel.build/modules/rules_shell/0.4.1/MODULE.bazel": "00e501db01bbf4e3e1dd1595959092c2fadf2087b2852d3f553b5370f5633592",
     "https://bcr.bazel.build/modules/rules_shell/0.6.1/MODULE.bazel": "72e76b0eea4e81611ef5452aa82b3da34caca0c8b7b5c0c9584338aa93bae26b",
     "https://bcr.bazel.build/modules/rules_shell/0.6.1/source.json": "20ec05cd5e592055e214b2da8ccb283c7f2a421ea0dc2acbf1aa792e11c03d0c",
@@ -481,8 +487,8 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
-        "usagesDigest": "7qQW8NJi1LQGLVvBXgGGtsrLCGN4svky+9z+/d1vs4w=",
+        "bzlTransitiveDigest": "x2Kj7Oxn5+ARD8JhVT4rQxt6OJQK1DRFxdb8xaCLLfo=",
+        "usagesDigest": "h4SPwfEUYdrnZTdYRIST+4YRTOUgHuybZk0OJlJ04pM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -743,10 +749,10 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/grpc/grpc/archive/v1.72.0.tar.gz"
+                "https://github.com/grpc/grpc/archive/v1.76.0.tar.gz"
               ],
-              "sha256": "4a8aa99d5e24f80ea6b7ec95463e16af5bd91aa805e26c661ef6491ae3d2d23c",
-              "strip_prefix": "grpc-1.72.0",
+              "sha256": "0af37b800953130b47c075b56683ee60bdc3eda3c37fc6004193f5b569758204",
+              "strip_prefix": "grpc-1.76.0",
               "patch_args": [
                 "-p1"
               ],
@@ -1326,28 +1332,6 @@
               "strip_prefix": "bazel-compilation-database-40864791135333e1446a04553b63cbe744d358d0"
             }
           },
-          "envoy_examples": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "urls": [
-                "https://github.com/envoyproxy/examples/archive/v0.1.4.tar.gz"
-              ],
-              "sha256": "9bb7cd507eb8a090820c8de99f29d9650ce758a84d381a4c63531b5786ed3143",
-              "strip_prefix": "examples-0.1.4"
-            }
-          },
-          "envoy_toolshed": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "urls": [
-                "https://github.com/envoyproxy/toolshed/archive/bazel-v0.3.8.tar.gz"
-              ],
-              "sha256": "588bb7e206897fffc3ad8f4d5835ee2bbdd9f79e543a33853936fa014bda04ee",
-              "strip_prefix": "toolshed-bazel-v0.3.8/bazel"
-            }
-          },
           "com_github_maxmind_libmaxminddb": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1395,9 +1379,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-aarch_64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-linux-aarch_64.zip"
               ],
-              "sha256": "6427349140e01f06e049e707a58709a4f221ae73ab9a0425bc4a00c8d0e1ab32",
+              "sha256": "6018147740548e0e0f764408c87f4cd040e6e1c1203e13aeacaf811892b604f3",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1407,9 +1391,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-x86_64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-linux-x86_64.zip"
               ],
-              "sha256": "3e866620c5be27664f3d2fa2d656b5f3e09b5152b42f1bedbf427b333e90021a",
+              "sha256": "f3340e28a83d1c637d8bafdeed92b9f7db6a384c26bca880a6e5217b40a4328b",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1419,9 +1403,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-ppcle_64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-linux-ppcle_64.zip"
               ],
-              "sha256": "0e9894ec2e3992b14d183e7ceac16465d6a6ee73e1d234695d80e6d1e947014c",
+              "sha256": "01d54870bc5887fc0afc92fd809d12de73e2e8cc42095b20ea0da98b06063c95",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1431,9 +1415,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-osx-aarch_64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-osx-aarch_64.zip"
               ],
-              "sha256": "2b8a3403cd097f95f3ba656e14b76c732b6b26d7f183330b11e36ef2bc028765",
+              "sha256": "db7e66ff7f9080614d0f5505a6b0ac488cf89a15621b6a361672d1332ec2e14e",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1443,9 +1427,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-osx-x86_64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-osx-x86_64.zip"
               ],
-              "sha256": "9a788036d8f9854f7b03c305df4777cf0e54e5b081e25bf15252da87e0e90875",
+              "sha256": "e20b5f930e886da85e7402776a4959efb1ed60c57e72794bcade765e67abaa82",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1455,9 +1439,9 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-win64.zip"
+                "https://github.com/protocolbuffers/protobuf/releases/download/v33.1/protoc-33.1-win64.zip"
               ],
-              "sha256": "57ea59e9f551ad8d71ffaa9b5cfbe0ca1f4e720972a1db7ec2d12ab44bff9383",
+              "sha256": "d7a207fb6eec0e4b1b6613be3b7d11905375b6fd1147a071116eb8e9f24ac53b",
               "strip_prefix": "",
               "build_file": "@@//bazel/protoc:BUILD.protoc"
             }
@@ -1470,7 +1454,13 @@
                 "https://github.com/grpc-ecosystem/grpc-httpjson-transcoding/archive/a6e226f9a2e656a973df3ad48f0ee5efacce1a28.tar.gz"
               ],
               "sha256": "45dc1a630f518df21b4e044e32b27c7b02ae77ef401b48a20e5ffde0f070113f",
-              "strip_prefix": "grpc-httpjson-transcoding-a6e226f9a2e656a973df3ad48f0ee5efacce1a28"
+              "strip_prefix": "grpc-httpjson-transcoding-a6e226f9a2e656a973df3ad48f0ee5efacce1a28",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//bazel:grpc_httpjson_transcoding.patch"
+              ]
             }
           },
           "com_google_protoconverter": {
@@ -1513,10 +1503,10 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/grpc-ecosystem/proto_processing_lib/archive/11d825fb33f92eefcbacbd7b0db9eea8df6e8acb.zip"
+                "https://github.com/grpc-ecosystem/proto_processing_lib/archive/279353cfab372ac7f268ae529df29c4d546ca18d.zip"
               ],
-              "sha256": "fb687515a3673849d5b9c4cfe3b6dc50d878a028b8579e6f546b2357931da7cd",
-              "strip_prefix": "proto_processing_lib-11d825fb33f92eefcbacbd7b0db9eea8df6e8acb",
+              "sha256": "bac7a0d02fd8533cd5ce6d0f39dc324fc0565702d85a9ee3b65b0be8e7cbdd8d",
+              "strip_prefix": "proto_processing_lib-279353cfab372ac7f268ae529df29c4d546ca18d",
               "patch_args": [
                 "-p1"
               ],
@@ -1629,8 +1619,8 @@
     },
     "//bazel:extensions.bzl%envoy_dev_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
-        "usagesDigest": "itgwZYREZ6oWsESZlxlhFLTxbH/rSusk5bMY3NPA9jk=",
+        "bzlTransitiveDigest": "x2Kj7Oxn5+ARD8JhVT4rQxt6OJQK1DRFxdb8xaCLLfo=",
+        "usagesDigest": "ZAYyz3usVjcAuu2gAABupY/A1Zzk+oUKdgyf8QCOh2A=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1673,8 +1663,8 @@
     },
     "//bazel:extensions.bzl%envoy_repo_extension": {
       "general": {
-        "bzlTransitiveDigest": "75KftLaOpw/K8mOxlYNfjyumiVr6GAJcytY+0XjZnL4=",
-        "usagesDigest": "6vEi+T6tKbM/JdB+YFkpxMNIv0lvTbW+upHHmYR1VX4=",
+        "bzlTransitiveDigest": "x2Kj7Oxn5+ARD8JhVT4rQxt6OJQK1DRFxdb8xaCLLfo=",
+        "usagesDigest": "dH/25I1PcOpj+q+tQmeBHSBtu1i0xO8p4CdnsMV03e8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2429,7 +2419,7 @@
     "@@rules_buf~//buf:extensions.bzl%buf": {
       "general": {
         "bzlTransitiveDigest": "Fs3aEH2a3ennV7lI28cs5WlTUgn7ADef/a4SUDpeP8k=",
-        "usagesDigest": "Fv1TKqYFZoSKCTi6lQ6cK6vBvfv8fBUQvepJOyYHs+8=",
+        "usagesDigest": "cLNU+tqF6UBx5Wc+4AGKpJ4KMXMyLmz/6AKJWJ/wsJM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

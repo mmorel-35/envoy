@@ -173,12 +173,12 @@ The version can be any valid semver (like "0.0.0") since the local_path_override
 **Recommended Action:**
 Update the envoy_examples bzlmod-migration branch to add version "0.0.0" to the bazel_dep declaration.
 
-### 🔴 Blocker #2: Circular Dependency (envoy ↔ envoy_examples)
+### 🟡 Blocker #2: Circular Dependency (envoy ↔ envoy_examples)
 
-**Status:** Critical - Prevents migration
+**Status:** Mitigated - Prevented via dev_dependency configuration
 
 **Description:**
-A circular dependency exists between `envoy` and `envoy_examples`:
+A potential circular dependency exists between `envoy` and `envoy_examples`:
 
 ```
 envoy_examples (wasm-cc) 
@@ -270,9 +270,9 @@ The circular dependency has been **mitigated** by marking envoy_examples as `dev
 
 This configuration allows testing without creating a true circular dependency in the module graph.
 
-### 🔴 Blocker #2: LLVM Extension Can Only Be Used by Root Module
+### 🔴 Blocker #3: LLVM Extension Can Only Be Used by Root Module
 
-**Status:** Critical - Prevents module resolution when envoy is used as a dependency
+**Status:** Documented - Expected behavior, not a blocker for envoy as root module
 
 **Error:**
 ```
@@ -455,16 +455,16 @@ The envoy bzlmod implementation uses the following module structure:
 
 3. **[COMPLETED] Document LLVM requirements**
    - ✅ Documented that LLVM extension only works for root modules
-   - ✅ Document workarounds for downstream consumers
+   - ✅ Documented workarounds for downstream consumers
 
-4. **[PENDING] Address circular dependency with envoy_examples**
-   - After Blocker #1 is fixed, test if circular dependency exists
-   - Option A: Verify dev_dependency = True prevents circular dependency
-   - Option B: If circular dependency still exists, consider removing envoy dependency from envoy_examples
+4. **[COMPLETED] Mitigate circular dependency with envoy_examples**
+   - ✅ envoy_examples marked as dev_dependency = True
+   - ✅ This prevents circular dependency when envoy is used as a dependency
+   - ✅ Allows testing while preventing module resolution issues
 
-5. **[PENDING] Test module resolution**
-   - Run `bazel mod graph --enable_bzlmod` to visualize dependency graph
-   - Verify no circular dependencies
+5. **[PENDING] Test module resolution after envoy_examples fixes**
+   - After Blocker #1 is fixed in envoy_examples
+   - Run `bazel mod graph --enable_bzlmod` to verify no circular dependencies
    - Check for version conflicts
 
 ### For envoy_examples bzlmod-migration branch

@@ -1,10 +1,11 @@
 module(
     name = "envoy_build_config",
+    version = "1.36.4-dev",
 )
 
 # All bazel_dep entries are organized alphabetically for improved readability.
-bazel_dep(name = "envoy")
-bazel_dep(name = "envoy_mobile")
+bazel_dep(name = "envoy", version = "1.36.4-dev")
+bazel_dep(name = "envoy_mobile", version = "1.36.4-dev")
 bazel_dep(name = "platforms", version = "1.0.0")
 
 # Local module overrides

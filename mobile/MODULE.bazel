@@ -1,14 +1,15 @@
 module(
     name = "envoy_mobile",
+    version = "1.36.4-dev",
 )
 
 # All bazel_dep entries are organized alphabetically for improved readability.
 bazel_dep(name = "abseil-cpp", version = "20250814.1", repo_name = "com_google_absl")
 bazel_dep(name = "apple_support", version = "1.24.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-bazel_dep(name = "envoy")
-bazel_dep(name = "envoy_api")
-bazel_dep(name = "envoy_build_config")
+bazel_dep(name = "envoy", version = "1.36.4-dev")
+bazel_dep(name = "envoy_api", version = "1.36.4-dev")
+bazel_dep(name = "envoy_build_config", version = "1.36.4-dev")
 bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1", repo_name = "com_google_googleapis")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "protobuf", version = "30.0", repo_name = "com_google_protobuf")
