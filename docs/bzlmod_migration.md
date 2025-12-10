@@ -990,9 +990,17 @@ This section provides a comprehensive analysis of Envoy's dependencies for poten
 ## Overview
 
 As of the current migration state:
-- **49 dependencies** loaded via `bazel_dep` from BCR
+- **47 dependencies** loaded via `bazel_dep` from BCR (cleaned up 2 unused dependencies)
 - **77 dependencies** loaded via `use_repo(envoy_deps, ...)` from module extension
 - **20 dependencies** use `repo_name` mapping
+
+### Recent Cleanup (2025-12-10)
+
+Removed unused dependencies from MODULE.bazel:
+- **googleapis-cc** - Not used anywhere in the codebase
+- **rules_ruby** - Not used anywhere in the codebase
+
+Both dependencies were declared but had no actual usage in BUILD files or .bzl files. Module resolution tested successfully after removal.
 
 ## Dependency Categories
 
@@ -1190,7 +1198,7 @@ This pattern:
 
 | Category | Count | Migration Status |
 |----------|-------|------------------|
-| Already in BCR (bazel_dep) | 49 | ✅ Migrated |
+| Already in BCR (bazel_dep) | 47 | ✅ Migrated (cleaned up 2 unused) |
 | Tool binaries | 11 | 🔒 Keep in extension |
 | git_override candidates | 5 | 🔄 Needs investigation |
 | Custom build files | 61 | ⏳ Monitor BCR availability |
