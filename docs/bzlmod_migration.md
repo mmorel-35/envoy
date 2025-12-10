@@ -53,14 +53,23 @@ This repository (envoy) has been updated with the following bzlmod migration cha
 
 ### 🔄 Latest Updates (2025-12-10)
 
-6. **Updated git_override commits:**
-   - envoy_examples and envoy_example_wasm_cc: Updated to commit 0b56dee5 (includes version fixes)
-   - envoy_toolshed: Updated to commit 192c4fca (latest bzlmod branch)
+**Update #3 (commit 9423333):**
+- ✅ Updated git_override commits to ed43f119 (examples) and 6b035f94 (toolshed)
+- ✅ **Blocker #2 RESOLVED**: LLVM extension removed from envoy_example_wasm_cc
+- ✅ **Blocker #3 RESOLVED**: LLVM extension removed from envoy_toolshed  
+- ✅ **Blocker #4 RESOLVED**: Fixed envoy_mobile kotlin_formatter/robolectric use_repo issue
+- ✅ **Module resolution SUCCESS**: `bazel mod graph --enable_bzlmod` completes without errors
+- ⚠️ Non-blocking warnings: Maven version conflicts (gson, error_prone_annotations, guava)
 
-7. **Tested module resolution:**
-   - Ran `bazel mod graph --enable_bzlmod`
-   - Identified new blockers: LLVM extension usage in envoy_example_wasm_cc and envoy_toolshed
-   - Previous blocker (missing versions) has been resolved
+**Update #2 (commit 066ef05):**
+- Updated git_override commits to 0b56dee5 (examples) and 192c4fca (toolshed)
+- Identified Blockers #2 and #3 (LLVM extension usage)
+- Tested module resolution
+
+**Update #1 (initial commits):**
+- Added git_override for envoy_examples and envoy_toolshed
+- Added version to envoy module
+- Created comprehensive documentation
 
 ## Migration Status
 
@@ -96,14 +105,14 @@ git_override(
 # Envoy examples - bzlmod migration branch
 git_override(
     module_name = "envoy_examples",
-    commit = "0b56dee5f8f5577ca492a069fe17495eb9bfbfca",  # bzlmod-migration branch
+    commit = "ed43f119108bce30c2c148227be6b79f360adecc",  # bzlmod-migration branch
     remote = "https://github.com/mmorel-35/examples",
 )
 
 # Envoy example wasm-cc - bzlmod migration branch
 git_override(
     module_name = "envoy_example_wasm_cc",
-    commit = "0b56dee5f8f5577ca492a069fe17495eb9bfbfca",  # bzlmod-migration branch
+    commit = "ed43f119108bce30c2c148227be6b79f360adecc",  # bzlmod-migration branch
     remote = "https://github.com/mmorel-35/examples",
     strip_prefix = "wasm-cc",
 )
@@ -112,18 +121,23 @@ git_override(
 # Note: strip_prefix points to bazel/ subdirectory where MODULE.bazel is located
 git_override(
     module_name = "envoy_toolshed",
-    commit = "192c4fca9a52e29d8a0c8c2c96cc0c41de2da1d8",  # bzlmod branch
+    commit = "6b035f9418c0512c95581736ce77d9f39e99e703",  # bzlmod branch
     remote = "https://github.com/mmorel-35/toolshed",
     strip_prefix = "bazel",
 )
 ```
 
 **Commit References:**
-- envoy_examples: `0b56dee5f8f5577ca492a069fe17495eb9bfbfca` from bzlmod-migration branch (updated 2025-12-10)
-- envoy_example_wasm_cc: `0b56dee5f8f5577ca492a069fe17495eb9bfbfca` from bzlmod-migration branch (updated 2025-12-10)
-- envoy_toolshed: `192c4fca9a52e29d8a0c8c2c96cc0c41de2da1d8` from bzlmod branch (updated 2025-12-10)
+- envoy_examples: `ed43f119108bce30c2c148227be6b79f360adecc` from bzlmod-migration branch (updated 2025-12-10)
+- envoy_example_wasm_cc: `ed43f119108bce30c2c148227be6b79f360adecc` from bzlmod-migration branch (updated 2025-12-10)
+- envoy_toolshed: `6b035f9418c0512c95581736ce77d9f39e99e703` from bzlmod branch (updated 2025-12-10)
 
-These commits represent the latest state with versions added to all envoy* modules. To update to newer commits:
+**Update History:**
+- 2025-12-10 (commit 9423333): Updated to ed43f119 (examples) and 6b035f94 (toolshed) - LLVM extensions removed
+- 2025-12-10 (commit 066ef05): Updated to 0b56dee5 (examples) and 192c4fca (toolshed) - versions added
+- Initial: 1ceb95e9 (examples) and d718b38e (toolshed)
+
+These commits include all fixes for Blockers #1-4. To update to newer commits:
 ```bash
 # Get latest commit from bzlmod-migration branch
 git ls-remote https://github.com/mmorel-35/examples refs/heads/bzlmod-migration
@@ -182,115 +196,55 @@ All envoy* modules now have versions:
 - envoy_example_wasm_cc: 0.1.5-dev
 - envoy_toolshed: 0.3.8-dev
 
-### 🔴 Blocker #2: LLVM Extension in envoy_example_wasm_cc
+### ✅ Blocker #2: LLVM Extension in envoy_example_wasm_cc - RESOLVED
 
-**Status:** Critical - Prevents module resolution
+**Status:** ✅ RESOLVED - LLVM extension removed in commit ed43f119
 
 **Description:**
-The `envoy_example_wasm_cc` MODULE.bazel uses the LLVM extension, which can only be used by the root module:
+The `envoy_example_wasm_cc` MODULE.bazel was using the LLVM extension, which can only be used by the root module.
 
-```starlark
-# In wasm-cc/MODULE.bazel (commit 0b56dee5)
-bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+**Solution Applied:**
+Updated in https://github.com/mmorel-35/examples/commit/ed43f119:
 
-git_override(
-    module_name = "toolchains_llvm",
-    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
-    remote = "https://github.com/bazel-contrib/toolchains_llvm",
-)
+Removed LLVM extension usage from wasm-cc/MODULE.bazel.
 
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(
-    llvm_version = "18.1.8",
-)
-use_repo(llvm, "llvm_toolchain")
+See: https://github.com/mmorel-35/examples/blob/bzlmod-migration/docs/bzlmod_migration.md
 
-register_toolchains("@llvm_toolchain//:all")
-```
+### ✅ Blocker #3: LLVM Extension in envoy_toolshed - RESOLVED
+
+**Status:** ✅ RESOLVED - LLVM extension removed in commit 6b035f94
+
+**Description:**
+The `envoy_toolshed` MODULE.bazel was using the LLVM extension.
+
+**Solution Applied:**
+Updated in https://github.com/mmorel-35/toolshed/commit/6b035f94:
+
+Removed LLVM extension and toolchains_llvm dependency from bazel/MODULE.bazel.
+
+**Note:** LLVM sanitizer library builds (e.g., `//compile:cxx_msan`) are only available in WORKSPACE mode, not bzlmod mode.
+
+See: https://github.com/mmorel-35/toolshed/blob/bzlmod/docs/bzlmod_migration.md
+
+### ✅ Blocker #4: envoy_mobile kotlin_formatter/robolectric in use_repo - RESOLVED
+
+**Status:** ✅ RESOLVED - Removed from use_repo in commit 9423333
+
+**Description:**
+The `mobile/MODULE.bazel` was trying to import `kotlin_formatter` and `robolectric` from the envoy_mobile_dependencies extension, but these dependencies are only loaded when `not bzlmod`.
 
 **Error:**
 ```
-ERROR: /home/runner/.cache/bazel/_bazel_runner/232997f8e2d32d79d849393f4fd56253/external/toolchains_llvm~/toolchain/extensions/llvm.bzl:55:17: Traceback (most recent call last):
-	File "/home/runner/.cache/bazel/_bazel_runner/232997f8e2d32d79d849393f4fd56253/external/toolchains_llvm~/toolchain/extensions/llvm.bzl", line 55, column 17, in _llvm_impl_
-		fail("Only the root module can use the 'llvm' extension")
-Error in fail: Only the root module can use the 'llvm' extension
+ERROR: module extension "envoy_mobile_dependencies" does not generate repository "kotlin_formatter"
 ```
 
-**Impact:** 
-- Module resolution fails when envoy is the root module
-- Cannot proceed with bzlmod builds until resolved
+**Solution Applied:**
+Removed `kotlin_formatter` and `robolectric` from use_repo in mobile/MODULE.bazel (commit 9423333).
 
-**Solution:**
-In the wasm-cc/MODULE.bazel file, remove the LLVM extension usage:
-
-```starlark
-# REMOVE these lines from wasm-cc/MODULE.bazel:
-# llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-# llvm.toolchain(
-#     llvm_version = "18.1.8",
-# )
-# use_repo(llvm, "llvm_toolchain")
-# register_toolchains("@llvm_toolchain//:all")
-
-# Keep the bazel_dep and git_override:
-bazel_dep(name = "toolchains_llvm", version = "1.4.0")
-
-git_override(
-    module_name = "toolchains_llvm",
-    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
-    remote = "https://github.com/bazel-contrib/toolchains_llvm",
-)
-```
-
-The LLVM toolchain will be configured by the root module (envoy), so wasm-cc doesn't need to configure it.
-
-**Recommended Action:**
-Update wasm-cc/MODULE.bazel in the bzlmod-migration branch to remove LLVM extension usage.
-
-### 🔴 Blocker #3: LLVM Extension in envoy_toolshed
-
-**Status:** Critical - Prevents module resolution
-
-**Description:**
-The `envoy_toolshed` MODULE.bazel also uses the LLVM extension:
-
-```starlark
-# In envoy_toolshed/bazel/MODULE.bazel (commit 192c4fca)
-bazel_dep(name = "toolchains_llvm", version = "1.4.0")
-
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain()
-use_repo(llvm, "llvm_toolchain")
-
-register_toolchains("@llvm_toolchain//:all")
-```
-
-**Error:**
-Same as Blocker #2 - "Only the root module can use the 'llvm' extension"
-
-**Impact:** 
-- Module resolution fails
-- Cannot proceed with bzlmod builds until resolved
-
-**Solution:**
-In the envoy_toolshed/bazel/MODULE.bazel file, remove the LLVM extension usage:
-
-```starlark
-# REMOVE these lines from envoy_toolshed/bazel/MODULE.bazel:
-# llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-# llvm.toolchain()
-# use_repo(llvm, "llvm_toolchain")
-# register_toolchains("@llvm_toolchain//:all")
-
-# Keep the bazel_dep if toolshed actually needs it:
-# bazel_dep(name = "toolchains_llvm", version = "1.4.0")
-# Or remove it if not needed
-```
-
-**Recommended Action:**
+These tools are Kotlin/Android development dependencies that are only needed in WORKSPACE mode.
 Update envoy_toolshed/bazel/MODULE.bazel in the bzlmod branch to remove LLVM extension usage.
 
-### 🟡 Blocker #4: Circular Dependency (envoy ↔ envoy_examples)
+### 🟡 Blocker #5: Circular Dependency (envoy ↔ envoy_examples)
 
 **Status:** Mitigated - Prevented via dev_dependency configuration
 
@@ -387,7 +341,7 @@ The circular dependency has been **mitigated** by marking envoy_examples as `dev
 
 This configuration allows testing without creating a true circular dependency in the module graph.
 
-### 📝 Blocker #5: LLVM Extension Can Only Be Used by Root Module (Documentation)
+### 📝 Blocker #6: LLVM Extension Can Only Be Used by Root Module (Documentation)
 
 **Status:** Documented - Expected behavior, not a blocker for envoy as root module
 
@@ -543,73 +497,58 @@ The envoy bzlmod implementation uses the following module structure:
 
 ### Build Testing Status
 
-- ✅ Git overrides updated to latest commits (0b56dee5 for examples, 192c4fca for toolshed)
-- ✅ Versions added to all envoy* modules (Blocker #1 resolved)
+- ✅ Git overrides updated to latest commits (ed43f119 for examples, 6b035f94 for toolshed)
+- ✅ All critical blockers (#1-4) RESOLVED
+- ✅ Versions added to all envoy* modules
 - ✅ bazel_dep declarations include versions
 - ✅ Module extensions implemented
 - ✅ envoy_examples and envoy_toolshed removed from envoy_dependencies_extension when bzlmod=True
 - ✅ Added git_override for envoy_example_wasm_cc module
-- 🔴 Module dependency graph resolution - **BLOCKED** (LLVM extension in envoy_example_wasm_cc - Blocker #2)
-- 🔴 Module dependency graph resolution - **BLOCKED** (LLVM extension in envoy_toolshed - Blocker #3)
-- 🟡 Circular dependency - **MITIGATED** (dev_dependency = True)
-- 📝 LLVM extension limitation - **DOCUMENTED** (only works for root module - Blocker #5)
-- ⏸️ Full build testing - **PENDING** (waiting for Blockers #2 and #3 resolution)
+- ✅ Removed kotlin_formatter and robolectric from envoy_mobile use_repo
+- ✅ Module dependency graph resolution - **SUCCESS** (`bazel mod graph --enable_bzlmod` completes)
+- 🟡 Circular dependency - **MITIGATED** (dev_dependency = True - Blocker #5)
+- 📝 LLVM extension limitation - **DOCUMENTED** (only works for root module - Blocker #6)
+- ⚠️ Maven version warnings - **NON-BLOCKING** (gson, error_prone_annotations, guava version conflicts)
+- ⏸️ Full build testing - **READY** (can now proceed with build tests)
 
 ## Next Steps
 
-### Immediate Actions (envoy_example_wasm_cc Repository)
+### Completed Actions
 
-1. **[CRITICAL] Remove LLVM extension from wasm-cc MODULE.bazel**
-   - In wasm-cc/MODULE.bazel, remove the LLVM extension usage (lines with llvm = use_extension...)
-   - Keep the bazel_dep and git_override for toolchains_llvm
-   - The LLVM toolchain will be configured by the root module (envoy)
-   
-   ```starlark
-   # DELETE these lines:
-   # llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-   # llvm.toolchain(
-   #     llvm_version = "18.1.8",
-   # )
-   # use_repo(llvm, "llvm_toolchain")
-   # register_toolchains("@llvm_toolchain//:all")
-   ```
+1. **[✅ COMPLETED] Update git_override commits**
+   - Updated to ed43f119 for envoy_examples and envoy_example_wasm_cc
+   - Updated to 6b035f94 for envoy_toolshed
 
-### Immediate Actions (envoy_toolshed Repository)
+2. **[✅ COMPLETED] Resolve LLVM extension blockers**
+   - Blocker #2: LLVM extension removed from envoy_example_wasm_cc
+   - Blocker #3: LLVM extension removed from envoy_toolshed
 
-2. **[CRITICAL] Remove LLVM extension from envoy_toolshed MODULE.bazel**
-   - In envoy_toolshed/bazel/MODULE.bazel, remove the LLVM extension usage
-   - Consider removing bazel_dep on toolchains_llvm if not actually needed
-   
-   ```starlark
-   # DELETE these lines:
-   # llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-   # llvm.toolchain()
-   # use_repo(llvm, "llvm_toolchain")
-   # register_toolchains("@llvm_toolchain//:all")
-   ```
+3. **[✅ COMPLETED] Fix envoy_mobile kotlin_formatter blocker**
+   - Blocker #4: Removed kotlin_formatter and robolectric from use_repo
 
-### Immediate Actions (This Repository)
+4. **[✅ COMPLETED] Module resolution testing**
+   - `bazel mod graph --enable_bzlmod` completes successfully
+   - All critical blockers resolved
 
-3. **[COMPLETED] Add git_override entries**
-   - ✅ Added bazel_dep and git_override for envoy_examples (with dev_dependency = True)
-   - ✅ Added git_override for envoy_example_wasm_cc (with strip_prefix)
-   - ✅ Added bazel_dep and git_override for envoy_toolshed (with strip_prefix)
-   - ✅ Removed envoy_examples and envoy_toolshed from use_repo when bzlmod=True
-   - ✅ Updated to latest commit hashes (0b56dee5, 192c4fca)
+### Ready for Next Phase
 
-4. **[COMPLETED] Document LLVM requirements**
-   - ✅ Documented that LLVM extension only works for root modules
-   - ✅ Documented workarounds for downstream consumers
+5. **[READY] Build testing with bzlmod**
+   - Test core envoy builds with `--enable_bzlmod`
+   - Test envoy_mobile builds
+   - Test example builds (wasm-cc)
+   - Identify any build-time issues
 
-5. **[COMPLETED] Mitigate circular dependency with envoy_examples**
-   - ✅ envoy_examples marked as dev_dependency = True
-   - ✅ This prevents circular dependency when envoy is used as a dependency
-   - ✅ Allows testing while preventing module resolution issues
+6. **[READY] CI/CD integration**
+   - Update CI workflows to test with bzlmod
+   - Ensure both WORKSPACE and bzlmod modes work
+   - Add bzlmod-specific test targets
 
-6. **[PENDING] Test module resolution after LLVM extension fixes**
-   - After Blockers #2 and #3 are fixed in envoy_example_wasm_cc and envoy_toolshed
-   - Run `bazel mod graph --enable_bzlmod` to verify no remaining blockers
-   - Check for any new version conflicts or issues
+### Ongoing Monitoring
+
+7. **Maven version warnings (non-blocking)**
+   - Monitor version conflicts: gson (2.10.1 vs 2.8.9), error_prone_annotations (2.23.0 vs 2.5.1), guava (32.0.1-jre vs 33.0.0-jre)
+   - Consider adding explicit version pins if issues arise
+   - Can be addressed with `known_contributing_modules` attribute if needed
 
 ### For envoy_examples bzlmod-migration branch
 
