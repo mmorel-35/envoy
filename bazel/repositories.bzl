@@ -256,8 +256,9 @@ def envoy_dependencies(skip_targets = [], bzlmod = False):
         external_http_archive("bazel_features")  # bazel_features is in BCR for bzlmod
     external_http_archive("bazel_toolchains")
     external_http_archive("bazel_compdb")
-    external_http_archive("envoy_examples")
-    external_http_archive("envoy_toolshed")
+    if not bzlmod:
+        external_http_archive("envoy_examples")  # envoy_examples is loaded via git_override for bzlmod
+        external_http_archive("envoy_toolshed")  # envoy_toolshed is loaded via git_override for bzlmod
 
     _com_github_maxmind_libmaxminddb()
 
