@@ -1881,7 +1881,7 @@
     },
     "@@aspect_rules_js~//npm:extensions.bzl%pnpm": {
       "general": {
-        "bzlTransitiveDigest": "krNV/89OPM1LfPincWGVSFu4hiWUZ6qE9Dmh5Hq9Dso=",
+        "bzlTransitiveDigest": "bjTh6LwVQmKXLLMCyHhaZ24PKNZhTzB5Zu5IKrvlJjA=",
         "usagesDigest": "3AzTJAfe5XVpVUGzpKn2Vey5gSL41A/RWrCJh1bJhHQ=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -2180,7 +2180,7 @@
     "@@envoy_api~//bazel:extensions.bzl%non_module_deps": {
       "general": {
         "bzlTransitiveDigest": "fyyNtC/4RMzMcNwVAgC7DHDH78f/2ZkqzfMuDdvHVCA=",
-        "usagesDigest": "lHPK7e1YfUJE1iELHYhCBfcHh7a7ey73SNOrlOBclS4=",
+        "usagesDigest": "tHL9grUBQEIkha6zvMFp6ASXhPCSfhsmCe23m/KQmTM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2234,10 +2234,94 @@
         ]
       }
     },
+    "@@envoy_mobile~//bazel:extensions.bzl%envoy_mobile_dependencies": {
+      "general": {
+        "bzlTransitiveDigest": "j3nPg9zL52W1i9iu7jpmVa+intgcMev8Bpv8oJxTUK0=",
+        "usagesDigest": "LZqQQJI0HJQC95/8bvdvMAr8MrYmssbgNTCZisX+OIs=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "google_bazel_common": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "d8c9586b24ce4a5513d972668f94b62eb7d705b92405d4bc102131f294751f1d",
+              "strip_prefix": "bazel-common-413b433b91f26dbe39cdbc20f742ad6555dd1e27",
+              "urls": [
+                "https://github.com/google/bazel-common/archive/413b433b91f26dbe39cdbc20f742ad6555dd1e27.zip"
+              ]
+            }
+          },
+          "com_github_libevent_libevent": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/libevent/libevent/archive/0d7d85c2083f7a4c9efe01c061486f332b576d28.tar.gz"
+              ],
+              "strip_prefix": "libevent-0d7d85c2083f7a4c9efe01c061486f332b576d28",
+              "sha256": "549d34065eb2485dfad6c8de638caaa6616ed130eec36dd978f73b6bdd5af113",
+              "build_file_content": "filegroup(name = \"all\", srcs = glob([\"**\"]), visibility = [\"//visibility:public\"])"
+            }
+          },
+          "DrString": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file_content": "exports_files([\"drstring\"])",
+              "sha256": "860788450cf9900613454a51276366ea324d5bfe71d1844106e9c1f1d7dfd82b",
+              "url": "https://github.com/dduan/DrString/releases/download/0.5.2/drstring-x86_64-apple-darwin.tar.gz"
+            }
+          },
+          "SwiftLint": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file_content": "exports_files([\"swiftlint\"])",
+              "sha256": "47078845857fa7cf8497f5861967c7ce67f91915e073fb3d3114b8b2486a9270",
+              "url": "https://github.com/realm/SwiftLint/releases/download/0.50.3/portable_swiftlint.zip"
+            }
+          },
+          "com_github_buildbuddy_io_rules_xcodeproj": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "d02932255ba3ffaab1859e44528c69988e93fa353fa349243e1ef5054bd1ba80",
+              "url": "https://github.com/buildbuddy-io/rules_xcodeproj/releases/download/1.2.0/release.tar.gz"
+            }
+          },
+          "xctestrunner": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/google/xctestrunner/archive/b7698df3d435b6491b4b4c0f9fc7a63fbed5e3a6.tar.gz"
+              ],
+              "strip_prefix": "xctestrunner-b7698df3d435b6491b4b4c0f9fc7a63fbed5e3a6",
+              "sha256": "ae3a063c985a8633cb7eb566db21656f8db8eb9a0edb8c182312c7f0db53730d",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@envoy_mobile~//bazel:xctestrunner.patch"
+              ]
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "envoy_mobile~",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
     "@@googleapis~//:extensions.bzl%switched_rules": {
       "general": {
         "bzlTransitiveDigest": "liqpEiZfQn8ycdEspyJt6J+baY9GQOl+9/prJJz2wTA=",
-        "usagesDigest": "cM/ubJ8WKMZeKkQoPjFzdq7Eyt64u+jqbTowqqtTKQA=",
+        "usagesDigest": "shHwPhRrNid6mb9rVkkNF7aNVOCYMCajSnjh8gb9MPQ=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2436,6 +2520,34 @@
         "recordedRepoMappingEntries": [
           [
             "rules_buf~",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
+    "@@rules_detekt~//detekt:extensions.bzl%detekt": {
+      "general": {
+        "bzlTransitiveDigest": "sQSkHnxWRF1/wY8MctfdVDf2IyaTKhU3wpJ6LAVKrX4=",
+        "usagesDigest": "g+dmeu4GLq4c6DHr+m1Y+hgykIwGC0N/tXvpnOcpFG4=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "detekt_cli_all": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_jar",
+            "attributes": {
+              "sha256": "089c15405ec5563adba285d09ceccff047ebc7888b8bbc3a386bbc6c6744d788",
+              "urls": [
+                "https://github.com/detekt/detekt/releases/download/v1.23.1/detekt-cli-1.23.1-all.jar"
+              ]
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "rules_detekt~",
             "bazel_tools",
             "bazel_tools"
           ]
@@ -2659,85 +2771,6 @@
           }
         },
         "recordedRepoMappingEntries": []
-      }
-    },
-    "@@rules_perl~//perl:extensions.bzl%perl_repositories": {
-      "general": {
-        "bzlTransitiveDigest": "QxTNifRskvdT4fouhOMIOzr0hZOCWmV2wDYxNroRRfY=",
-        "usagesDigest": "tuJgAyNZD8Ewzr/MlAnnittbPMDC60XQF8aGrsjU+nY=",
-        "recordedFileInputs": {},
-        "recordedDirentsInputs": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "perl_darwin_arm64": {
-            "bzlFile": "@@rules_perl~//perl:repo.bzl",
-            "ruleClassName": "perl_download",
-            "attributes": {
-              "strip_prefix": "perl-darwin-arm64",
-              "sha256": "285769f3c50c339fb59a3987b216ae3c5c573b95babe6875a1ef56fb178433da",
-              "urls": [
-                "https://github.com/skaji/relocatable-perl/releases/download/5.36.0.1/perl-darwin-arm64.tar.xz"
-              ]
-            }
-          },
-          "perl_darwin_amd64": {
-            "bzlFile": "@@rules_perl~//perl:repo.bzl",
-            "ruleClassName": "perl_download",
-            "attributes": {
-              "strip_prefix": "perl-darwin-amd64",
-              "sha256": "63bc5ee36f5394d71c50cca6cafdd333ee58f9eaa40bca63c85f9bd06f2c1fd6",
-              "urls": [
-                "https://github.com/skaji/relocatable-perl/releases/download/5.36.0.1/perl-darwin-amd64.tar.xz"
-              ]
-            }
-          },
-          "perl_linux_amd64": {
-            "bzlFile": "@@rules_perl~//perl:repo.bzl",
-            "ruleClassName": "perl_download",
-            "attributes": {
-              "strip_prefix": "perl-linux-amd64",
-              "sha256": "3bdffa9d7a3f97c0207314637b260ba5115b1d0829f97e3e2e301191a4d4d076",
-              "urls": [
-                "https://github.com/skaji/relocatable-perl/releases/download/5.36.0.1/perl-linux-amd64.tar.xz"
-              ]
-            }
-          },
-          "perl_linux_arm64": {
-            "bzlFile": "@@rules_perl~//perl:repo.bzl",
-            "ruleClassName": "perl_download",
-            "attributes": {
-              "strip_prefix": "perl-linux-arm64",
-              "sha256": "6fa4ece99e790ecbc2861f6ecb7b52694c01c2eeb215b4370f16a3b12d952117",
-              "urls": [
-                "https://github.com/skaji/relocatable-perl/releases/download/5.36.0.1/perl-linux-arm64.tar.xz"
-              ]
-            }
-          },
-          "perl_windows_x86_64": {
-            "bzlFile": "@@rules_perl~//perl:repo.bzl",
-            "ruleClassName": "perl_download",
-            "attributes": {
-              "strip_prefix": "",
-              "sha256": "aeb973da474f14210d3e1a1f942dcf779e2ae7e71e4c535e6c53ebabe632cc98",
-              "urls": [
-                "https://mirror.bazel.build/strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
-                "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip"
-              ]
-            }
-          }
-        },
-        "recordedRepoMappingEntries": [
-          [
-            "rules_perl~",
-            "bazel_tools",
-            "bazel_tools"
-          ],
-          [
-            "rules_perl~",
-            "rules_perl",
-            "rules_perl~"
-          ]
-        ]
       }
     },
     "@@rules_python~//python/uv:uv.bzl%uv": {

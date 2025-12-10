@@ -32,11 +32,13 @@ This repository (envoy) has been updated with the following bzlmod migration cha
 
 1. **Added bazel_dep declarations for ecosystem modules:**
    - `bazel_dep(name = "envoy_toolshed")` - Runtime dependency
-   - `bazel_dep(name = "envoy_examples", dev_dependency = True)` - Dev-only dependency
+   - `bazel_dep(name = "envoy_examples", dev_dependency = True, version = "0.1.5-dev")` - Dev-only dependency
+   - All local modules now have versions: envoy_api, envoy_build_config, envoy_mobile (1.36.4-dev)
 
 2. **Added git_override entries to use bzlmod migration branches:**
-   - `envoy_examples`: Points to https://github.com/mmorel-35/examples bzlmod-migration branch
-   - `envoy_toolshed`: Points to https://github.com/mmorel-35/toolshed bzlmod branch with `strip_prefix = "bazel"`
+   - `envoy_examples`: Points to https://github.com/mmorel-35/examples bzlmod-migration branch (commit 0b56dee5)
+   - `envoy_example_wasm_cc`: Points to https://github.com/mmorel-35/examples bzlmod-migration branch with `strip_prefix = "wasm-cc"` (commit 0b56dee5)
+   - `envoy_toolshed`: Points to https://github.com/mmorel-35/toolshed bzlmod branch with `strip_prefix = "bazel"` (commit 192c4fca)
 
 3. **Updated bazel/repositories.bzl:**
    - Wrapped `envoy_examples` and `envoy_toolshed` http_archive calls with `if not bzlmod:` condition
@@ -48,6 +50,17 @@ This repository (envoy) has been updated with the following bzlmod migration cha
 
 5. **Created comprehensive documentation:**
    - This file (docs/bzlmod_migration.md) documents all blockers, recommendations, and migration status
+
+### 🔄 Latest Updates (2025-12-10)
+
+6. **Updated git_override commits:**
+   - envoy_examples and envoy_example_wasm_cc: Updated to commit 0b56dee5 (includes version fixes)
+   - envoy_toolshed: Updated to commit 192c4fca (latest bzlmod branch)
+
+7. **Tested module resolution:**
+   - Ran `bazel mod graph --enable_bzlmod`
+   - Identified new blockers: LLVM extension usage in envoy_example_wasm_cc and envoy_toolshed
+   - Previous blocker (missing versions) has been resolved
 
 ## Migration Status
 
@@ -81,28 +94,36 @@ git_override(
 )
 
 # Envoy examples - bzlmod migration branch
-# NOTE: See Blocker #1 below - missing version issue in envoy_examples
 git_override(
     module_name = "envoy_examples",
-    commit = "1ceb95e9c9c8b1892d0c14a1ba4c42216348831d",  # bzlmod-migration branch
+    commit = "0b56dee5f8f5577ca492a069fe17495eb9bfbfca",  # bzlmod-migration branch
     remote = "https://github.com/mmorel-35/examples",
+)
+
+# Envoy example wasm-cc - bzlmod migration branch
+git_override(
+    module_name = "envoy_example_wasm_cc",
+    commit = "0b56dee5f8f5577ca492a069fe17495eb9bfbfca",  # bzlmod-migration branch
+    remote = "https://github.com/mmorel-35/examples",
+    strip_prefix = "wasm-cc",
 )
 
 # Envoy toolshed - bzlmod migration branch
 # Note: strip_prefix points to bazel/ subdirectory where MODULE.bazel is located
 git_override(
     module_name = "envoy_toolshed",
-    commit = "d718b38e7d0bd7e41394ff48db046b15b20784d5",  # bzlmod branch
+    commit = "192c4fca9a52e29d8a0c8c2c96cc0c41de2da1d8",  # bzlmod branch
     remote = "https://github.com/mmorel-35/toolshed",
     strip_prefix = "bazel",
 )
 ```
 
 **Commit References:**
-- envoy_examples: `1ceb95e9c9c8b1892d0c14a1ba4c42216348831d` from bzlmod-migration branch
-- envoy_toolshed: `d718b38e7d0bd7e41394ff48db046b15b20784d5` from bzlmod branch
+- envoy_examples: `0b56dee5f8f5577ca492a069fe17495eb9bfbfca` from bzlmod-migration branch (updated 2025-12-10)
+- envoy_example_wasm_cc: `0b56dee5f8f5577ca492a069fe17495eb9bfbfca` from bzlmod-migration branch (updated 2025-12-10)
+- envoy_toolshed: `192c4fca9a52e29d8a0c8c2c96cc0c41de2da1d8` from bzlmod branch (updated 2025-12-10)
 
-These commits represent the latest state as of the documentation date. To update to newer commits:
+These commits represent the latest state with versions added to all envoy* modules. To update to newer commits:
 ```bash
 # Get latest commit from bzlmod-migration branch
 git ls-remote https://github.com/mmorel-35/examples refs/heads/bzlmod-migration
@@ -129,51 +150,147 @@ bazel_dep(name = "xds", repo_name = "com_github_cncf_xds")
 
 ## Critical Blockers
 
-### 🔴 Blocker #1: Missing Version in envoy_examples → envoy_example_wasm_cc
+### ✅ Blocker #1: Missing Version in envoy_examples → envoy_example_wasm_cc - RESOLVED
+
+**Status:** ✅ RESOLVED - Version added in commit 0b56dee5
+
+**Description:**
+The `envoy_examples` repository previously had a bazel_dep on `envoy_example_wasm_cc` without specifying a version.
+
+**Solution Applied:**
+Updated in https://github.com/mmorel-35/examples/commit/0b56dee5:
+
+```starlark
+# envoy_examples/MODULE.bazel
+module(
+    name = "envoy_examples",
+    version = "0.1.5-dev",
+)
+bazel_dep(name = "envoy_example_wasm_cc", version = "0.1.5-dev")
+local_path_override(
+    module_name = "envoy_example_wasm_cc",
+    path = "wasm-cc",
+)
+```
+
+All envoy* modules now have versions:
+- envoy: 1.36.4-dev
+- envoy_api: 1.36.4-dev
+- envoy_build_config: 1.36.4-dev
+- envoy_mobile: 1.36.4-dev
+- envoy_examples: 0.1.5-dev
+- envoy_example_wasm_cc: 0.1.5-dev
+- envoy_toolshed: 0.3.8-dev
+
+### 🔴 Blocker #2: LLVM Extension in envoy_example_wasm_cc
 
 **Status:** Critical - Prevents module resolution
 
 **Description:**
-The `envoy_examples` repository has a bazel_dep on `envoy_example_wasm_cc` without specifying a version:
+The `envoy_example_wasm_cc` MODULE.bazel uses the LLVM extension, which can only be used by the root module:
 
 ```starlark
-# In envoy_examples/MODULE.bazel
-bazel_dep(name = "envoy_example_wasm_cc")
-local_path_override(
-    module_name = "envoy_example_wasm_cc",
-    path = "wasm-cc",
+# In wasm-cc/MODULE.bazel (commit 0b56dee5)
+bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+
+git_override(
+    module_name = "toolchains_llvm",
+    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
 )
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = "18.1.8",
+)
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
 ```
 
 **Error:**
 ```
-ERROR: in module dependency chain <root> -> envoy_examples@_ -> envoy_example_wasm_cc@_: 
-bad bazel_dep on module 'envoy_example_wasm_cc' with no version. 
-Did you forget to specify a version, or a non-registry override?
+ERROR: /home/runner/.cache/bazel/_bazel_runner/232997f8e2d32d79d849393f4fd56253/external/toolchains_llvm~/toolchain/extensions/llvm.bzl:55:17: Traceback (most recent call last):
+	File "/home/runner/.cache/bazel/_bazel_runner/232997f8e2d32d79d849393f4fd56253/external/toolchains_llvm~/toolchain/extensions/llvm.bzl", line 55, column 17, in _llvm_impl_
+		fail("Only the root module can use the 'llvm' extension")
+Error in fail: Only the root module can use the 'llvm' extension
 ```
 
 **Impact:** 
-- Bazel module resolution fails
-- Cannot proceed with bzlmod testing until resolved
+- Module resolution fails when envoy is the root module
+- Cannot proceed with bzlmod builds until resolved
 
 **Solution:**
-In the envoy_examples repository (https://github.com/mmorel-35/examples/tree/bzlmod-migration), update MODULE.bazel:
+In the wasm-cc/MODULE.bazel file, remove the LLVM extension usage:
 
 ```starlark
-# Specify a version even with local_path_override
-bazel_dep(name = "envoy_example_wasm_cc", version = "0.0.0")
-local_path_override(
-    module_name = "envoy_example_wasm_cc",
-    path = "wasm-cc",
+# REMOVE these lines from wasm-cc/MODULE.bazel:
+# llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+# llvm.toolchain(
+#     llvm_version = "18.1.8",
+# )
+# use_repo(llvm, "llvm_toolchain")
+# register_toolchains("@llvm_toolchain//:all")
+
+# Keep the bazel_dep and git_override:
+bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+
+git_override(
+    module_name = "toolchains_llvm",
+    commit = "fb29f3d53757790dad17b90df0794cea41f1e183",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
 )
 ```
 
-The version can be any valid semver (like "0.0.0") since the local_path_override will take precedence.
+The LLVM toolchain will be configured by the root module (envoy), so wasm-cc doesn't need to configure it.
 
 **Recommended Action:**
-Update the envoy_examples bzlmod-migration branch to add version "0.0.0" to the bazel_dep declaration.
+Update wasm-cc/MODULE.bazel in the bzlmod-migration branch to remove LLVM extension usage.
 
-### 🟡 Blocker #2: Circular Dependency (envoy ↔ envoy_examples)
+### 🔴 Blocker #3: LLVM Extension in envoy_toolshed
+
+**Status:** Critical - Prevents module resolution
+
+**Description:**
+The `envoy_toolshed` MODULE.bazel also uses the LLVM extension:
+
+```starlark
+# In envoy_toolshed/bazel/MODULE.bazel (commit 192c4fca)
+bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain()
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
+```
+
+**Error:**
+Same as Blocker #2 - "Only the root module can use the 'llvm' extension"
+
+**Impact:** 
+- Module resolution fails
+- Cannot proceed with bzlmod builds until resolved
+
+**Solution:**
+In the envoy_toolshed/bazel/MODULE.bazel file, remove the LLVM extension usage:
+
+```starlark
+# REMOVE these lines from envoy_toolshed/bazel/MODULE.bazel:
+# llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+# llvm.toolchain()
+# use_repo(llvm, "llvm_toolchain")
+# register_toolchains("@llvm_toolchain//:all")
+
+# Keep the bazel_dep if toolshed actually needs it:
+# bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+# Or remove it if not needed
+```
+
+**Recommended Action:**
+Update envoy_toolshed/bazel/MODULE.bazel in the bzlmod branch to remove LLVM extension usage.
+
+### 🟡 Blocker #4: Circular Dependency (envoy ↔ envoy_examples)
 
 **Status:** Mitigated - Prevented via dev_dependency configuration
 
@@ -270,7 +387,7 @@ The circular dependency has been **mitigated** by marking envoy_examples as `dev
 
 This configuration allows testing without creating a true circular dependency in the module graph.
 
-### 🔴 Blocker #3: LLVM Extension Can Only Be Used by Root Module
+### 📝 Blocker #5: LLVM Extension Can Only Be Used by Root Module (Documentation)
 
 **Status:** Documented - Expected behavior, not a blocker for envoy as root module
 
@@ -426,79 +543,107 @@ The envoy bzlmod implementation uses the following module structure:
 
 ### Build Testing Status
 
-- ✅ Git overrides correctly configured for envoy_toolshed with strip_prefix
-- ✅ Git overrides correctly configured for envoy_examples  
-- ✅ bazel_dep declarations added
+- ✅ Git overrides updated to latest commits (0b56dee5 for examples, 192c4fca for toolshed)
+- ✅ Versions added to all envoy* modules (Blocker #1 resolved)
+- ✅ bazel_dep declarations include versions
 - ✅ Module extensions implemented
 - ✅ envoy_examples and envoy_toolshed removed from envoy_dependencies_extension when bzlmod=True
-- 🔴 Module dependency graph resolution - **BLOCKED** (envoy_examples needs version on envoy_example_wasm_cc bazel_dep)
-- 🔴 LLVM extension limitation - **DOCUMENTED** (only works for root module)
-- ⏸️ Circular dependency testing - **PENDING** (waiting for Blocker #1 resolution)
-- ⏸️ Full build testing - **PENDING** (waiting for all blockers resolution)
+- ✅ Added git_override for envoy_example_wasm_cc module
+- 🔴 Module dependency graph resolution - **BLOCKED** (LLVM extension in envoy_example_wasm_cc - Blocker #2)
+- 🔴 Module dependency graph resolution - **BLOCKED** (LLVM extension in envoy_toolshed - Blocker #3)
+- 🟡 Circular dependency - **MITIGATED** (dev_dependency = True)
+- 📝 LLVM extension limitation - **DOCUMENTED** (only works for root module - Blocker #5)
+- ⏸️ Full build testing - **PENDING** (waiting for Blockers #2 and #3 resolution)
 
 ## Next Steps
 
-### Immediate Actions (envoy_examples Repository)
+### Immediate Actions (envoy_example_wasm_cc Repository)
 
-1. **[CRITICAL] Fix missing version in bazel_dep**
-   - In envoy_examples/MODULE.bazel, add version to envoy_example_wasm_cc:
+1. **[CRITICAL] Remove LLVM extension from wasm-cc MODULE.bazel**
+   - In wasm-cc/MODULE.bazel, remove the LLVM extension usage (lines with llvm = use_extension...)
+   - Keep the bazel_dep and git_override for toolchains_llvm
+   - The LLVM toolchain will be configured by the root module (envoy)
+   
    ```starlark
-   bazel_dep(name = "envoy_example_wasm_cc", version = "0.0.0")
+   # DELETE these lines:
+   # llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+   # llvm.toolchain(
+   #     llvm_version = "18.1.8",
+   # )
+   # use_repo(llvm, "llvm_toolchain")
+   # register_toolchains("@llvm_toolchain//:all")
+   ```
+
+### Immediate Actions (envoy_toolshed Repository)
+
+2. **[CRITICAL] Remove LLVM extension from envoy_toolshed MODULE.bazel**
+   - In envoy_toolshed/bazel/MODULE.bazel, remove the LLVM extension usage
+   - Consider removing bazel_dep on toolchains_llvm if not actually needed
+   
+   ```starlark
+   # DELETE these lines:
+   # llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+   # llvm.toolchain()
+   # use_repo(llvm, "llvm_toolchain")
+   # register_toolchains("@llvm_toolchain//:all")
    ```
 
 ### Immediate Actions (This Repository)
 
-2. **[COMPLETED] Add git_override entries**
+3. **[COMPLETED] Add git_override entries**
    - ✅ Added bazel_dep and git_override for envoy_examples (with dev_dependency = True)
+   - ✅ Added git_override for envoy_example_wasm_cc (with strip_prefix)
    - ✅ Added bazel_dep and git_override for envoy_toolshed (with strip_prefix)
    - ✅ Removed envoy_examples and envoy_toolshed from use_repo when bzlmod=True
+   - ✅ Updated to latest commit hashes (0b56dee5, 192c4fca)
 
-3. **[COMPLETED] Document LLVM requirements**
+4. **[COMPLETED] Document LLVM requirements**
    - ✅ Documented that LLVM extension only works for root modules
    - ✅ Documented workarounds for downstream consumers
 
-4. **[COMPLETED] Mitigate circular dependency with envoy_examples**
+5. **[COMPLETED] Mitigate circular dependency with envoy_examples**
    - ✅ envoy_examples marked as dev_dependency = True
    - ✅ This prevents circular dependency when envoy is used as a dependency
    - ✅ Allows testing while preventing module resolution issues
 
-5. **[PENDING] Test module resolution after envoy_examples fixes**
-   - After Blocker #1 is fixed in envoy_examples
-   - Run `bazel mod graph --enable_bzlmod` to verify no circular dependencies
-   - Check for version conflicts
+6. **[PENDING] Test module resolution after LLVM extension fixes**
+   - After Blockers #2 and #3 are fixed in envoy_example_wasm_cc and envoy_toolshed
+   - Run `bazel mod graph --enable_bzlmod` to verify no remaining blockers
+   - Check for any new version conflicts or issues
 
 ### For envoy_examples bzlmod-migration branch
 
-6. **[CRITICAL] Fix bazel_dep version issue**
-   - Add version to envoy_example_wasm_cc bazel_dep:
-   ```starlark
-   bazel_dep(name = "envoy_example_wasm_cc", version = "0.0.0")
-   local_path_override(
-       module_name = "envoy_example_wasm_cc",
-       path = "wasm-cc",
-   )
-   ```
+7. **[COMPLETED] Fix bazel_dep version issue**
+   - ✅ Version "0.1.5-dev" added to envoy_example_wasm_cc bazel_dep in commit 0b56dee5
+   
+8. **[CRITICAL] Remove LLVM extension from wasm-cc**
+   - Remove LLVM extension usage from wasm-cc/MODULE.bazel (see step 1 above)
+   - This is Blocker #2 that prevents module resolution
 
-7. **Check for circular dependency with envoy**
-   - After fixing Blocker #1, verify if envoy_examples depends on envoy
-   - If yes, consider using archive_override instead of bazel_dep to break the cycle
-   - Or restructure so examples don't need core envoy
+9. **[PENDING] Check for circular dependency with envoy**
+   - After fixing Blockers #2 and #3, verify the circular dependency is properly mitigated
+   - The dev_dependency = True should prevent issues
 
-8. **Update dependency versions** (after blockers resolved)
-   - Align rules_cc, rules_go, rules_python, rules_rust versions with envoy
-   - This reduces version conflict warnings
+10. **[PENDING] Update dependency versions** (after blockers resolved)
+    - Align rules_cc, rules_go, rules_python, rules_rust versions with envoy
+    - Current mismatches documented in Version Conflicts section
 
-9. **Test builds** (after blockers resolved)
-   - Test `bazel build //wasm-cc:envoy_filter_http_wasm_example.wasm`
-   - Test other example builds
-   - Verify CI compatibility
+11. **[PENDING] Test builds** (after blockers resolved)
+    - Test `bazel build //wasm-cc:envoy_filter_http_wasm_example.wasm`
+    - Test other example builds
+    - Verify CI compatibility
 
 ### For envoy_toolshed bzlmod branch
 
-7. **Verify toolshed integration**
-   - Test that git_override works correctly
-   - Verify no missing dependencies
-   - Check build compatibility with envoy
+12. **[CRITICAL] Remove LLVM extension from envoy_toolshed**
+    - Remove LLVM extension usage from envoy_toolshed/bazel/MODULE.bazel (see step 2 above)
+    - This is Blocker #3 that prevents module resolution
+    - Consider if toolchains_llvm bazel_dep is actually needed
+
+13. **[PENDING] Verify toolshed integration** (after blocker resolved)
+    - Test that git_override works correctly after LLVM extension removal
+    - Verify no missing dependencies
+    - Check build compatibility with envoy
 
 ## Recommendations
 

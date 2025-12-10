@@ -18,7 +18,7 @@ bazel_dep(name = "emsdk", version = "4.0.13")
 bazel_dep(name = "envoy_api", version = "1.36.4-dev")
 bazel_dep(name = "envoy_build_config", version = "1.36.4-dev")
 bazel_dep(name = "envoy_mobile", version = "1.36.4-dev")
-bazel_dep(name = "envoy_toolshed")
+bazel_dep(name = "envoy_toolshed", version = "0.3.8-dev")
 bazel_dep(name = "fast_float", version = "8.0.2")
 bazel_dep(name = "flatbuffers", version = "25.9.23", repo_name = "com_github_google_flatbuffers")
 bazel_dep(name = "fmt", version = "12.1.0", repo_name = "com_github_fmtlib_fmt")
@@ -119,7 +119,7 @@ git_override(
 git_override(
     module_name = "envoy_toolshed",
     remote = "https://github.com/mmorel-35/toolshed",
-    commit = "d718b38e7d0bd7e41394ff48db046b15b20784d5",
+    commit = "192c4fca9a52e29d8a0c8c2c96cc0c41de2da1d8",
     strip_prefix = "bazel",
 )
 
