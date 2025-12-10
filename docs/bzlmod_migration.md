@@ -178,12 +178,12 @@ envoy_examples (wasm-cc)
 **Evidence:**
 In `envoy/MODULE.bazel`:
 ```starlark
-envoy_deps = use_extension("//bazel:extensions.bzl", "envoy_dependencies_extension")
-use_repo(
-    envoy_deps,
-    ...
-    "envoy_examples",
-    ...
+bazel_dep(name = "envoy_examples", dev_dependency = True)
+
+git_override(
+    module_name = "envoy_examples",
+    commit = "1ceb95e9c9c8b1892d0c14a1ba4c42216348831d",
+    remote = "https://github.com/mmorel-35/examples",
 )
 ```
 
@@ -201,6 +201,19 @@ envoy_examples = dict(
     ...
 )
 ```
+
+In `envoy_examples/wasm-cc/MODULE.bazel`:
+```starlark
+bazel_dep(name = "envoy")
+
+git_override(
+    module_name = "envoy",
+    commit = "4fc5c5cd8a2aec2a51fd21462bbd648d92d0889e",
+    remote = "https://github.com/mmorel-35/envoy",
+)
+```
+
+This creates a circular dependency: envoy → envoy_examples (dev) → wasm-cc → envoy
 
 **Impact:** 
 - Bazel module resolution will fail due to circular dependency
@@ -234,9 +247,17 @@ envoy_examples = dict(
 **Recommended Action for this repository:**
 
 Since `envoy_examples` is marked as `test_only`, the best approach is to:
-- If envoy_examples needs to be declared as bazel_dep, mark it as `dev_dependency = True`
-- Consider removing it from the main envoy_dependencies_extension and loading it only in test contexts
+- ✅ **IMPLEMENTED**: envoy_examples is declared with `dev_dependency = True`
+- ✅ **IMPLEMENTED**: This prevents envoy_examples from being included when envoy is used as a dependency
 - Document that downstream consumers should not depend on envoy_examples through envoy
+
+**Status of Circular Dependency:**
+The circular dependency has been **mitigated** by marking envoy_examples as `dev_dependency = True`. This means:
+- When envoy is built standalone (as root module), envoy_examples is loaded
+- When envoy is used as a dependency by another project, envoy_examples is NOT loaded
+- The wasm-cc example in envoy_examples uses git_override to point to mmorel-35/envoy (bzlmod-migration branch)
+
+This configuration allows testing without creating a true circular dependency in the module graph.
 
 ### 🔴 Blocker #2: LLVM Extension Can Only Be Used by Root Module
 
@@ -307,6 +328,34 @@ If you are using envoy as a dependency in your bzlmod project, you must configur
 - C++ standard: c++20
 
 ## Warnings (Non-blocking)
+
+### Version Conflicts in envoy_examples/wasm-cc
+
+Several dependency version mismatches exist between envoy and wasm-cc MODULE.bazel files:
+
+| Dependency | envoy version | wasm-cc version | Status |
+|------------|---------------|-----------------|--------|
+| rules_cc | 0.2.14 | 0.1.1 | ⚠️ Mismatch |
+| rules_go | 0.59.0 | 0.53.0 | ⚠️ Mismatch |
+| rules_python | 1.6.3 | 1.4.1 | ⚠️ Mismatch |
+| rules_rust | 0.67.0 | 0.56.0 | ⚠️ Mismatch |
+| toolchains_llvm | git_override (commit fb29f3d) | 1.4.0 | ⚠️ Different source |
+
+**Solution:**
+Update `wasm-cc/MODULE.bazel` to use compatible versions:
+
+```starlark
+# Update to match envoy's requirements:
+bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "rules_go", version = "0.59.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_python", version = "1.6.3")
+bazel_dep(name = "rules_rust", version = "0.67.0")
+
+# Remove toolchains_llvm bazel_dep if using git_override from envoy
+# Or align with envoy's git_override
+```
+
+Bazel will automatically resolve to the highest compatible version, but warnings may appear during module resolution.
 
 ### Rust Cargo Lockfile May Need Update
 
@@ -409,12 +458,26 @@ The envoy bzlmod implementation uses the following module structure:
 
 ### For envoy_examples bzlmod-migration branch
 
-5. **Remove or restructure envoy dependency**
-   - If envoy_examples needs envoy, use archive_override to break the cycle
-   - Consider splitting examples into those that need envoy and those that don't
-   - Update dependency versions to match envoy's requirements
+6. **[CRITICAL] Fix bazel_dep version issue**
+   - Add version to envoy_example_wasm_cc bazel_dep:
+   ```starlark
+   bazel_dep(name = "envoy_example_wasm_cc", version = "0.0.0")
+   local_path_override(
+       module_name = "envoy_example_wasm_cc",
+       path = "wasm-cc",
+   )
+   ```
 
-6. **Test builds** (after blockers resolved)
+7. **Check for circular dependency with envoy**
+   - After fixing Blocker #1, verify if envoy_examples depends on envoy
+   - If yes, consider using archive_override instead of bazel_dep to break the cycle
+   - Or restructure so examples don't need core envoy
+
+8. **Update dependency versions** (after blockers resolved)
+   - Align rules_cc, rules_go, rules_python, rules_rust versions with envoy
+   - This reduces version conflict warnings
+
+9. **Test builds** (after blockers resolved)
    - Test `bazel build //wasm-cc:envoy_filter_http_wasm_example.wasm`
    - Test other example builds
    - Verify CI compatibility
