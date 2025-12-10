@@ -54,7 +54,4 @@ use_repo(
     "com_github_buildbuddy_io_rules_xcodeproj",
     "google_bazel_common",
     "xctestrunner",
-    # Kotlin/Android tooling
-    "kotlin_formatter",
-    "robolectric",
 )
