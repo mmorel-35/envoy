@@ -78,6 +78,7 @@ See MODULE.bazel for the complete list of bazel_dep() entries.
 
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
+load("@envoy_toolshed//repository:utils.bzl", "arch_alias")
 load(":repo.bzl", "envoy_repo")
 load(":repositories.bzl", "envoy_dependencies", "external_http_archive")
 load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
@@ -117,6 +118,29 @@ def _envoy_repo_impl(module_ctx):
         module_ctx: The module extension context
     """
     envoy_repo()
+
+def _envoy_toolchains_impl(module_ctx):
+    """Implementation of the envoy_toolchains module extension.
+
+    This extension registers toolchains needed for Envoy builds in bzlmod mode,
+    including the clang_platform alias used in various BUILD files.
+
+    In WORKSPACE mode, this is handled by calling envoy_toolchains() from WORKSPACE.
+    In bzlmod mode, we need to use this extension to make the same repositories available.
+
+    Args:
+        module_ctx: The module extension context
+    """
+    # Create the clang_platform repository using arch_alias
+    # Note: We can't call envoy_toolchains() directly here because it uses native.register_toolchains
+    # which is not allowed in module extensions. Instead, we only create the arch_alias repository.
+    arch_alias(
+        name = "clang_platform",
+        aliases = {
+            "amd64": "@envoy//bazel/platforms/rbe:linux_x64",
+            "aarch64": "@envoy//bazel/platforms/rbe:linux_arm64",
+        },
+    )
 
 # Define the module extensions
 envoy_dependencies_extension = module_extension(
@@ -161,5 +185,21 @@ envoy_repo_extension = module_extension(
     - Repository path information
 
     This is required for RBE toolchain configuration and various build utilities.
+    """,
+)
+
+envoy_toolchains_extension = module_extension(
+    implementation = _envoy_toolchains_impl,
+    doc = """
+    Extension for Envoy toolchain setup in bzlmod mode.
+
+    This extension creates toolchain-related repositories needed for Envoy builds:
+    - clang_platform: Architecture-specific platform aliases for RBE builds
+
+    In WORKSPACE mode, these are created by calling envoy_toolchains() from WORKSPACE.
+    In bzlmod mode, this extension provides the same functionality.
+
+    Note: Toolchain registration itself is handled by MODULE.bazel using the LLVM
+    toolchain extension. This extension only creates auxiliary repositories.
     """,
 )

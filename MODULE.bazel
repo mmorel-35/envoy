@@ -24,6 +24,7 @@ bazel_dep(name = "flatbuffers", version = "25.9.23", repo_name = "com_github_goo
 bazel_dep(name = "fmt", version = "12.1.0", repo_name = "com_github_fmtlib_fmt")
 bazel_dep(name = "gazelle", version = "0.47.0", repo_name = "bazel_gazelle")
 bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1", repo_name = "com_google_googleapis")
+bazel_dep(name = "googleapis-cc", version = "1.0.0")
 bazel_dep(name = "gperftools", version = "2.17.2")
 bazel_dep(name = "highway", version = "1.2.0")
 bazel_dep(name = "numactl", version = "2.0.19")
@@ -405,3 +406,8 @@ use_repo(
 # information and container metadata for RBE builds
 envoy_repo_ext = use_extension("//bazel:extensions.bzl", "envoy_repo_extension")
 use_repo(envoy_repo_ext, "envoy_repo")
+
+# Envoy toolchains extension
+# This extension creates toolchain-related repositories for bzlmod mode
+envoy_toolchains_ext = use_extension("//bazel:extensions.bzl", "envoy_toolchains_extension")
+use_repo(envoy_toolchains_ext, "clang_platform")
