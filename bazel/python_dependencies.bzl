@@ -9,12 +9,14 @@ def envoy_python_dependencies():
         name = "base_pip3",
         requirements_lock = "@envoy//tools/base:requirements.txt",
         extra_pip_args = ["--require-hashes"],
+        python_interpreter_target = "@python3_12//:python",
     )
 
     pip_parse(
         name = "dev_pip3",
         requirements_lock = "@envoy//tools/dev:requirements.txt",
         extra_pip_args = ["--require-hashes"],
+        python_interpreter_target = "@python3_12//:python",
     )
 
     system_python(
