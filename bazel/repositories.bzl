@@ -849,10 +849,14 @@ filegroup(
 def _rules_fuzzing():
     external_http_archive(
         name = "rules_fuzzing",
+        # Redirect @fuzzing_py_deps to @fuzzing_pip3 so we can use Envoy's Python interpreter.
+        # rules_fuzzing would normally create @fuzzing_py_deps via rules_fuzzing_init(), but
+        # that doesn't support specifying a custom Python interpreter. See python_dependencies.bzl.
         repo_mapping = {
             "@fuzzing_py_deps": "@fuzzing_pip3",
         },
-        # TODO(asraa): Try this fix for OSS-Fuzz build failure on tar command.
+        # Patch adds: 1) compression to tar command for OSS-Fuzz compatibility,
+        # 2) sys.path fix for Python module imports in validate_dict.py.
         patch_args = ["-p1"],
         patches = ["@envoy//bazel:rules_fuzzing.patch"],
     )

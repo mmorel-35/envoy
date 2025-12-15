@@ -131,7 +131,8 @@ REPOSITORY_LOCATIONS_SPEC = dict(
         project_name = "Fuzzing Rules for Bazel",
         project_desc = "Bazel rules for fuzz tests",
         project_url = "https://github.com/bazelbuild/rules_fuzzing",
-        # Patch contains workaround for https://github.com/bazelbuild/rules_python/issues/1221
+        # Patch contains: 1) tar compression fix for OSS-Fuzz, 2) Python import path fix.
+        # repo_mapping redirects @fuzzing_py_deps to @fuzzing_pip3 to use custom Python interpreter.
         version = "0.7.0",
         sha256 = "87adb1357bb5a932fa0de6fed0fc37412490a0c96f5259855008f208cf53a74f",
         strip_prefix = "rules_fuzzing-{version}",

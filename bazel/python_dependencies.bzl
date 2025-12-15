@@ -19,6 +19,10 @@ def envoy_python_dependencies():
         extra_pip_args = ["--require-hashes"],
     )
 
+    # fuzzing_pip3 uses @rules_fuzzing's requirements.txt but with Envoy's Python interpreter.
+    # This is necessary because rules_fuzzing_init() doesn't support specifying a custom
+    # Python interpreter. The repo_mapping in repositories.bzl redirects @fuzzing_py_deps
+    # (which rules_fuzzing would create) to this @fuzzing_pip3 repository.
     pip_parse(
         name = "fuzzing_pip3",
         python_interpreter_target = "@python3_12_host//:python",
