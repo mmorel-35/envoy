@@ -17,12 +17,6 @@ def envoy_python_dependencies():
         extra_pip_args = ["--require-hashes"],
     )
 
-    pip_parse(
-        name = "fuzzing_pip3",
-        requirements_lock = "@rules_fuzzing//fuzzing:requirements.txt",
-        extra_pip_args = ["--require-hashes"],
-    )
-
     system_python(
         name = "system_python",
         minimum_python_version = "3.7",
