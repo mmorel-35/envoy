@@ -62,7 +62,8 @@ test --experimental_ui_max_stdouterr_bytes=11712829 #default 1048576
 common --experimental_allow_tags_propagation
 
 # Python
-common --@rules_python//python/config_settings:bootstrap_impl=script
+# Note: Using build instead of common for bzlmod compatibility
+build --@rules_python//python/config_settings:bootstrap_impl=script
 
 # We already have absl in the build, define absl=1 to tell googletest to use absl for backtrace.
 build --define absl=1
@@ -115,7 +116,8 @@ common:clang-common --@toolchains_llvm//toolchain/config:libunwind=false
 # Clang with libc++ (default)
 common:clang --config=clang-common
 common:clang --config=libc++
-common:clang --host_platform=@clang_platform
+# TODO(bzlmod): Re-enable host_platform once toolchain resolution is fixed
+# common:clang --host_platform=@clang_platform
 common:clang --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 
 # Clang installed to non-standard location (ie not /opt/llvm/)

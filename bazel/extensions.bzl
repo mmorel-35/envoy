@@ -78,10 +78,47 @@ See MODULE.bazel for the complete list of bazel_dep() entries.
 
 load("@envoy_api//bazel:envoy_http_archive.bzl", "envoy_http_archive")
 load("@envoy_api//bazel:external_deps.bzl", "load_repository_locations")
-load("@envoy_toolshed//repository:utils.bzl", "arch_alias")
 load(":repo.bzl", "envoy_repo")
 load(":repositories.bzl", "envoy_dependencies", "external_http_archive")
 load(":repository_locations.bzl", "REPOSITORY_LOCATIONS_SPEC")
+
+def _platform_alias_impl(ctx):
+    """Create a simple platform alias repository."""
+    arch = ctx.os.arch
+    actual = ctx.attr.platform_map.get(arch)
+    if not actual:
+        fail("Unsupported host architecture '{}'. Supported architectures are: {}".format(
+            arch,
+            ctx.attr.platform_map.keys(),
+        ))
+    
+    # Create a platform that inherits from the actual platform instead of just an alias
+    # This helps with toolchain resolution in bzlmod mode
+    ctx.file(
+        "BUILD.bazel",
+        content = """\
+platform(
+    name = "{name}",
+    constraint_values = [],
+    parents = ["{actual}"],
+    visibility = ["//visibility:public"],
+)
+""".format(name = ctx.attr.target_name, actual = actual),
+    )
+
+_platform_alias = repository_rule(
+    implementation = _platform_alias_impl,
+    attrs = {
+        "target_name": attr.string(
+            doc = "The name of the alias target to create",
+            mandatory = True,
+        ),
+        "platform_map": attr.string_dict(
+            doc = "A dictionary mapping architecture names to platform targets",
+            mandatory = True,
+        ),
+    },
+)
 
 def _envoy_dependencies_impl(module_ctx):
     """Implementation of the envoy_dependencies module extension.
@@ -131,14 +168,27 @@ def _envoy_toolchains_impl(module_ctx):
     Args:
         module_ctx: The module extension context
     """
-    # Create the clang_platform repository using arch_alias
-    # Note: We can't call envoy_toolchains() directly here because it uses native.register_toolchains
-    # which is not allowed in module extensions. Instead, we only create the arch_alias repository.
-    arch_alias(
+    # Create the clang_platform repository with architecture-specific platform aliases
+    # Note: We can't use arch_alias from envoy_toolshed here because in module extension
+    # context, ctx.name returns the full canonical repository name, not just "clang_platform".
+    # Instead, we use our own _platform_alias repository rule.
+    _platform_alias(
         name = "clang_platform",
-        aliases = {
+        target_name = "clang_platform",
+        platform_map = {
             "amd64": "@envoy//bazel/platforms/rbe:linux_x64",
             "aarch64": "@envoy//bazel/platforms/rbe:linux_arm64",
+        },
+    )
+    
+    # Create the mobile_clang_platform repository for Envoy Mobile builds
+    # Note: Currently only amd64 is configured as that's what the mobile CI uses.
+    # Add aarch64 support when mobile CI supports ARM64 builds.
+    _platform_alias(
+        name = "mobile_clang_platform",
+        target_name = "mobile_clang_platform",
+        platform_map = {
+            "amd64": "@envoy_mobile//bazel/platforms/rbe:linux_x64",
         },
     )
 
