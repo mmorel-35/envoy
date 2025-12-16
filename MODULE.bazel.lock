@@ -497,7 +497,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%envoy_dependencies_extension": {
       "general": {
-        "bzlTransitiveDigest": "wD1LY/XHvIG7dIM2ZcVwmwlG6+8M6jOcV9c3Bb745ZI=",
+        "bzlTransitiveDigest": "Lmmhtr+3X/7cgvzJzwT89jNxceQv8qzPgBQJ8Yx3zp8=",
         "usagesDigest": "h4SPwfEUYdrnZTdYRIST+4YRTOUgHuybZk0OJlJ04pM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -1269,10 +1269,10 @@
             "ruleClassName": "http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/proxy-wasm/proxy-wasm-cpp-host/archive/65bb78fbf8beb6d3670701d35711e691c0c4c4ce.tar.gz"
+                "https://github.com/proxy-wasm/proxy-wasm-cpp-host/archive/c8868da77499d414f3dcd07e4fbe584dc9a1c30d.tar.gz"
               ],
-              "sha256": "a73bb64561d631097d4c1fb1c3c64f41f107b6186544565db70e74358b5f3ec3",
-              "strip_prefix": "proxy-wasm-cpp-host-65bb78fbf8beb6d3670701d35711e691c0c4c4ce",
+              "sha256": "e7fa65cff1048737baebf403e76839b5979b2b32bf01e3285223976b715d1a74",
+              "strip_prefix": "proxy-wasm-cpp-host-c8868da77499d414f3dcd07e4fbe584dc9a1c30d",
               "patch_args": [
                 "-p1"
               ],
@@ -1695,7 +1695,7 @@
     },
     "//bazel:extensions.bzl%envoy_repo_extension": {
       "general": {
-        "bzlTransitiveDigest": "wD1LY/XHvIG7dIM2ZcVwmwlG6+8M6jOcV9c3Bb745ZI=",
+        "bzlTransitiveDigest": "Lmmhtr+3X/7cgvzJzwT89jNxceQv8qzPgBQJ8Yx3zp8=",
         "usagesDigest": "dH/25I1PcOpj+q+tQmeBHSBtu1i0xO8p4CdnsMV03e8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -1738,7 +1738,7 @@
     },
     "//bazel:extensions.bzl%envoy_toolchains_extension": {
       "general": {
-        "bzlTransitiveDigest": "wD1LY/XHvIG7dIM2ZcVwmwlG6+8M6jOcV9c3Bb745ZI=",
+        "bzlTransitiveDigest": "Lmmhtr+3X/7cgvzJzwT89jNxceQv8qzPgBQJ8Yx3zp8=",
         "usagesDigest": "Fix0zFDYRqIAOTkh0jonSxDzQtk/RCYEnBqQsa/Fsks=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
