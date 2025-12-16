@@ -96,7 +96,7 @@ def _platform_alias_impl(ctx):
     # This helps with toolchain resolution in bzlmod mode
     ctx.file(
         "BUILD.bazel",
-        """
+        content = """\
 platform(
     name = "{name}",
     constraint_values = [],
@@ -182,6 +182,8 @@ def _envoy_toolchains_impl(module_ctx):
     )
     
     # Create the mobile_clang_platform repository for Envoy Mobile builds
+    # Note: Currently only amd64 is configured as that's what the mobile CI uses.
+    # Add aarch64 support when mobile CI supports ARM64 builds.
     _platform_alias(
         name = "mobile_clang_platform",
         target_name = "mobile_clang_platform",
