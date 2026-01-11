@@ -16,6 +16,46 @@ updates:
     interval: "daily"
     time: "06:00"
 
+- package-ecosystem: "bazel"
+  directory: "/"
+  groups:
+    envoy:
+      patterns:
+      - "*"
+  schedule:
+    interval: daily
+    time: "06:00"
+
+- package-ecosystem: "bazel"
+  directory: "/api"
+  groups:
+    envoy-api:
+      patterns:
+      - "*"
+  schedule:
+    interval: daily
+    time: "06:00"
+
+- package-ecosystem: "bazel"
+  directory: "/mobile"
+  groups:
+    envoy-mobile:
+      patterns:
+      - "*"
+  schedule:
+    interval: daily
+    time: "06:00"
+
+- package-ecosystem: "bazel"
+  directory: "/mobile/envoy_build_config"
+  groups:
+    envoy-build-config:
+      patterns:
+      - "*"
+  schedule:
+    interval: daily
+    time: "06:00"
+
 - package-ecosystem: "docker"
   directory: "/.devcontainer"
   schedule:
