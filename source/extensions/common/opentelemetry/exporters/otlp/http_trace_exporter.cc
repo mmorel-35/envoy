@@ -13,6 +13,8 @@
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 OtlpHttpTraceExporter::OtlpHttpTraceExporter(
     Upstream::ClusterManager& cluster_manager,
@@ -21,12 +23,13 @@ OtlpHttpTraceExporter::OtlpHttpTraceExporter(
     : cluster_manager_(cluster_manager), http_service_(http_service),
       headers_applicator_(std::move(headers_applicator)) {}
 
-bool OtlpHttpTraceExporter::log(const TraceExportRequest& request) {
+bool OtlpHttpTraceExporter::log(
+    const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest& request) {
   std::string request_body;
 
   const auto ok = request.SerializeToString(&request_body);
   if (!ok) {
-    ENVOY_LOG(warn, "Error while serializing the binary proto TraceExportRequest.");
+    ENVOY_LOG(warn, "Error while serializing the binary proto ExportTraceServiceRequest.");
     return false;
   }
 
@@ -92,6 +95,8 @@ void OtlpHttpTraceExporter::onFailure(const Http::AsyncClient::Request& request,
   ENVOY_LOG(debug, "The OTLP export request failed. Reason {}", enumToInt(reason));
 }
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy

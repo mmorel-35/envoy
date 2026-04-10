@@ -1,18 +1,11 @@
 load(
     "//bazel:envoy_build_system.bzl",
-    "envoy_cc_library",
     "envoy_extension_package",
 )
 
 licenses(["notice"])  # Apache 2
 
+# Placeholder package for Envoy's OpenTelemetry SDK metrics layer.
+# Mirrors opentelemetry::sdk::metrics from opentelemetry-cpp.
+# Future additions: Envoy-specific metric data types, metric processors, etc.
 envoy_extension_package()
-
-envoy_cc_library(
-    name = "sdk_metrics_types_lib",
-    hdrs = ["types.h"],
-    deps = [
-        "@opentelemetry-proto//:metrics_proto_cc",
-        "@opentelemetry-proto//:metrics_service_proto_cc",
-    ],
-)

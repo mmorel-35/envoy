@@ -13,7 +13,6 @@
 
 #include "source/common/common/matchers.h"
 #include "source/common/grpc/typed_async_client.h"
-#include "source/extensions/common/opentelemetry/sdk/metrics/types.h"
 #include "source/extensions/common/opentelemetry/types.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
@@ -27,13 +26,14 @@ namespace Extensions {
 namespace StatSinks {
 namespace OpenTelemetry {
 
-using AggregationTemporality = ::Envoy::Extensions::OpenTelemetry::AggregationTemporality;
-using MetricsExportRequest = ::Envoy::Extensions::OpenTelemetry::MetricsExportRequest;
-using MetricsExportResponse = ::Envoy::Extensions::OpenTelemetry::MetricsExportResponse;
+using AggregationTemporality = opentelemetry::proto::metrics::v1::AggregationTemporality;
+using MetricsExportRequest =
+    opentelemetry::proto::collector::metrics::v1::ExportMetricsServiceRequest;
+using MetricsExportResponse =
+    opentelemetry::proto::collector::metrics::v1::ExportMetricsServiceResponse;
 using KeyValue = ::Envoy::Extensions::OpenTelemetry::KeyValue;
-using MetricsExportRequestPtr = ::Envoy::Extensions::OpenTelemetry::MetricsExportRequestPtr;
-using MetricsExportRequestSharedPtr =
-    ::Envoy::Extensions::OpenTelemetry::MetricsExportRequestSharedPtr;
+using MetricsExportRequestPtr = std::unique_ptr<MetricsExportRequest>;
+using MetricsExportRequestSharedPtr = std::shared_ptr<MetricsExportRequest>;
 using SinkConfig = envoy::extensions::stat_sinks::open_telemetry::v3::SinkConfig;
 
 /**

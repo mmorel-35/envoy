@@ -34,7 +34,6 @@ envoy_cc_library(
         "//source/common/grpc:async_client_lib",
         "//source/common/stats:stat_match_input_lib",
         "//source/extensions/common/opentelemetry:otlp_types_lib",
-        "//source/extensions/common/opentelemetry/sdk/metrics:sdk_metrics_types_lib",
         "//source/extensions/tracers/opentelemetry/resource_detectors:resource_detector_lib",
         "@envoy_api//envoy/extensions/stat_sinks/open_telemetry/v3:pkg_cc_proto",
         "@opentelemetry-proto//:metrics_proto_cc",

@@ -37,7 +37,8 @@ const std::string& OtlpUtils::getOtlpUserAgentHeader() {
   CONSTRUCT_ON_FIRST_USE(std::string, "OTel-OTLP-Exporter-Envoy/" + VersionInfo::version());
 }
 
-void OtlpUtils::populateAnyValue(AnyValue& value_proto, const OTelAttribute& attribute_value) {
+void OtlpUtils::populateAnyValue(AnyValue& value_proto,
+                                 const Sdk::Common::AttributeValue& attribute_value) {
   switch (attribute_value.index()) {
   case OTelAttributeType::KTypeBool:
     value_proto.set_bool_value(absl::get<bool>(attribute_value) ? true : false);

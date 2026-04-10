@@ -33,7 +33,6 @@ envoy_cc_library(
         "//source/common/tracing:trace_context_lib",
         "//source/common/version:version_lib",
         "//source/extensions/common/opentelemetry:otlp_utils_lib",
-        "//source/extensions/common/opentelemetry/sdk/trace:sdk_trace_types_lib",
         "//source/server:generic_factory_context_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@opentelemetry-cpp//api",

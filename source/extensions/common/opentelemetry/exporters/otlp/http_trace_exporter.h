@@ -15,11 +15,14 @@
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 /**
  * HTTP implementation of the OTLP trace exporter.
  *
- * Mirrors opentelemetry::exporter::otlp::OtlpHttpExporter, adapted for Envoy's HTTP async client.
+ * Mirrors opentelemetry::exporter::otlp::OtlpHttpExporter from opentelemetry-cpp, adapted to use
+ * Envoy's HTTP async client instead of the upstream's libcurl-based HTTP client.
  * @see https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
  */
 class OtlpHttpTraceExporter : public OtlpTraceExporter, public Http::AsyncClient::Callbacks {
@@ -29,7 +32,8 @@ public:
       const envoy::config::core::v3::HttpService& http_service,
       std::shared_ptr<const Http::HttpServiceHeadersApplicator> headers_applicator);
 
-  bool log(const TraceExportRequest& request) override;
+  bool log(const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest&
+               request) override;
 
   // Http::AsyncClient::Callbacks.
   void onSuccess(const Http::AsyncClient::Request&, Http::ResponseMessagePtr&&) override;
@@ -44,6 +48,9 @@ private:
   std::shared_ptr<const Http::HttpServiceHeadersApplicator> headers_applicator_;
 };
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy
+

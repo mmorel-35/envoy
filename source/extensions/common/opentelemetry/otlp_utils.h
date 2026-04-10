@@ -29,7 +29,8 @@ public:
    * @param value_proto Proto object which gets the value set.
    * @param attribute_value Value to set on the proto object.
    */
-  static void populateAnyValue(AnyValue& value_proto, const OTelAttribute& attribute_value);
+  static void populateAnyValue(AnyValue& value_proto,
+                               const Sdk::Common::AttributeValue& attribute_value);
 
   /**
    * @brief Create a KeyValue protobuf with a string value.

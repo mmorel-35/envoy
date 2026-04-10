@@ -13,7 +13,7 @@ namespace OpenTelemetry {
 
 // Re-export into the Tracers::OpenTelemetry namespace for backward compatibility.
 using OpenTelemetryHttpTraceExporter =
-    ::Envoy::Extensions::OpenTelemetry::OtlpHttpTraceExporter;
+    ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpHttpTraceExporter;
 
 } // namespace OpenTelemetry
 } // namespace Tracers

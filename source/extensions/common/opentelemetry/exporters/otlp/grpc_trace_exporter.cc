@@ -7,6 +7,8 @@
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 OtlpGrpcTraceExporter::OtlpGrpcTraceExporter(const Grpc::RawAsyncClientSharedPtr& client)
     : client_(client),
@@ -17,8 +19,10 @@ void OtlpGrpcTraceExporter::onCreateInitialMetadata(Http::RequestHeaderMap& meta
   metadata.setReferenceUserAgent(OtlpUtils::getOtlpUserAgentHeader());
 }
 
-void OtlpGrpcTraceExporter::onSuccess(Grpc::ResponsePtr<TraceExportResponse>&& response,
-                                       Tracing::Span&) {
+void OtlpGrpcTraceExporter::onSuccess(
+    Grpc::ResponsePtr<opentelemetry::proto::collector::trace::v1::ExportTraceServiceResponse>&&
+        response,
+    Tracing::Span&) {
   if (response->has_partial_success()) {
     auto msg = response->partial_success().error_message();
     auto rejected_spans = response->partial_success().rejected_spans();
@@ -37,13 +41,16 @@ void OtlpGrpcTraceExporter::onFailure(Grpc::Status::GrpcStatus status, const std
             Grpc::Utility::grpcStatusToString(status), message);
 }
 
-bool OtlpGrpcTraceExporter::log(const TraceExportRequest& request) {
+bool OtlpGrpcTraceExporter::log(
+    const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest& request) {
   client_->send(service_method_, request, *this, Tracing::NullSpan::instance(),
                 Http::AsyncClient::RequestOptions());
   OtlpTraceExporter::logExportedSpans(request);
   return true;
 }
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy

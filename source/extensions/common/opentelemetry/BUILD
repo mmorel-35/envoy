@@ -17,11 +17,9 @@ envoy_cc_library(
         "-DHAVE_ABSEIL",
     ],
     deps = [
-        "//source/extensions/common/opentelemetry/sdk/trace:sdk_trace_types_lib",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/strings",
-        "@abseil-cpp//absl/types:variant",
+        "//source/extensions/common/opentelemetry/sdk/common:sdk_common_types_lib",
         "@opentelemetry-proto//:common_proto_cc",
+        "@opentelemetry-proto//:trace_proto_cc",
     ],
 )
 
