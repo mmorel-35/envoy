@@ -9,15 +9,16 @@ licenses(["notice"])  # Apache 2
 envoy_package()
 
 envoy_cc_test(
-    name = "otlp_utils_test",
-    srcs = ["otlp_utils_test.cc"],
+    name = "populate_attribute_utils_test",
+    srcs = ["populate_attribute_utils_test.cc"],
     copts = [
         # Make sure that headers included from opentelemetry-api use Abseil from Envoy
         # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.14.0/api/BUILD#L32
         "-DHAVE_ABSEIL",
     ],
     deps = [
-        "//source/extensions/common/opentelemetry:otlp_utils_lib",
+        "//source/extensions/common/opentelemetry:populate_attribute_utils_lib",
+        "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
         "//test/test_common:utility_lib",
         "@opentelemetry-proto//:common_proto_cc",
     ],

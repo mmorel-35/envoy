@@ -5,7 +5,7 @@
 #include "source/common/http/message_impl.h"
 #include "source/common/http/utility.h"
 #include "source/common/protobuf/protobuf.h"
-#include "source/extensions/common/opentelemetry/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -45,7 +45,7 @@ void OpenTelemetryHttpMetricsExporter::send(MetricsExportRequestPtr&& metrics) {
 
   // User-Agent header follows the OTLP specification.
   message->headers().setReferenceUserAgent(
-      ::Envoy::Extensions::OpenTelemetry::OtlpUtils::getOtlpUserAgentHeader());
+      ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::GetUserAgent());
 
   // Add custom headers from config.
   headers_applicator_->apply(message->headers());

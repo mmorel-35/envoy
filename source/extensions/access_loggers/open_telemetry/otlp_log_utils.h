@@ -13,7 +13,8 @@
 
 #include "source/common/common/hex.h"
 #include "source/common/tracing/custom_tag_impl.h"
-#include "source/extensions/common/opentelemetry/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
+#include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
@@ -51,10 +52,10 @@ struct OtlpAccessLogStats {
 };
 
 // Creates a KeyValue protobuf with a string value.
-// Delegates to Extensions::OpenTelemetry::OtlpUtils::getStringKeyValue.
-inline opentelemetry::proto::common::v1::KeyValue getStringKeyValue(const std::string& key,
-                                                                    const std::string& value) {
-  return ::Envoy::Extensions::OpenTelemetry::OtlpUtils::getStringKeyValue(key, value);
+// Delegates to Extensions::OpenTelemetry::PopulateAttributeUtils::makeKeyValue.
+inline opentelemetry::proto::common::v1::KeyValue makeKeyValue(const std::string& key,
+                                                               const std::string& value) {
+  return ::Envoy::Extensions::OpenTelemetry::PopulateAttributeUtils::makeKeyValue(key, value);
 }
 
 // Packs the body "AnyValue" to a "KeyValueList" with a single key.
@@ -66,9 +67,9 @@ packBody(const ::opentelemetry::proto::common::v1::AnyValue& body);
 unpackBody(const ::opentelemetry::proto::common::v1::KeyValueList& value);
 
 // User-Agent header per OTLP specification.
-// Delegates to Extensions::OpenTelemetry::OtlpUtils::getOtlpUserAgentHeader.
-inline const std::string& getOtlpUserAgentHeader() {
-  return ::Envoy::Extensions::OpenTelemetry::OtlpUtils::getOtlpUserAgentHeader();
+// Delegates to Extensions::OpenTelemetry::Exporters::Otlp::GetUserAgent.
+inline const std::string& GetUserAgent() {
+  return ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::GetUserAgent();
 }
 
 // Populates trace context (trace_id, span_id) on a LogRecord.

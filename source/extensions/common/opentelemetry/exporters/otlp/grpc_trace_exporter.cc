@@ -2,7 +2,7 @@
 
 #include "source/common/common/logger.h"
 #include "source/common/grpc/status.h"
-#include "source/extensions/common/opentelemetry/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -16,7 +16,7 @@ OtlpGrpcTraceExporter::OtlpGrpcTraceExporter(const Grpc::RawAsyncClientSharedPtr
           "opentelemetry.proto.collector.trace.v1.TraceService.Export")) {}
 
 void OtlpGrpcTraceExporter::onCreateInitialMetadata(Http::RequestHeaderMap& metadata) {
-  metadata.setReferenceUserAgent(OtlpUtils::getOtlpUserAgentHeader());
+  metadata.setReferenceUserAgent(GetUserAgent());
 }
 
 void OtlpGrpcTraceExporter::onSuccess(

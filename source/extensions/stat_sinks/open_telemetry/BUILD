@@ -55,7 +55,7 @@ envoy_cc_library(
         "//source/common/http:message_lib",
         "//source/common/http:utility_lib",
         "//source/common/protobuf",
-        "//source/extensions/common/opentelemetry:otlp_utils_lib",
+        "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
     ],
 )

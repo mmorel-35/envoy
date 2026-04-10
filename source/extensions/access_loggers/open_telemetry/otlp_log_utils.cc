@@ -181,10 +181,10 @@ opentelemetry::proto::logs::v1::ScopeLogs* initOtlpMessageRoot(
   auto* root = resource_logs->add_scope_logs();
   auto* resource = resource_logs->mutable_resource();
   if (!config.disable_builtin_labels()) {
-    *resource->add_attributes() = getStringKeyValue("log_name", getLogName(config));
-    *resource->add_attributes() = getStringKeyValue("zone_name", local_info.zoneName());
-    *resource->add_attributes() = getStringKeyValue("cluster_name", local_info.clusterName());
-    *resource->add_attributes() = getStringKeyValue("node_name", local_info.nodeName());
+    *resource->add_attributes() = makeKeyValue("log_name", getLogName(config));
+    *resource->add_attributes() = makeKeyValue("zone_name", local_info.zoneName());
+    *resource->add_attributes() = makeKeyValue("cluster_name", local_info.clusterName());
+    *resource->add_attributes() = makeKeyValue("node_name", local_info.nodeName());
   }
   for (const auto& pair : config.resource_attributes().values()) {
     *resource->add_attributes() = pair;

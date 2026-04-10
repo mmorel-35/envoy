@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/extensions/common/opentelemetry/otlp_utils.h"
+#include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
 #include "source/extensions/common/opentelemetry/types.h"
 
 namespace Envoy {
@@ -12,7 +12,8 @@ namespace OpenTelemetry {
 using OTelSpanKind = ::Envoy::Extensions::OpenTelemetry::OTelSpanKind;
 using OTelAttribute = ::Envoy::Extensions::OpenTelemetry::OTelAttribute;
 using OtelAttributes = ::Envoy::Extensions::OpenTelemetry::OtelAttributes;
-using OtlpUtils = ::Envoy::Extensions::OpenTelemetry::OtlpUtils;
+// OtlpUtils is kept as an alias so existing tracer code compiles unchanged.
+using OtlpUtils = ::Envoy::Extensions::OpenTelemetry::PopulateAttributeUtils;
 
 } // namespace OpenTelemetry
 } // namespace Tracers

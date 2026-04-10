@@ -24,7 +24,7 @@ const std::string kTestCluster = "test_cluster";
 const std::string kTestNode = "test_node";
 
 TEST(OtlpLogUtilsTest, GetStringKeyValue) {
-  auto kv = getStringKeyValue("test_key", "test_value");
+  auto kv = makeKeyValue("test_key", "test_value");
   EXPECT_EQ("test_key", kv.key());
   EXPECT_EQ("test_value", kv.value().string_value());
 }
@@ -42,10 +42,10 @@ TEST(OtlpLogUtilsTest, PackUnpackBody) {
 }
 
 TEST(OtlpLogUtilsTest, GetOtlpUserAgentHeader) {
-  const auto& header = getOtlpUserAgentHeader();
+  const auto& header = GetUserAgent();
   EXPECT_TRUE(absl::StartsWith(header, "OTel-OTLP-Exporter-Envoy/"));
   // Should return the same instance each time.
-  EXPECT_EQ(&header, &getOtlpUserAgentHeader());
+  EXPECT_EQ(&header, &GetUserAgent());
 }
 
 TEST(OtlpLogUtilsTest, PopulateTraceContextFullTraceId) {
