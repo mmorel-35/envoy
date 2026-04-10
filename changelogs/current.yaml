@@ -334,6 +334,14 @@ removed_config_or_runtime:
     and legacy code path.
 
 new_features:
+- area: tracing
+  change: |
+    Centralized shared OpenTelemetry types and utilities into
+    ``source/extensions/common/opentelemetry/``. The common ``OtlpUtils`` class
+    now provides ``getOtlpUserAgentHeader``, ``populateAnyValue``, and
+    ``getStringKeyValue`` for reuse across tracers, access loggers, and stat sinks.
+    ``OtelAttributes`` now uses ``absl::flat_hash_map`` instead of ``std::map``.
+
 - area: ratelimit
   change: |
     Added ``is_negative_hits`` boolean to the ``hits_addend``

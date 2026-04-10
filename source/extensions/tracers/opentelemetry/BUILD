@@ -61,7 +61,6 @@ envoy_cc_library(
     srcs = [
         "grpc_trace_exporter.cc",
         "http_trace_exporter.cc",
-        "otlp_utils.cc",
     ],
     hdrs = [
         "grpc_trace_exporter.h",
@@ -82,6 +81,7 @@ envoy_cc_library(
         "//source/common/protobuf",
         "//source/common/tracing:trace_context_lib",
         "//source/common/version:version_lib",
+        "//source/extensions/common/opentelemetry:otlp_utils_lib",
         "//source/server:generic_factory_context_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@opentelemetry-cpp//api",

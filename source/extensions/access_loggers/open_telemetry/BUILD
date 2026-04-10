@@ -27,7 +27,7 @@ envoy_cc_library(
         "//source/common/tracing:custom_tag_lib",
         "//source/common/tracing:http_tracer_lib",
         "//source/common/tracing:trace_context_lib",
-        "//source/common/version:version_lib",
+        "//source/extensions/common/opentelemetry:otlp_utils_lib",
         "@abseil-cpp//absl/strings",
         "@envoy_api//envoy/data/accesslog/v3:pkg_cc_proto",
         "@envoy_api//envoy/extensions/access_loggers/open_telemetry/v3:pkg_cc_proto",
