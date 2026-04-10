@@ -19,6 +19,21 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
+    name = "populate_attribute_utils_lib",
+    srcs = ["populate_attribute_utils.cc"],
+    hdrs = ["populate_attribute_utils.h"],
+    copts = [
+        # Make sure that headers included from opentelemetry-api use Abseil from Envoy
+        # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.14.0/api/BUILD#L32
+        "-DHAVE_ABSEIL",
+    ],
+    deps = [
+        "//source/common/common:assert_lib",
+        "//source/extensions/common/opentelemetry:otlp_types_lib",
+    ],
+)
+
+envoy_cc_library(
     name = "trace_exporter_lib",
     srcs = [
         "grpc_trace_exporter.cc",
@@ -42,8 +57,8 @@ envoy_cc_library(
         "//source/common/protobuf",
         "//source/common/tracing:trace_context_lib",
         "//source/common/version:version_lib",
-        "//source/extensions/common/opentelemetry:populate_attribute_utils_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
+        "//source/extensions/common/opentelemetry/exporters/otlp:populate_attribute_utils_lib",
         "//source/server:generic_factory_context_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@opentelemetry-cpp//api",

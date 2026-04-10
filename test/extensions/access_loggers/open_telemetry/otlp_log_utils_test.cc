@@ -23,7 +23,7 @@ const std::string kTestZone = "test_zone";
 const std::string kTestCluster = "test_cluster";
 const std::string kTestNode = "test_node";
 
-TEST(OtlpLogUtilsTest, GetStringKeyValue) {
+TEST(OtlpLogUtilsTest, MakeKeyValue) {
   auto kv = makeKeyValue("test_key", "test_value");
   EXPECT_EQ("test_key", kv.key());
   EXPECT_EQ("test_value", kv.value().string_value());
@@ -41,7 +41,7 @@ TEST(OtlpLogUtilsTest, PackUnpackBody) {
   EXPECT_EQ("test body content", unpacked.string_value());
 }
 
-TEST(OtlpLogUtilsTest, GetOtlpUserAgentHeader) {
+TEST(OtlpLogUtilsTest, GetUserAgent) {
   const auto& header = GetUserAgent();
   EXPECT_TRUE(absl::StartsWith(header, "OTel-OTLP-Exporter-Envoy/"));
   // Should return the same instance each time.

@@ -7,6 +7,8 @@
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 
 /**
  * Utility functions for populating OTLP protobuf attribute types.
@@ -20,6 +22,9 @@ class PopulateAttributeUtils {
 public:
   /**
    * @brief Populate an AnyValue proto from an attribute value variant.
+   *
+   * Handles all AttributeValue alternatives. uint64_t values that exceed INT64_MAX are clamped to
+   * INT64_MAX to avoid signed integer overflow.
    *
    * @param value_proto Proto object to populate.
    * @param attribute_value Value to set on the proto object.
@@ -37,6 +42,8 @@ public:
   static KeyValue makeKeyValue(const std::string& key, const std::string& value);
 };
 
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy

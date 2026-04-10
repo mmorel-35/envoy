@@ -14,7 +14,7 @@
 #include "source/common/common/hex.h"
 #include "source/common/tracing/custom_tag_impl.h"
 #include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
-#include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
@@ -52,10 +52,11 @@ struct OtlpAccessLogStats {
 };
 
 // Creates a KeyValue protobuf with a string value.
-// Delegates to Extensions::OpenTelemetry::PopulateAttributeUtils::makeKeyValue.
+// Delegates to Extensions::OpenTelemetry::Exporters::Otlp::PopulateAttributeUtils::makeKeyValue.
 inline opentelemetry::proto::common::v1::KeyValue makeKeyValue(const std::string& key,
                                                                const std::string& value) {
-  return ::Envoy::Extensions::OpenTelemetry::PopulateAttributeUtils::makeKeyValue(key, value);
+  return ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::PopulateAttributeUtils::makeKeyValue(
+      key, value);
 }
 
 // Packs the body "AnyValue" to a "KeyValueList" with a single key.

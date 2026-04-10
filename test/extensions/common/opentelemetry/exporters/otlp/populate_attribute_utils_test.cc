@@ -1,7 +1,7 @@
 #include <type_traits>
 
 #include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
-#include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 #include "source/extensions/common/opentelemetry/types.h"
 
 #include "test/test_common/utility.h"
@@ -12,13 +12,15 @@
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
 namespace {
 
 TEST(ExporterEnvironmentTest, GetUserAgent) {
-  const auto& ua = Exporters::Otlp::GetUserAgent();
+  const auto& ua = GetUserAgent();
   EXPECT_TRUE(absl::StartsWith(ua, "OTel-OTLP-Exporter-Envoy/"));
   // Should return the same instance each time (CONSTRUCT_ON_FIRST_USE).
-  EXPECT_EQ(&ua, &Exporters::Otlp::GetUserAgent());
+  EXPECT_EQ(&ua, &GetUserAgent());
 }
 
 TEST(PopulateAttributeUtilsTest, MakeKeyValueSetsKeyAndStringValue) {
@@ -68,6 +70,14 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueUInt64) {
   EXPECT_EQ(static_cast<int64_t>(999999999999ULL), proto.int_value());
 }
 
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueUInt64Clamped) {
+  AnyValue proto;
+  // Value exceeds INT64_MAX — should be clamped.
+  OTelAttribute attr = static_cast<uint64_t>(std::numeric_limits<uint64_t>::max());
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  EXPECT_EQ(std::numeric_limits<int64_t>::max(), proto.int_value());
+}
+
 TEST(PopulateAttributeUtilsTest, PopulateAnyValueDouble) {
   AnyValue proto;
   OTelAttribute attr = 3.14;
@@ -89,6 +99,53 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueStringView) {
   EXPECT_EQ("world", proto.string_value());
 }
 
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorBool) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<bool>{true, false, true};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(3, proto.array_value().values_size());
+  EXPECT_TRUE(proto.array_value().values(0).bool_value());
+  EXPECT_FALSE(proto.array_value().values(1).bool_value());
+  EXPECT_TRUE(proto.array_value().values(2).bool_value());
+}
+
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorInt32) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<int32_t>{1, -2, 3};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(3, proto.array_value().values_size());
+  EXPECT_EQ(1, proto.array_value().values(0).int_value());
+  EXPECT_EQ(-2, proto.array_value().values(1).int_value());
+  EXPECT_EQ(3, proto.array_value().values(2).int_value());
+}
+
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorUInt32) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<uint32_t>{10, 20};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(2, proto.array_value().values_size());
+  EXPECT_EQ(10, proto.array_value().values(0).int_value());
+  EXPECT_EQ(20, proto.array_value().values(1).int_value());
+}
+
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorInt64) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<int64_t>{100LL, -200LL};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(2, proto.array_value().values_size());
+  EXPECT_EQ(100LL, proto.array_value().values(0).int_value());
+  EXPECT_EQ(-200LL, proto.array_value().values(1).int_value());
+}
+
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorDouble) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<double>{1.1, 2.2};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(2, proto.array_value().values_size());
+  EXPECT_DOUBLE_EQ(1.1, proto.array_value().values(0).double_value());
+  EXPECT_DOUBLE_EQ(2.2, proto.array_value().values(1).double_value());
+}
+
 TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorString) {
   AnyValue proto;
   OTelAttribute attr = std::vector<std::string>{"a", "b", "c"};
@@ -108,6 +165,22 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorStringView) {
   EXPECT_EQ("y", proto.array_value().values(1).string_value());
 }
 
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorUInt64) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<uint64_t>{500ULL, std::numeric_limits<uint64_t>::max()};
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  ASSERT_EQ(2, proto.array_value().values_size());
+  EXPECT_EQ(500LL, proto.array_value().values(0).int_value());
+  EXPECT_EQ(std::numeric_limits<int64_t>::max(), proto.array_value().values(1).int_value());
+}
+
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorBytes) {
+  AnyValue proto;
+  OTelAttribute attr = std::vector<uint8_t>{0x41, 0x42, 0x43}; // "ABC"
+  PopulateAttributeUtils::populateAnyValue(proto, attr);
+  EXPECT_EQ("\x41\x42\x43", proto.bytes_value());
+}
+
 TEST(PopulateAttributeUtilsTest, OtelAttributesUsesAbslFlatHashMap) {
   // Compile-time check: OtelAttributes must be exactly absl::flat_hash_map<std::string,
   // OTelAttribute>.
@@ -123,6 +196,8 @@ TEST(PopulateAttributeUtilsTest, OtelAttributesUsesAbslFlatHashMap) {
 }
 
 } // namespace
+} // namespace Otlp
+} // namespace Exporters
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy

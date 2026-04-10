@@ -65,6 +65,7 @@ envoy_cc_library(
         "trace_exporter.h",
     ],
     deps = [
+        "//source/extensions/common/opentelemetry/exporters/otlp:populate_attribute_utils_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:trace_exporter_lib",
     ],
 )
