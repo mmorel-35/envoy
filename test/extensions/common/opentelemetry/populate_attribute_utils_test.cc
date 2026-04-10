@@ -2,6 +2,8 @@
 #include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
 #include "source/extensions/common/opentelemetry/types.h"
 
+#include <type_traits>
+
 #include "absl/strings/match.h"
 #include "test/test_common/utility.h"
 
