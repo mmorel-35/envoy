@@ -241,36 +241,6 @@ OtlpOptions::OtlpOptions(const SinkConfig& sink_config,
       resource_attributes_(generateResourceAttributes(resource)),
       matcher_(createMatcher(sink_config.custom_metric_conversions(), server)) {}
 
-OpenTelemetryGrpcMetricsExporterImpl::OpenTelemetryGrpcMetricsExporterImpl(
-    const OtlpOptionsSharedPtr config, Grpc::RawAsyncClientSharedPtr raw_async_client)
-    : config_(config), client_(raw_async_client),
-      service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(
-          "opentelemetry.proto.collector.metrics.v1.MetricsService."
-          "Export")) {}
-
-void OpenTelemetryGrpcMetricsExporterImpl::send(MetricsExportRequestPtr&& export_request) {
-  ENVOY_LOG(debug, "sending a OTLP metric request: {}", export_request->DebugString());
-  client_->send(service_method_, *export_request, *this, Tracing::NullSpan::instance(),
-                Http::AsyncClient::RequestOptions());
-}
-
-void OpenTelemetryGrpcMetricsExporterImpl::onSuccess(
-    Grpc::ResponsePtr<MetricsExportResponse>&& export_response, Tracing::Span&) {
-  if (export_response->has_partial_success()) {
-    ENVOY_LOG(debug,
-              "export response with partial success; {} rejected, collector "
-              "message: {}",
-              export_response->partial_success().rejected_data_points(),
-              export_response->partial_success().error_message());
-  }
-}
-
-void OpenTelemetryGrpcMetricsExporterImpl::onFailure(Grpc::Status::GrpcStatus response_status,
-                                                     const std::string& response_message,
-                                                     Tracing::Span&) {
-  ENVOY_LOG(debug, "export failure; status: {}, message: {}", response_status, response_message);
-}
-
 template <class StatType>
 OtlpMetricsFlusherImpl::MetricConfig
 OtlpMetricsFlusherImpl::getMetricConfig(const StatType& stat) const {
