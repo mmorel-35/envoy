@@ -341,6 +341,17 @@ new_features:
     now provides ``getOtlpUserAgentHeader``, ``populateAnyValue``, and
     ``getStringKeyValue`` for reuse across tracers, access loggers, and stat sinks.
     ``OtelAttributes`` now uses ``absl::flat_hash_map`` instead of ``std::map``.
+    OTLP trace exporters (gRPC and HTTP) moved to
+    ``source/extensions/common/opentelemetry/exporters/otlp/`` and are exposed under
+    ``Envoy::Extensions::OpenTelemetry::Exporters::Otlp``; the original headers in
+    ``source/extensions/tracers/opentelemetry/`` are retained as forwarding headers.
+    Added ``sdk/common/types.h`` with a shared ``AttributeValue`` variant type in the
+    ``Sdk::Common`` namespace, and empty placeholder headers for
+    ``sdk/trace/``, ``sdk/logs/``, and ``sdk/metrics/`` mirroring the opentelemetry-cpp
+    SDK directory structure.
+    Eliminated the cross-extension dependency from ``stat_sinks/open_telemetry`` on
+    ``access_loggers/open_telemetry``; the stat sink now uses
+    ``source/extensions/common/opentelemetry/otlp_utils.h`` directly.
 
 - area: ratelimit
   change: |
