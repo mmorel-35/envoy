@@ -13,6 +13,7 @@
 
 #include "source/common/common/matchers.h"
 #include "source/common/grpc/typed_async_client.h"
+#include "source/extensions/common/opentelemetry/types.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
 #include "opentelemetry/proto/collector/metrics/v1/metrics_service.pb.h"
@@ -30,7 +31,7 @@ using MetricsExportRequest =
     opentelemetry::proto::collector::metrics::v1::ExportMetricsServiceRequest;
 using MetricsExportResponse =
     opentelemetry::proto::collector::metrics::v1::ExportMetricsServiceResponse;
-using KeyValue = opentelemetry::proto::common::v1::KeyValue;
+using KeyValue = ::Envoy::Extensions::OpenTelemetry::KeyValue;
 using MetricsExportRequestPtr = std::unique_ptr<MetricsExportRequest>;
 using MetricsExportRequestSharedPtr = std::shared_ptr<MetricsExportRequest>;
 using SinkConfig = envoy::extensions::stat_sinks::open_telemetry::v3::SinkConfig;
