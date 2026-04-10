@@ -97,7 +97,7 @@ node_modules
 #############################
 *.log
 lerna-debug.log*
-logs
+/logs
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*

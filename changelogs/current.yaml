@@ -344,15 +344,15 @@ new_features:
     ``Envoy::Extensions::OpenTelemetry::Exporters::Otlp``; the original headers in
     ``source/extensions/tracers/opentelemetry/`` are retained as forwarding headers.
     Added ``sdk/common/types.h`` with a shared ``AttributeValue`` variant type in the
-    ``Sdk::Common`` namespace, and empty placeholder headers for
-    ``sdk/trace/``, ``sdk/logs/``, and ``sdk/metrics/`` mirroring the opentelemetry-cpp
-    SDK directory structure.
+    ``Sdk::Common`` namespace, along with ``sdk/trace/``, ``sdk/logs/``, and ``sdk/metrics/``
+    subdirectories containing OTLP service-method and HTTP-endpoint constants that mirror
+    the opentelemetry-cpp SDK directory structure.
     Eliminated the cross-extension dependency from ``stat_sinks/open_telemetry`` on
     ``access_loggers/open_telemetry``.
     Refactored naming to align with opentelemetry-cpp conventions:
     the ``OtlpUtils`` class is replaced by ``PopulateAttributeUtils``
     (``populateAnyValue``, ``makeKeyValue``) in
-    ``source/extensions/common/opentelemetry/populate_attribute_utils.h``,
+    ``source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h``,
     mirroring ``OtlpPopulateAttributeUtils`` from opentelemetry-cpp; and
     the User-Agent helper is now ``Exporters::Otlp::GetUserAgent()`` in
     ``source/extensions/common/opentelemetry/exporters/otlp/environment.h``,
