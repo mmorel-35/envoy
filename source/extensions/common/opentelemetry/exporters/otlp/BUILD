@@ -59,6 +59,7 @@ envoy_cc_library(
         "//source/common/version:version_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:populate_attribute_utils_lib",
+        "//source/extensions/common/opentelemetry/sdk/trace:sdk_trace_constants_lib",
         "//source/server:generic_factory_context_lib",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
         "@opentelemetry-cpp//api",

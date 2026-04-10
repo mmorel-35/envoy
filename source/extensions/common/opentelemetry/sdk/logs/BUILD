@@ -1,11 +1,19 @@
 load(
     "//bazel:envoy_build_system.bzl",
+    "envoy_cc_library",
     "envoy_extension_package",
 )
 
 licenses(["notice"])  # Apache 2
 
-# Placeholder package for Envoy's OpenTelemetry SDK logs layer.
+# OpenTelemetry SDK logs signal constants.
 # Mirrors opentelemetry::sdk::logs from opentelemetry-cpp.
-# Future additions: Envoy-specific log record types, log processors, etc.
 envoy_extension_package()
+
+envoy_cc_library(
+    name = "sdk_logs_constants_lib",
+    hdrs = ["constants.h"],
+    deps = [
+        "@abseil-cpp//absl/strings",
+    ],
+)
