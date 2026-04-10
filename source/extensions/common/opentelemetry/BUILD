@@ -37,20 +37,3 @@ envoy_cc_library(
         "//source/common/common:assert_lib",
     ],
 )
-
-# Forwarding target for backward compatibility.
-# New code should depend on :populate_attribute_utils_lib and/or
-# //source/extensions/common/opentelemetry/exporters/otlp:environment_lib directly.
-envoy_cc_library(
-    name = "otlp_utils_lib",
-    hdrs = ["otlp_utils.h"],
-    copts = [
-        # Make sure that headers included from opentelemetry-api use Abseil from Envoy
-        # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.14.0/api/BUILD#L32
-        "-DHAVE_ABSEIL",
-    ],
-    deps = [
-        ":populate_attribute_utils_lib",
-        "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
-    ],
-)

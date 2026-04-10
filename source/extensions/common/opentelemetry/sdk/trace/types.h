@@ -1,4 +1,5 @@
 #pragma once
+// NOLINT(namespace-envoy)
 
 // This file is intentionally empty. It previously contained only proto type
 // aliases with no added value.

@@ -17,7 +17,8 @@ namespace Otlp {
  *
  * Mirrors opentelemetry::sdk::trace::SpanExporter from opentelemetry-cpp, adapted to Envoy's
  * async I/O model and proto-based OTLP wire format.
- * @see https://github.com/open-telemetry/opentelemetry-cpp/blob/main/sdk/include/opentelemetry/sdk/trace/exporter.h
+ * @see
+ * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/sdk/include/opentelemetry/sdk/trace/exporter.h
  */
 class OtlpTraceExporter : public Logger::Loggable<Logger::Id::tracing> {
 public:
@@ -63,4 +64,3 @@ using OtlpTraceExporterPtr = std::unique_ptr<OtlpTraceExporter>;
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy
-

@@ -16,7 +16,8 @@ namespace Tracers {
 namespace OpenTelemetry {
 
 // Re-export types into the Tracers::OpenTelemetry namespace for backward compatibility.
-using OpenTelemetryTraceExporter = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpTraceExporter;
+using OpenTelemetryTraceExporter =
+    ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpTraceExporter;
 using OpenTelemetryTraceExporterPtr =
     ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpTraceExporterPtr;
 
@@ -24,4 +25,3 @@ using OpenTelemetryTraceExporterPtr =
 } // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
-

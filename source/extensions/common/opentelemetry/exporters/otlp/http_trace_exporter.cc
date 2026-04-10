@@ -78,7 +78,7 @@ bool OtlpHttpTraceExporter::log(
 }
 
 void OtlpHttpTraceExporter::onSuccess(const Http::AsyncClient::Request& request,
-                                       Http::ResponseMessagePtr&& http_response) {
+                                      Http::ResponseMessagePtr&& http_response) {
   active_requests_.remove(request);
   const auto response_code = Http::Utility::getResponseStatus(http_response->headers());
   if (response_code != enumToInt(Http::Code::OK)) {
@@ -90,7 +90,7 @@ void OtlpHttpTraceExporter::onSuccess(const Http::AsyncClient::Request& request,
 }
 
 void OtlpHttpTraceExporter::onFailure(const Http::AsyncClient::Request& request,
-                                       Http::AsyncClient::FailureReason reason) {
+                                      Http::AsyncClient::FailureReason reason) {
   active_requests_.remove(request);
   ENVOY_LOG(debug, "The OTLP export request failed. Reason {}", enumToInt(reason));
 }

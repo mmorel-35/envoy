@@ -1,12 +1,12 @@
+#include <type_traits>
+
 #include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
 #include "source/extensions/common/opentelemetry/populate_attribute_utils.h"
 #include "source/extensions/common/opentelemetry/types.h"
 
-#include <type_traits>
-
-#include "absl/strings/match.h"
 #include "test/test_common/utility.h"
 
+#include "absl/strings/match.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
 
 namespace Envoy {
@@ -111,9 +111,8 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueVectorStringView) {
 TEST(PopulateAttributeUtilsTest, OtelAttributesUsesAbslFlatHashMap) {
   // Compile-time check: OtelAttributes must be exactly absl::flat_hash_map<std::string,
   // OTelAttribute>.
-  static_assert(
-      std::is_same_v<OtelAttributes, absl::flat_hash_map<std::string, OTelAttribute>>,
-      "OtelAttributes must be absl::flat_hash_map<std::string, OTelAttribute>");
+  static_assert(std::is_same_v<OtelAttributes, absl::flat_hash_map<std::string, OTelAttribute>>,
+                "OtelAttributes must be absl::flat_hash_map<std::string, OTelAttribute>");
 
   OtelAttributes attrs;
   attrs["key1"] = std::string("val1");

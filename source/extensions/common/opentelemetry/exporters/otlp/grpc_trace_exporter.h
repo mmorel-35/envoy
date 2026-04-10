@@ -16,7 +16,8 @@ namespace Otlp {
  *
  * Mirrors opentelemetry::exporter::otlp::OtlpGrpcExporter from opentelemetry-cpp, adapted to use
  * Envoy's gRPC async client instead of the upstream's gRPC blocking/streaming client.
- * @see https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
+ * @see
+ * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
  */
 class OtlpGrpcTraceExporter
     : public OtlpTraceExporter,
@@ -36,8 +37,8 @@ public:
   void onFailure(Grpc::Status::GrpcStatus status, const std::string& message,
                  Tracing::Span&) override;
 
-  bool log(const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest&
-               request) override;
+  bool log(const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest& request)
+      override;
 
   Grpc::AsyncClient<opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest,
                     opentelemetry::proto::collector::trace::v1::ExportTraceServiceResponse>

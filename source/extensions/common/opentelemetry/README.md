@@ -14,10 +14,6 @@ in Envoy, used across tracers, access loggers, and stat sinks.
 - **`exporters/otlp:environment_lib`**: OTLP exporter environment helpers,
   including `Exporters::Otlp::GetUserAgent()` for the OTLP User-Agent header.
 
-- **`otlp_utils_lib`**: Backward-compatibility forwarding target. New code should
-  depend on `populate_attribute_utils_lib` and/or `exporters/otlp:environment_lib`
-  directly.
-
 ## Namespace
 
 All code lives in `Envoy::Extensions::OpenTelemetry`. The `GetUserAgent()` helper

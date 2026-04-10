@@ -1,7 +1,8 @@
 #pragma once
 
-// This file has moved to source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h
-// It is kept here as a forwarding header for backward compatibility.
+// This file has moved to
+// source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h It is kept here as a
+// forwarding header for backward compatibility.
 
 #include "source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h"
 #include "source/extensions/tracers/opentelemetry/trace_exporter.h"
@@ -19,4 +20,3 @@ using OpenTelemetryHttpTraceExporter =
 } // namespace Tracers
 } // namespace Extensions
 } // namespace Envoy
-

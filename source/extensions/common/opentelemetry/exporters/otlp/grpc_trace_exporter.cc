@@ -36,7 +36,7 @@ void OtlpGrpcTraceExporter::onSuccess(
 }
 
 void OtlpGrpcTraceExporter::onFailure(Grpc::Status::GrpcStatus status, const std::string& message,
-                                       Tracing::Span&) {
+                                      Tracing::Span&) {
   ENVOY_LOG(debug, "OTLP trace export failed with status: {}, message: {}",
             Grpc::Utility::grpcStatusToString(status), message);
 }
