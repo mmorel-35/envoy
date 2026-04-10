@@ -1,5 +1,6 @@
 #include "source/extensions/common/opentelemetry/otlp_utils.h"
 
+#include "absl/strings/match.h"
 #include "test/test_common/utility.h"
 
 #include "opentelemetry/proto/common/v1/common.pb.h"
