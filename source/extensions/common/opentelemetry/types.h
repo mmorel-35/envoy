@@ -3,22 +3,20 @@
 #include <string>
 #include <vector>
 
+#include "source/extensions/common/opentelemetry/sdk/trace/types.h"
+
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/variant.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
-#include "opentelemetry/proto/trace/v1/trace.pb.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace OpenTelemetry {
 
-/**
- * @brief The type of the span.
- * see
- * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind
- */
-using OTelSpanKind = ::opentelemetry::proto::trace::v1::Span::SpanKind;
+// OTelSpanKind is re-exported from sdk/trace/types.h for backward compatibility.
+// New code should use SpanKind directly.
+using OTelSpanKind = SpanKind;
 
 /**
  * @brief Based on Open-telemetry OwnedAttributeValue
