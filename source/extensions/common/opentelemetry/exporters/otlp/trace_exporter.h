@@ -40,10 +40,17 @@ public:
    */
   void logExportedSpans(
       const opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest& request) {
-    if (request.resource_spans(0).has_resource()) {
-      if (request.resource_spans(0).scope_spans(0).has_scope()) {
-        ENVOY_LOG(debug, "Number of exported spans: {}",
-                  request.resource_spans(0).scope_spans(0).spans_size());
+    if (request.resource_spans_size() == 0) {
+      return;
+    }
+    const auto& resource_spans = request.resource_spans(0);
+    if (resource_spans.scope_spans_size() == 0) {
+      return;
+    }
+    const auto& scope_spans = resource_spans.scope_spans(0);
+    if (resource_spans.has_resource()) {
+      if (scope_spans.has_scope()) {
+        ENVOY_LOG(debug, "Number of exported spans: {}", scope_spans.spans_size());
       }
     }
   }

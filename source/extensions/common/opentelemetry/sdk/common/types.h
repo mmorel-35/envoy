@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -14,10 +15,13 @@ namespace Sdk {
 namespace Common {
 
 /**
- * @brief Envoy's owned representation of an OpenTelemetry attribute value.
+ * @brief Envoy's representation of an OpenTelemetry attribute value.
  *
  * Mirrors opentelemetry::sdk::common::OwnedAttributeValue from opentelemetry-cpp, adapted to use
  * Abseil types available in Envoy's build environment rather than the upstream's type-list.
+ * Note: like the upstream type, this variant includes both owning (std::string, std::vector) and
+ * non-owning (absl::string_view) alternatives. Callers that need to retain values across scope
+ * boundaries must store std::string, not absl::string_view.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/sdk/include/opentelemetry/sdk/common/attribute_utils.h
  */
@@ -29,7 +33,7 @@ using AttributeValue =
                   std::vector<uint8_t>>;
 
 /**
- * @brief A map of owned OpenTelemetry attribute key-value pairs.
+ * @brief A map of OpenTelemetry attribute key-value pairs.
  *
  * Mirrors opentelemetry::sdk::common::OrderedAttributeMap / AttributeMap, using Abseil's
  * flat_hash_map for efficient lookups in Envoy's hot paths.

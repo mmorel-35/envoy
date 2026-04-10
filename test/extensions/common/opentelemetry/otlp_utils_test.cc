@@ -104,7 +104,12 @@ TEST(OtlpUtilsTest, PopulateAnyValueVectorStringView) {
 }
 
 TEST(OtlpUtilsTest, OtelAttributesUsesAbslFlatHashMap) {
-  // Verify OtelAttributes is absl::flat_hash_map (not std::map).
+  // Compile-time check: OtelAttributes must be exactly absl::flat_hash_map<std::string,
+  // OTelAttribute>.
+  static_assert(
+      std::is_same_v<OtelAttributes, absl::flat_hash_map<std::string, OTelAttribute>>,
+      "OtelAttributes must be absl::flat_hash_map<std::string, OTelAttribute>");
+
   OtelAttributes attrs;
   attrs["key1"] = std::string("val1");
   attrs["key2"] = static_cast<int32_t>(2);
