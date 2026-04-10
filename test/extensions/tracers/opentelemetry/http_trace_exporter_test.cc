@@ -222,6 +222,35 @@ TEST_F(OpenTelemetryHttpTraceExporterTest, UnsuccessfulLogWithoutThreadLocalClus
   EXPECT_FALSE(trace_exporter_->log(export_trace_service_request));
 }
 
+TEST_F(OpenTelemetryHttpTraceExporterTest, UnsuccessfulLogWhenAsyncClientReturnsNullRequest) {
+  std::string yaml_string = fmt::format(R"EOF(
+  http_uri:
+    uri: "https://some-o11y.com/otlp/v1/traces"
+    cluster: "my_o11y_backend"
+    timeout: 0.250s
+  )EOF");
+
+  envoy::config::core::v3::HttpService http_service;
+  TestUtility::loadFromYaml(yaml_string, http_service);
+  setup(http_service);
+
+  EXPECT_CALL(cluster_manager_.thread_local_cluster_.async_client_, send_(_, _, _))
+      .WillOnce(Return(nullptr));
+
+  opentelemetry::proto::collector::trace::v1::ExportTraceServiceRequest
+      export_trace_service_request;
+  opentelemetry::proto::trace::v1::Span span;
+  span.set_name("test");
+  auto* resource_spans = export_trace_service_request.add_resource_spans();
+  resource_spans->mutable_resource();
+  auto* scope_spans = resource_spans->add_scope_spans();
+  scope_spans->mutable_scope();
+  *scope_spans->add_spans() = span;
+
+  EXPECT_LOG_CONTAINS("debug", "Number of exported spans: 1",
+                      EXPECT_FALSE(trace_exporter_->log(export_trace_service_request)));
+}
+
 } // namespace OpenTelemetry
 } // namespace Tracers
 } // namespace Extensions
