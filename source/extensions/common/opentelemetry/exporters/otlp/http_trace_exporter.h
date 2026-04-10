@@ -53,4 +53,3 @@ private:
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy
-

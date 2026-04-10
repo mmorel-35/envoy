@@ -27,4 +27,3 @@ using AnyValue = ::opentelemetry::proto::common::v1::AnyValue;
 } // namespace OpenTelemetry
 } // namespace Extensions
 } // namespace Envoy
-
