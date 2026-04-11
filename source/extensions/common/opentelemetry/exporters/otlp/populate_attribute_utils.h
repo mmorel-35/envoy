@@ -23,8 +23,8 @@ public:
   /**
    * @brief Populate an AnyValue proto from an attribute value variant.
    *
-   * Handles all AttributeValue alternatives. uint64_t values that exceed INT64_MAX are clamped to
-   * INT64_MAX to avoid signed integer overflow.
+   * Handles all AttributeValue alternatives. uint64_t values are reinterpreted as int64_t via
+   * static_cast (two's complement bit pattern is preserved).
    *
    * @param value_proto Proto object to populate.
    * @param attribute_value Value to set on the proto object.

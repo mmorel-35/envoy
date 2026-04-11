@@ -1,6 +1,5 @@
 #include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 
-#include <limits>
 #include <string>
 #include <type_traits>
 
@@ -26,10 +25,7 @@ void PopulateAttributeUtils::populateAnyValue(AnyValue& value_proto,
         } else if constexpr (std::is_same_v<T, uint32_t>) {
           value_proto.set_int_value(val);
         } else if constexpr (std::is_same_v<T, uint64_t>) {
-          value_proto.set_int_value(
-              val <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
-                  ? static_cast<int64_t>(val)
-                  : std::numeric_limits<int64_t>::max());
+          value_proto.set_int_value(static_cast<int64_t>(val));
         } else if constexpr (std::is_same_v<T, double>) {
           value_proto.set_double_value(val);
         } else if constexpr (std::is_same_v<T, std::string>) {
@@ -74,10 +70,7 @@ void PopulateAttributeUtils::populateAnyValue(AnyValue& value_proto,
         } else if constexpr (std::is_same_v<T, std::vector<uint64_t>>) {
           auto* array_value = value_proto.mutable_array_value();
           for (const uint64_t elem : val) {
-            array_value->add_values()->set_int_value(
-                elem <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
-                    ? static_cast<int64_t>(elem)
-                    : std::numeric_limits<int64_t>::max());
+            array_value->add_values()->set_int_value(static_cast<int64_t>(elem));
           }
         } else if constexpr (std::is_same_v<T, std::vector<uint8_t>>) {
           value_proto.set_bytes_value(val.data(), val.size());
