@@ -14,7 +14,7 @@ namespace Otlp {
  * Utility functions for populating OTLP protobuf attribute types.
  * Shared across OpenTelemetry extensions (tracers, access loggers, stat sinks).
  *
- * Mirrors opentelemetry::exporter::otlp::OtlpPopulateAttributeUtils from opentelemetry-cpp.
+ * Mirrors `opentelemetry::exporter::otlp::OtlpPopulateAttributeUtils` from `opentelemetry-cpp`.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_populate_attribute_utils.h
  */

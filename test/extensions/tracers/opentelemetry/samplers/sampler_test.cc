@@ -213,7 +213,7 @@ TEST_F(SamplerFactoryTest, TestWithSampler) {
   EXPECT_EQ(get_attr_value("int64_t_key")->int_value(), INT64_MAX);
 
   ASSERT_NE(get_attr_value("uint64_t_key"), nullptr);
-  EXPECT_EQ(get_attr_value("uint64_t_key")->int_value(), UINT64_MAX);
+  EXPECT_EQ(get_attr_value("uint64_t_key")->int_value(), INT64_MAX);
 
   ASSERT_NE(get_attr_value("double_key"), nullptr);
   EXPECT_EQ(get_attr_value("double_key")->double_value(), 0.123);

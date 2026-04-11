@@ -14,7 +14,7 @@ namespace Otlp {
  * The value is compliant with the OpenTelemetry specification. See:
  * https://github.com/open-telemetry/opentelemetry-specification/blob/v1.30.0/specification/protocol/exporter.md#user-agent
  *
- * Mirrors opentelemetry::exporter::otlp::GetOtlpDefaultUserAgent() from opentelemetry-cpp.
+ * Mirrors `opentelemetry::exporter::otlp::GetOtlpDefaultUserAgent()` from `opentelemetry-cpp`.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_environment.h
  *
