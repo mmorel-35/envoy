@@ -205,8 +205,7 @@ TEST_F(DynatraceSamplerTest, TestWithDynatraceParentContextIgnored) {
   EXPECT_EQ(absl::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             4);
-  EXPECT_EQ(absl::get<uint64_t>(
-                sampling_result.attributes->find("sampling.threshold")->second),
+  EXPECT_EQ(absl::get<uint64_t>(sampling_result.attributes->find("sampling.threshold")->second),
             54043195528445952);
 
   // tracestate should be forwarded

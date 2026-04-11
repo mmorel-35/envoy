@@ -14,7 +14,7 @@ namespace Otlp {
  * Utility functions for populating OTLP protobuf attribute types.
  * Shared across OpenTelemetry extensions (tracers, access loggers, stat sinks).
  *
- * Mirrors opentelemetry::exporter::otlp::OtlpPopulateAttributeUtils from opentelemetry-cpp.
+ * Mirrors `opentelemetry::exporter::otlp::OtlpPopulateAttributeUtils` from `opentelemetry-cpp`.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_populate_attribute_utils.h
  */
@@ -23,8 +23,8 @@ public:
   /**
    * @brief Populate an AnyValue proto from an attribute value variant.
    *
-   * Handles all AttributeValue alternatives. uint64_t values that exceed INT64_MAX are clamped to
-   * INT64_MAX to avoid signed integer overflow.
+   * Handles all AttributeValue alternatives. uint64_t values are reinterpreted as int64_t via
+   * static_cast (two's complement bit pattern is preserved).
    *
    * @param value_proto Proto object to populate.
    * @param attribute_value Value to set on the proto object.

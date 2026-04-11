@@ -15,7 +15,7 @@ namespace Otlp {
 /**
  * @brief Base interface for all Envoy OTLP trace exporters.
  *
- * Mirrors opentelemetry::sdk::trace::SpanExporter from opentelemetry-cpp, adapted to Envoy's
+ * Mirrors `opentelemetry::sdk::trace::SpanExporter` from `opentelemetry-cpp`, adapted to Envoy's
  * async I/O model and proto-based OTLP wire format.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/sdk/include/opentelemetry/sdk/trace/exporter.h

@@ -10,9 +10,8 @@ namespace StatSinks {
 namespace OpenTelemetry {
 
 void validateProtoDescriptors() {
-  const auto method = std::string(
-      Envoy::Extensions::Common::OpenTelemetry::Sdk::Metrics::Constants::
-          kMetricsServiceExportMethod);
+  const auto method = std::string(Envoy::Extensions::Common::OpenTelemetry::Sdk::Metrics::
+                                      Constants::kMetricsServiceExportMethod);
 
   RELEASE_ASSERT(Protobuf::DescriptorPool::generated_pool()->FindMethodByName(method) != nullptr,
                  "");

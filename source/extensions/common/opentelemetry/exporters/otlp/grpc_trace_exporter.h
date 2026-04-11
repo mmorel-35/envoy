@@ -14,7 +14,7 @@ namespace Otlp {
 /**
  * gRPC implementation of the OTLP trace exporter.
  *
- * Mirrors opentelemetry::exporter::otlp::OtlpGrpcExporter from opentelemetry-cpp, adapted to use
+ * Mirrors `opentelemetry::exporter::otlp::OtlpGrpcExporter` from `opentelemetry-cpp`, adapted to use
  * Envoy's gRPC async client instead of the upstream's gRPC blocking/streaming client.
  * @see
  * https://github.com/open-telemetry/opentelemetry-cpp/blob/main/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
