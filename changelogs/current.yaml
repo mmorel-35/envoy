@@ -334,31 +334,6 @@ removed_config_or_runtime:
     and legacy code path.
 
 new_features:
-- area: tracing
-  change: |
-    Centralized shared OpenTelemetry types and utilities into
-    ``source/extensions/common/opentelemetry/``.
-    ``OtelAttributes`` now uses ``absl::flat_hash_map`` instead of ``std::map``.
-    OTLP trace exporters (gRPC and HTTP) moved to
-    ``source/extensions/common/opentelemetry/exporters/otlp/`` and are exposed under
-    ``Envoy::Extensions::OpenTelemetry::Exporters::Otlp``; the original headers in
-    ``source/extensions/tracers/opentelemetry/`` are retained as forwarding headers.
-    Added ``sdk/common/types.h`` with a shared ``AttributeValue`` variant type in the
-    ``Sdk::Common`` namespace, along with ``sdk/trace/``, ``sdk/logs/``, and ``sdk/metrics/``
-    subdirectories containing OTLP service-method and HTTP-endpoint constants that mirror
-    the opentelemetry-cpp SDK directory structure.
-    Eliminated the cross-extension dependency from ``stat_sinks/open_telemetry`` on
-    ``access_loggers/open_telemetry``.
-    Refactored naming to align with opentelemetry-cpp conventions:
-    the ``OtlpUtils`` class is replaced by ``PopulateAttributeUtils``
-    (``populateAnyValue``, ``makeKeyValue``) in
-    ``source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h``,
-    mirroring ``OtlpPopulateAttributeUtils`` from opentelemetry-cpp; and
-    the User-Agent helper is now ``Exporters::Otlp::GetUserAgent()`` in
-    ``source/extensions/common/opentelemetry/exporters/otlp/environment.h``,
-    mirroring ``GetOtlpDefaultUserAgent()`` from opentelemetry-cpp's
-    ``otlp_environment.h``.
-
 - area: ratelimit
   change: |
     Added ``is_negative_hits`` boolean to the ``hits_addend``

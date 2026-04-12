@@ -85,13 +85,13 @@ TEST_F(DynatraceSamplerTest, TestWithoutParentContext) {
                              ::opentelemetry::proto::trace::v1::Span::SPAN_KIND_SERVER, {}, {});
   EXPECT_EQ(sampling_result.decision, Decision::RecordAndSample);
   EXPECT_EQ(sampling_result.attributes->size(), 2);
-  EXPECT_EQ(absl::get<uint32_t>(
+  EXPECT_EQ(opentelemetry::nostd::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             1);
 
   auto tcr = sampling_result.attributes->find("trace.capture.reasons");
   ASSERT_NE(tcr, sampling_result.attributes->end());
-  auto tcr_values = absl::get<std::vector<absl::string_view>>(tcr->second);
+  auto tcr_values = opentelemetry::nostd::get<std::vector<absl::string_view>>(tcr->second);
   ASSERT_EQ(tcr_values.size(), 1);
   EXPECT_EQ(tcr_values[0], "atm");
 
@@ -110,7 +110,7 @@ TEST_F(DynatraceSamplerTest, TestWithUnknownParentContext) {
                              ::opentelemetry::proto::trace::v1::Span::SPAN_KIND_SERVER, {}, {});
   EXPECT_EQ(sampling_result.decision, Decision::RecordAndSample);
   EXPECT_EQ(sampling_result.attributes->size(), 2);
-  EXPECT_EQ(absl::get<uint32_t>(
+  EXPECT_EQ(opentelemetry::nostd::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             1);
   // Dynatrace tracestate should be prepended
@@ -129,7 +129,7 @@ TEST_F(DynatraceSamplerTest, TestWithDynatraceParentContextSampled) {
                              ::opentelemetry::proto::trace::v1::Span::SPAN_KIND_SERVER, {}, {});
   EXPECT_EQ(sampling_result.decision, Decision::RecordAndSample);
   EXPECT_EQ(sampling_result.attributes->size(), 1);
-  EXPECT_EQ(absl::get<uint32_t>(
+  EXPECT_EQ(opentelemetry::nostd::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             1);
   // tracestate should be forwarded
@@ -202,10 +202,11 @@ TEST_F(DynatraceSamplerTest, TestWithDynatraceParentContextIgnored) {
                              ::opentelemetry::proto::trace::v1::Span::SPAN_KIND_SERVER, {}, {});
   EXPECT_EQ(sampling_result.decision, Decision::Drop);
   EXPECT_EQ(sampling_result.attributes->size(), 2);
-  EXPECT_EQ(absl::get<uint32_t>(
+  EXPECT_EQ(opentelemetry::nostd::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             4);
-  EXPECT_EQ(absl::get<uint64_t>(sampling_result.attributes->find("sampling.threshold")->second),
+  EXPECT_EQ(opentelemetry::nostd::get<uint64_t>(
+                sampling_result.attributes->find("sampling.threshold")->second),
             54043195528445952);
 
   // tracestate should be forwarded
@@ -226,7 +227,7 @@ TEST_F(DynatraceSamplerTest, TestWithDynatraceParentContextFromDifferentTenant) 
   // sampling decision on tracestate should be ignored because it is from a different tenant.
   EXPECT_EQ(sampling_result.decision, Decision::RecordAndSample);
   EXPECT_EQ(sampling_result.attributes->size(), 2);
-  EXPECT_EQ(absl::get<uint32_t>(
+  EXPECT_EQ(opentelemetry::nostd::get<uint32_t>(
                 sampling_result.attributes->find("supportability.atm_sampling_ratio")->second),
             1);
   // new Dynatrace tag should be prepended, already existing tag should be kept
@@ -379,7 +380,7 @@ TEST_P(DynatraceSamplerTraceCaptureReasonTest, TraceCaptureReasonScenarios) {
 
   // Check that the sampling result contains the expected trace capture reason attributes
   if (!expected.tcr_values.empty()) {
-    auto actual_tcr_values = absl::get<std::vector<absl::string_view>>(
+    auto actual_tcr_values = opentelemetry::nostd::get<std::vector<absl::string_view>>(
         actual.attributes->find("trace.capture.reasons")->second);
     ASSERT_EQ(actual_tcr_values.size(), expected.tcr_values.size());
 

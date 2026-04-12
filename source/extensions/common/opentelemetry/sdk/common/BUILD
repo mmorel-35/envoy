@@ -17,7 +17,6 @@ envoy_cc_library(
         "-DHAVE_ABSEIL",
     ],
     deps = [
-        "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:variant",
     ],

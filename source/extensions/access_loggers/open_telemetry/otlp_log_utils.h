@@ -52,11 +52,16 @@ struct OtlpAccessLogStats {
 };
 
 // Creates a KeyValue protobuf with a string value.
-// Delegates to Extensions::OpenTelemetry::Exporters::Otlp::PopulateAttributeUtils::makeKeyValue.
 inline opentelemetry::proto::common::v1::KeyValue makeKeyValue(const std::string& key,
                                                                const std::string& value) {
   return ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::PopulateAttributeUtils::makeKeyValue(
       key, value);
+}
+
+// Backward-compatible alias for makeKeyValue.
+inline opentelemetry::proto::common::v1::KeyValue getStringKeyValue(const std::string& key,
+                                                                    const std::string& value) {
+  return makeKeyValue(key, value);
 }
 
 // Packs the body "AnyValue" to a "KeyValueList" with a single key.
@@ -68,10 +73,12 @@ packBody(const ::opentelemetry::proto::common::v1::AnyValue& body);
 unpackBody(const ::opentelemetry::proto::common::v1::KeyValueList& value);
 
 // User-Agent header per OTLP specification.
-// Delegates to Extensions::OpenTelemetry::Exporters::Otlp::GetUserAgent.
 inline const std::string& GetUserAgent() {
   return ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::GetUserAgent();
 }
+
+// Backward-compatible alias for GetUserAgent.
+inline const std::string& getOtlpUserAgentHeader() { return GetUserAgent(); }
 
 // Populates trace context (trace_id, span_id) on a LogRecord.
 // Handles 128-bit (32 hex chars) and 64-bit Zipkin-style (16 hex chars) trace IDs.
