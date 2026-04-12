@@ -1,6 +1,5 @@
 #pragma once
 
-#include "opentelemetry/common/attribute_value.h"
 #include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 #include "source/extensions/common/opentelemetry/types.h"
 
