@@ -2,8 +2,6 @@
 #include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
 #include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 
-#include "test/test_common/utility.h"
-
 #include "gtest/gtest.h"
 
 namespace Envoy {

@@ -21,6 +21,5 @@ envoy_cc_test(
         "//source/common/version:version_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:populate_attribute_utils_lib",
-        "//test/test_common:utility_lib",
     ],
 )
