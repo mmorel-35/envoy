@@ -13,6 +13,8 @@
 
 #include "source/common/common/matchers.h"
 #include "source/common/grpc/typed_async_client.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/grpc_metrics_exporter.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/metrics_exporter.h"
 #include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
 #include "opentelemetry/proto/collector/metrics/v1/metrics_service.pb.h"
@@ -244,61 +246,13 @@ private:
   const std::function<bool(const Stats::Metric&)> predicate_;
 };
 
-/**
- * Abstract base class for OTLP metrics exporters.
- */
-class OtlpMetricsExporter {
-public:
-  virtual ~OtlpMetricsExporter() = default;
-
-  /**
-   * Send metrics to the configured OTLP service.
-   * @param metrics the OTLP metrics export request.
-   */
-  virtual void send(MetricsExportRequestPtr&& metrics) PURE;
-};
-
-using OtlpMetricsExporterSharedPtr = std::shared_ptr<OtlpMetricsExporter>;
-
-/**
- * gRPC implementation of OtlpMetricsExporter.
- */
-class OpenTelemetryGrpcMetricsExporter : public OtlpMetricsExporter,
-                                         public Grpc::AsyncRequestCallbacks<MetricsExportResponse> {
-public:
-  ~OpenTelemetryGrpcMetricsExporter() override = default;
-
-  // Grpc::AsyncRequestCallbacks
-  void onCreateInitialMetadata(Http::RequestHeaderMap&) override {}
-};
-
-using OpenTelemetryGrpcMetricsExporterSharedPtr = std::shared_ptr<OpenTelemetryGrpcMetricsExporter>;
-
-/**
- * Production implementation of OpenTelemetryGrpcMetricsExporter
- */
-class OpenTelemetryGrpcMetricsExporterImpl : public Singleton::Instance,
-                                             public OpenTelemetryGrpcMetricsExporter,
-                                             public Logger::Loggable<Logger::Id::stats> {
-public:
-  OpenTelemetryGrpcMetricsExporterImpl(const OtlpOptionsSharedPtr config,
-                                       Grpc::RawAsyncClientSharedPtr raw_async_client);
-
-  // OpenTelemetryGrpcMetricsExporter
-  void send(MetricsExportRequestPtr&& metrics) override;
-
-  // Grpc::AsyncRequestCallbacks
-  void onSuccess(Grpc::ResponsePtr<MetricsExportResponse>&&, Tracing::Span&) override;
-  void onFailure(Grpc::Status::GrpcStatus, const std::string&, Tracing::Span&) override;
-
-private:
-  const OtlpOptionsSharedPtr config_;
-  Grpc::AsyncClient<MetricsExportRequest, MetricsExportResponse> client_;
-  const Protobuf::MethodDescriptor& service_method_;
-};
-
-using OpenTelemetryGrpcMetricsExporterImplPtr =
-    std::unique_ptr<OpenTelemetryGrpcMetricsExporterImpl>;
+// Compatibility aliases - the exporter classes now live in shared OTLP.
+using OtlpMetricsExporter = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpMetricsExporter;
+using OtlpMetricsExporterSharedPtr = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpMetricsExporterSharedPtr;
+using OpenTelemetryGrpcMetricsExporter = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpGrpcMetricsExporter;
+using OpenTelemetryGrpcMetricsExporterSharedPtr = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpGrpcMetricsExporterSharedPtr;
+using OpenTelemetryGrpcMetricsExporterImpl = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpGrpcMetricsExporterImpl;
+using OpenTelemetryGrpcMetricsExporterImplPtr = ::Envoy::Extensions::OpenTelemetry::Exporters::Otlp::OtlpGrpcMetricsExporterImplPtr;
 
 /**
  * Stats sink that exports metrics via OTLP (gRPC or HTTP).
