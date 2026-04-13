@@ -1,0 +1,91 @@
+#include "source/extensions/common/opentelemetry/exporters/otlp/http_metrics_exporter.h"
+
+#include "source/common/common/enum_to_int.h"
+#include "source/common/http/headers.h"
+#include "source/common/http/message_impl.h"
+#include "source/common/http/utility.h"
+#include "source/common/protobuf/protobuf.h"
+#include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
+
+namespace Envoy {
+namespace Extensions {
+namespace OpenTelemetry {
+namespace Exporters {
+namespace Otlp {
+
+OtlpHttpMetricsExporter::OtlpHttpMetricsExporter(
+    Upstream::ClusterManager& cluster_manager,
+    const envoy::config::core::v3::HttpService& http_service,
+    Server::Configuration::ServerFactoryContext& server_context)
+    : cluster_manager_(cluster_manager), http_service_(http_service),
+      headers_applicator_(
+          Http::HttpServiceHeadersApplicator::createOrThrow(http_service, server_context)) {}
+
+void OtlpHttpMetricsExporter::send(MetricsExportRequestPtr&& metrics) {
+  std::string request_body;
+  const auto ok = metrics->SerializeToString(&request_body);
+  if (!ok) {
+    ENVOY_LOG(warn, "Error while serializing the binary proto ExportMetricsServiceRequest.");
+    return;
+  }
+
+  const auto thread_local_cluster =
+      cluster_manager_.getThreadLocalCluster(http_service_.http_uri().cluster());
+  if (thread_local_cluster == nullptr) {
+    ENVOY_LOG(error, "OTLP HTTP metrics exporter failed: [cluster = {}] is not configured",
+              http_service_.http_uri().cluster());
+    return;
+  }
+
+  Http::RequestMessagePtr message = Http::Utility::prepareHeaders(http_service_.http_uri());
+
+  // The request follows the OTLP HTTP specification:
+  // https://github.com/open-telemetry/opentelemetry-proto/blob/v1.9.0/docs/specification.md#otlphttp
+  message->headers().setReferenceMethod(Http::Headers::get().MethodValues.Post);
+  message->headers().setReferenceContentType(Http::Headers::get().ContentTypeValues.Protobuf);
+
+  // User-Agent header follows the OTLP specification.
+  message->headers().setReferenceUserAgent(GetUserAgent());
+
+  // Add custom headers from config.
+  headers_applicator_->apply(message->headers());
+  message->body().add(request_body);
+
+  const auto options =
+      Http::AsyncClient::RequestOptions()
+          .setTimeout(std::chrono::milliseconds(
+              DurationUtil::durationToMilliseconds(http_service_.http_uri().timeout())))
+          .setDiscardResponseBody(true);
+
+  Http::AsyncClient::Request* in_flight_request =
+      thread_local_cluster->httpAsyncClient().send(std::move(message), *this, options);
+
+  if (in_flight_request != nullptr) {
+    active_requests_.add(*in_flight_request);
+  }
+}
+
+void OtlpHttpMetricsExporter::onSuccess(const Http::AsyncClient::Request& request,
+                                         Http::ResponseMessagePtr&& http_response) {
+  active_requests_.remove(request);
+  const auto response_code = Http::Utility::getResponseStatus(http_response->headers());
+  if (response_code != enumToInt(Http::Code::OK)) {
+    ENVOY_LOG(error,
+              "OTLP HTTP metrics exporter received a non-success status code: {} while "
+              "exporting the OTLP message",
+              response_code);
+  }
+}
+
+void OtlpHttpMetricsExporter::onFailure(const Http::AsyncClient::Request& request,
+                                         Http::AsyncClient::FailureReason reason) {
+  active_requests_.remove(request);
+  ENVOY_LOG(warn, "OTLP HTTP metrics export request failed. Failure reason: {}",
+            enumToInt(reason));
+}
+
+} // namespace Otlp
+} // namespace Exporters
+} // namespace OpenTelemetry
+} // namespace Extensions
+} // namespace Envoy

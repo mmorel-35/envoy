@@ -39,8 +39,7 @@ OpenTelemetrySinkFactory::createStatsSink(const Protobuf::Message& config,
             grpc_service, server.scope(), false);
     RETURN_IF_NOT_OK_REF(client_or_error.status());
     std::shared_ptr<OtlpMetricsExporter> grpc_metrics_exporter =
-        std::make_shared<OpenTelemetryGrpcMetricsExporterImpl>(otlp_options,
-                                                               client_or_error.value());
+        std::make_shared<OpenTelemetryGrpcMetricsExporterImpl>(client_or_error.value());
 
     return std::make_unique<OpenTelemetrySink>(
         otlp_metrics_flusher, grpc_metrics_exporter,
