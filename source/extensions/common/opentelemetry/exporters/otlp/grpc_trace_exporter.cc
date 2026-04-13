@@ -13,9 +13,8 @@ namespace Otlp {
 
 OtlpGrpcTraceExporter::OtlpGrpcTraceExporter(const Grpc::RawAsyncClientSharedPtr& client)
     : client_(client),
-      service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(
-          std::string(Envoy::Extensions::OpenTelemetry::Sdk::Trace::Constants::
-                          kTraceServiceExportMethod))) {}
+      service_method_(*Protobuf::DescriptorPool::generated_pool()->FindMethodByName(std::string(
+          Envoy::Extensions::OpenTelemetry::Sdk::Trace::Constants::kTraceServiceExportMethod))) {}
 
 void OtlpGrpcTraceExporter::onCreateInitialMetadata(Http::RequestHeaderMap& metadata) {
   metadata.setReferenceUserAgent(GetUserAgent());

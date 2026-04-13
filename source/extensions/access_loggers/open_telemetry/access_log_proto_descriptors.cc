@@ -11,8 +11,8 @@ namespace AccessLoggers {
 namespace OpenTelemetry {
 
 void validateProtoDescriptors() {
-  const auto method = std::string(
-      Envoy::Extensions::OpenTelemetry::Sdk::Logs::Constants::kLogsServiceExportMethod);
+  const auto method =
+      std::string(Envoy::Extensions::OpenTelemetry::Sdk::Logs::Constants::kLogsServiceExportMethod);
 
   RELEASE_ASSERT(Protobuf::DescriptorPool::generated_pool()->FindMethodByName(method) != nullptr,
                  "");

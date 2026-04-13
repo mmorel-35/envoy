@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <string>
 
-#include "opentelemetry/proto/common/v1/common.pb.h"
 #include "source/common/common/assert.h"
+
+#include "opentelemetry/proto/common/v1/common.pb.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -36,8 +37,8 @@ enum OTelAttributeType {
 
 } // namespace
 
-void PopulateAttributeUtils::populateAnyValue(opentelemetry::proto::common::v1::AnyValue& value_proto,
-                                              const OTelAttribute& attribute_value) {
+void PopulateAttributeUtils::populateAnyValue(
+    opentelemetry::proto::common::v1::AnyValue& value_proto, const OTelAttribute& attribute_value) {
   switch (attribute_value.index()) {
   case OTelAttributeType::KTypeBool:
     value_proto.set_bool_value(opentelemetry::nostd::get<bool>(attribute_value) ? true : false);
