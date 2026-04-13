@@ -107,7 +107,7 @@ envoy_cc_library(
     srcs = ["logs_utils.cc"],
     hdrs = ["logs_utils.h"],
     deps = [
-        "//envoy/formatter:http_formatter_interface",
+        "//envoy/formatter:http_formatter_context_interface",
         "//envoy/local_info:local_info_interface",
         "//envoy/stats:stats_interface",
         "//envoy/stream_info:filter_state_interface",
