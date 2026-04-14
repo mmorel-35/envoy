@@ -70,6 +70,12 @@ jobs:
       with:
         ref: ${{ fromJSON(inputs.request).request.sha }}
         persist-credentials: false
+    # Pin the Go toolchain for the root module (go.mod: go 1.24.6).
+    - name: Set up Go (root module)
+      uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b  # v5.4.0
+      with:
+        go-version-file: go.mod
+        cache: false
     # Lint the pure-Go packages of the root module.
     # CGo packages under contrib/golang/*/source are intentionally excluded by
     # passing explicit package paths: they cannot be built without Envoy C headers.
@@ -83,6 +89,12 @@ jobs:
           ./contrib/golang/common/go/api/...
           ./contrib/golang/common/go/utils/...
       continue-on-error: true
+    # Pin the Go toolchain for the dynamic_modules module (go.mod: go 1.25.6).
+    - name: Set up Go (dynamic_modules module)
+      uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b  # v5.4.0
+      with:
+        go-version-file: source/extensions/dynamic_modules/go.mod
+        cache: false
     # Lint all packages of the dynamic_modules module (pure Go, no CGo).
     - name: golangci-lint (dynamic_modules module)
       id: lint-dynamic
