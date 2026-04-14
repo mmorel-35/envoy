@@ -1,0 +1,27 @@
+# golangci-lint v2 configuration for the dynamic_modules Go module
+# (source/extensions/dynamic_modules).
+#
+# This module is pure Go (no CGo), so all packages are analyzed with ./...
+# See .github/workflows/_precheck_format.yml for the CI integration.
+#
+# Advisory mode: lint failures are visible in CI but do not block merging.
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    # Standard Go vet checks (high confidence, low noise).
+    - govet
+    # Comprehensive static analysis: catches bugs, deprecated APIs, etc.
+    - staticcheck
+    # Typo detection in comments and string literals.
+    - misspell
+    # Unused code detection (safe for a pure-Go module).
+    - unused
+  exclusions:
+    # Skip files carrying a "Code generated" header (e.g. MockGen output).
+    generated: lax

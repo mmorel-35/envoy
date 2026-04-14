@@ -31,6 +31,7 @@
 !.gitignore
 !.python-version
 !.yamllint
+!.golangci.yml
 !.zuul
 !.zuul.yaml
 

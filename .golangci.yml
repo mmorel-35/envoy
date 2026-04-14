@@ -1,0 +1,27 @@
+# golangci-lint v2 configuration for the root Go module.
+#
+# This covers only the pure-Go packages in the root module.
+# CGo-heavy packages under contrib/golang/*/source/go are excluded from the
+# golangci-lint run by passing explicit package paths on the command line
+# (see .github/workflows/_precheck_format.yml).
+#
+# Advisory mode: lint failures are visible in CI but do not block merging.
+# See .github/config.yml and .github/workflows/_precheck_format.yml.
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    # Standard Go vet checks (high confidence, low noise).
+    - govet
+    # Comprehensive static analysis: catches bugs, deprecated APIs, etc.
+    - staticcheck
+    # Typo detection in comments and string literals.
+    - misspell
+  exclusions:
+    # Skip files carrying a "Code generated" header.
+    generated: lax
