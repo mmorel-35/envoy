@@ -56,3 +56,50 @@ jobs:
         - target: format-api
           upload-name: fix_proto_format.diff
           upload-path: /home/runner/work/_temp/container/fix_proto_format.diff
+
+  go-lint:
+    name: Go lint (advisory)
+    # Advisory: a failure here is visible in CI but does not block merging.
+    # Remove continue-on-error once the baseline issues are resolved.
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+      with:
+        ref: ${{ fromJSON(inputs.request).request.sha }}
+        persist-credentials: false
+    # Lint the pure-Go packages of the root module.
+    # CGo packages under contrib/golang/*/source are intentionally excluded by
+    # passing explicit package paths: they cannot be built without Envoy C headers.
+    - name: golangci-lint (root module)
+      id: lint-root
+      uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea  # v6.5.1
+      with:
+        version: v2.11.4
+        args: >-
+          --timeout=5m
+          ./contrib/golang/common/go/api/...
+          ./contrib/golang/common/go/utils/...
+      continue-on-error: true
+    # Lint all packages of the dynamic_modules module (pure Go, no CGo).
+    - name: golangci-lint (dynamic_modules module)
+      id: lint-dynamic
+      uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea  # v6.5.1
+      with:
+        version: v2.11.4
+        working-directory: source/extensions/dynamic_modules
+        args: --timeout=5m
+      continue-on-error: true
+    # Fail the job (advisory) if either lint run found issues, so the result
+    # is visible in the GitHub checks UI. The job-level continue-on-error
+    # prevents this from blocking the required Envoy/Prechecks status.
+    - name: Report lint status
+      if: always()
+      run: |
+        if [[ "${{ steps.lint-root.outcome }}" == "failure" \
+           || "${{ steps.lint-dynamic.outcome }}" == "failure" ]]; then
+          echo "::warning::golangci-lint found issues (advisory). These will become blocking once the baseline is clean."
+          exit 1
+        fi
