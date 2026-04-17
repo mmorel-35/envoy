@@ -21,5 +21,17 @@ envoy_cc_test(
         "//source/common/version:version_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:environment_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:populate_attribute_utils_lib",
+        "//test/test_common:utility_lib",
+    ],
+)
+
+envoy_cc_test(
+    name = "trace_exporter_test",
+    srcs = ["trace_exporter_test.cc"],
+    rbe_pool = "6gig",
+    deps = [
+        "//source/extensions/common/opentelemetry/exporters/otlp:trace_exporter_lib",
+        "//test/test_common:logging_lib",
+        "//test/test_common:utility_lib",
     ],
 )

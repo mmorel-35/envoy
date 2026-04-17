@@ -2,6 +2,8 @@
 #include "source/extensions/common/opentelemetry/exporters/otlp/environment.h"
 #include "source/extensions/common/opentelemetry/exporters/otlp/populate_attribute_utils.h"
 
+#include "test/test_common/utility.h"
+
 #include "gtest/gtest.h"
 
 namespace Envoy {
@@ -107,6 +109,16 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueEmptyVectorOfStrings) {
   std::vector<std::string> empty;
   PopulateAttributeUtils::populateAnyValue(proto, OTelAttribute{empty});
   EXPECT_EQ(0, proto.array_value().values_size());
+}
+
+// Tests that passing an unsupported OTelAttribute variant (e.g. std::vector<bool>, which
+// corresponds to KTypeSpanBool and is not handled by the switch) triggers IS_ENVOY_BUG.
+TEST(PopulateAttributeUtilsTest, PopulateAnyValueUnsupportedTypeTriggersEnvoyBug) {
+  AnyValue proto;
+  std::vector<bool> unsupported = {true, false};
+  EXPECT_ENVOY_BUG(
+      PopulateAttributeUtils::populateAnyValue(proto, OTelAttribute{unsupported}),
+      "unexpected otel attribute type");
 }
 
 // Tests for GetUserAgent
