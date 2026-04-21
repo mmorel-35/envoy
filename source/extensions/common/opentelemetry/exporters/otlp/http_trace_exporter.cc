@@ -29,8 +29,10 @@ bool OtlpHttpTraceExporter::log(
 
   const auto ok = request.SerializeToString(&request_body);
   if (!ok) {
-    ENVOY_LOG(warn, "Error while serializing the binary proto ExportTraceServiceRequest.");
-    return false;
+    ENVOY_LOG(
+        warn,
+        "Error while serializing the binary proto ExportTraceServiceRequest."); // LCOV_EXCL_LINE
+    return false;                                                               // LCOV_EXCL_LINE
   }
 
   const auto thread_local_cluster =

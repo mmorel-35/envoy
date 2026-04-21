@@ -214,6 +214,24 @@ TEST_F(OtlpHttpTraceExporterTest, LogReturnsFalseWhenAsyncClientReturnsNull) {
                       EXPECT_FALSE(trace_exporter_->log(req)));
 }
 
+// onBeforeFinalizeUpstreamSpan is a no-op override required by the interface; verify it can be
+// called without crashing.
+TEST_F(OtlpHttpTraceExporterTest, OnBeforeFinalizeUpstreamSpanIsNoOp) {
+  std::string yaml_string = R"EOF(
+  http_uri:
+    uri: "https://some-o11y.com/otlp/v1/traces"
+    cluster: "my_o11y_backend"
+    timeout: 0.250s
+  )EOF";
+
+  envoy::config::core::v3::HttpService http_service;
+  TestUtility::loadFromYaml(yaml_string, http_service);
+  setup(http_service);
+
+  Tracing::NullSpan null_span;
+  trace_exporter_->onBeforeFinalizeUpstreamSpan(null_span, nullptr);
+}
+
 } // namespace Otlp
 } // namespace Exporters
 } // namespace OpenTelemetry
