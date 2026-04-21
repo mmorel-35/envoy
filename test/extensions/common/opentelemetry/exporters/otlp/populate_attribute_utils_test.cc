@@ -116,9 +116,8 @@ TEST(PopulateAttributeUtilsTest, PopulateAnyValueEmptyVectorOfStrings) {
 TEST(PopulateAttributeUtilsTest, PopulateAnyValueUnsupportedTypeTriggersEnvoyBug) {
   AnyValue proto;
   std::vector<bool> unsupported = {true, false};
-  EXPECT_ENVOY_BUG(
-      PopulateAttributeUtils::populateAnyValue(proto, OTelAttribute{unsupported}),
-      "unexpected otel attribute type");
+  EXPECT_ENVOY_BUG(PopulateAttributeUtils::populateAnyValue(proto, OTelAttribute{unsupported}),
+                   "unexpected otel attribute type");
 }
 
 // Tests for GetUserAgent
