@@ -1,3 +1,4 @@
+#include "source/common/version/version.h"
 #include "source/extensions/common/opentelemetry/exporters/otlp/http_trace_exporter.h"
 
 #include "test/mocks/server/tracer_factory_context.h"

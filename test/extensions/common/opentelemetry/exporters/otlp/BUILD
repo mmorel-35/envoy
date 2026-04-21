@@ -26,6 +26,7 @@ envoy_cc_test(
     srcs = ["http_trace_exporter_test.cc"],
     rbe_pool = "6gig",
     deps = [
+        "//source/common/version:version_lib",
         "//source/extensions/common/opentelemetry/exporters/otlp:trace_exporter_lib",
         "//test/mocks/http:http_mocks",
         "//test/mocks/server:tracer_factory_context_mocks",
